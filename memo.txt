@@ -1,0 +1,19 @@
+[train]
+  yolo detect train data=data/fujinolab-all.yaml model=yolov8s.yaml exist_ok
+
+  [multi gpu training]
+    python -m torch.distributed.run --nproc_per_node 2 train.py --batch-size 16 --device 0,1 --data data/fujinolab-all.yaml
+
+[val]
+  python val.py --weights weights/fujinolab-all.pt --data data/fujinolab-all.yaml --exist-ok
+
+[detect]
+  yolo predict model=yolov8n.pt source="https://ultralytics.com/images/bus.jpg" save=True
+
+[debug]
+python -m torch.distributed.run --nproc_per_node 2 train.py --cache --batch-size 16 --epochs 2 --device 0,1 --hyp data/hyps/custom-hyps.yaml --exist-ok
+
+[datase symlink (容量を圧縮)]
+find ../fujinolab-all -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
+
+comitid: 3765f4f

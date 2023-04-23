@@ -1,0 +1,8 @@
+data_path: dataset/kaist-all
+rgb_folder: RGB
+fir_folder: FIR
+labels_folder: FIR_labels
+
+nc: 1
+ch: 4
+names: ["person"]
