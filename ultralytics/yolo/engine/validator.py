@@ -19,6 +19,7 @@ Usage - formats:
                           yolov8n_paddle_model       # PaddlePaddle
 """
 import json
+import os
 from collections import defaultdict
 from pathlib import Path
 
@@ -32,6 +33,7 @@ from ultralytics.yolo.utils import DEFAULT_CFG, LOGGER, RANK, SETTINGS, TQDM_BAR
 from ultralytics.yolo.utils.checks import check_imgsz
 from ultralytics.yolo.utils.files import increment_path
 from ultralytics.yolo.utils.ops import Profile
+from ultralytics.yolo.utils.plotting import output_to_target
 from ultralytics.yolo.utils.torch_utils import de_parallel, select_device, smart_inference_mode
 
 
@@ -134,10 +136,10 @@ class BaseValidator:
                 self.args.workers = 0  # faster CPU val as time dominated by inference, not dataloading
             if not pt:
                 self.args.rect = False
-            self.dataloader = self.dataloader or self.get_dataloader(self.data.get(self.args.split), self.args.batch)
-
+            # self.dataloader = self.dataloader or self.get_dataloader(self.data.get(self.args.split), self.args.batch)
+            self.dataloader = self.get_dataloader(self.data, self.args.batch)
             model.eval()
-            model.warmup(imgsz=(1 if pt else self.args.batch, 3, imgsz, imgsz))  # warmup
+            model.warmup(imgsz=(1 if pt else self.args.batch, model.model.yaml["ch"], imgsz, imgsz))  # warmup
 
         dt = Profile(), Profile(), Profile(), Profile()
         n_batches = len(self.dataloader)
@@ -148,6 +150,14 @@ class BaseValidator:
         bar = tqdm(self.dataloader, desc, n_batches, bar_format=TQDM_BAR_FORMAT)
         self.init_metrics(de_parallel(model))
         self.jdict = []  # empty before each val
+
+        if not self.training and self.args.plots:
+            os.makedirs(self.save_dir / "examples", exist_ok=True)
+            os.makedirs(self.save_dir / "examples", exist_ok=True)
+        if not self.training and self.args.get("save_all") and self.args.plots:
+            os.makedirs(self.save_dir / "jpg" / "gt", exist_ok=True)
+            os.makedirs(self.save_dir / "jpg" / "pred", exist_ok=True)
+
         for batch_i, batch in enumerate(bar):
             self.run_callbacks("on_val_batch_start")
             self.batch_i = batch_i
@@ -169,11 +179,40 @@ class BaseValidator:
                 preds = self.postprocess(preds)
 
             self.update_metrics(preds, batch)
-            if self.args.plots and batch_i < 3:
-                self.plot_val_samples(batch, batch_i)
-                self.plot_predictions(batch, preds, batch_i)
+
+            # keep max number of instances : add by okuda
+            if not self.training and self.args.plots:
+                targets = output_to_target(preds, max_det=15)[2]
+                gt = len(batch.get("bboxes"))
+                target = sum(bbox[4] > 0.25 for bbox in targets)
+                diff = abs(gt - target)
+                if batch_i == 0 or (best_diff > diff and gt > self.args.batch):
+                    best_diff = diff
+                    best_example = (batch, preds, batch_i)
+                if batch_i == 0 or (worst_diff < diff and gt > self.args.batch):
+                    worst_diff = diff
+                    worst_example = (batch, preds, batch_i)
+
+                if self.args.get("save_all"):
+                    fname = self.save_dir / "jpg" / "gt" / f"val_batch{batch_i}_labels.jpg"
+                    self.plot_val_samples(batch, batch_i, fname)
+                    fname = self.save_dir / "jpg" / "pred" / f"val_batch{batch_i}_pred.jpg"
+                    self.plot_predictions(batch, preds, batch_i, fname)
 
             self.run_callbacks("on_val_batch_end")
+
+        if not self.training and self.args.plots:
+            batch, preds, batch_i = best_example
+            fname = self.save_dir / "examples" / f"val_best_{batch_i}_labels.jpg"
+            self.plot_val_samples(batch, batch_i, fname)
+            fname = self.save_dir / "examples" / f"val_best_{batch_i}_pred.jpg"
+            self.plot_predictions(batch, preds, batch_i, fname)
+
+            batch, preds, batch_i = worst_example
+            fname = self.save_dir / "examples" / f"val_worst_{batch_i}_labels.jpg"
+            self.plot_val_samples(batch, batch_i, fname)
+            fname = self.save_dir / "examples" / f"val_worst_{batch_i}_pred.jpg"
+            self.plot_predictions(batch, preds, batch_i, fname)
         stats = self.get_stats()
         self.check_stats(stats)
         self.print_results()
@@ -237,10 +276,10 @@ class BaseValidator:
         return []
 
     # TODO: may need to put these following functions into callback
-    def plot_val_samples(self, batch, ni):
+    def plot_val_samples(self, batch, ni, fname):
         pass
 
-    def plot_predictions(self, batch, preds, ni):
+    def plot_predictions(self, batch, preds, ni, fname):
         pass
 
     def pred_to_json(self, preds, batch):

@@ -70,6 +70,7 @@ class Annotator:
     def __init__(self, im, line_width=None, font_size=None, font="Arial.ttf", pil=False, example="abc"):
         assert im.data.contiguous, "Image not contiguous. Apply np.ascontiguousarray(im) to Annotator() input images."
         non_ascii = not is_ascii(example)  # non-latin labels, i.e. asian, arabic, cyrillic
+        self.ch = 1 if len(im.shape) < 3 else im.shape[2]
         self.pil = pil or non_ascii
         if self.pil:  # use PIL
             self.pil_9_2_0_check = check_version(pil_version, "9.2.0")  # deprecation check
@@ -85,7 +86,9 @@ class Annotator:
             self.im = im
         self.lw = line_width or max(round(sum(im.shape) / 2 * 0.003), 2)  # line width
 
-    def box_label(self, box, label="", color=(128, 128, 128), txt_color=(255, 255, 255)):
+    def box_label(self, box, label="", color=(128, 128, 128, 128), txt_color=(255, 255, 255, 255)):
+        if self.ch == 1:
+            color = (0,)
         # Add one xyxy box to image with label
         if isinstance(box, torch.Tensor):
             box = box.tolist()
@@ -165,7 +168,7 @@ class Annotator:
         # Add rectangle to image (PIL-only)
         self.draw.rectangle(xy, fill, outline, width)
 
-    def text(self, xy, text, txt_color=(255, 255, 255), anchor="top"):
+    def text(self, xy, text, txt_color=(255, 255, 255, 255), anchor="top"):
         # Add text to image (PIL-only)
         if anchor == "bottom":  # start y from font bottom
             w, h = self.font.getsize(text)  # text width, height
@@ -234,8 +237,7 @@ def plot_labels(boxes, cls, names=(), save_dir=Path("")):
 
 def save_one_box(xyxy, im, file=Path("im.jpg"), gain=1.02, pad=10, square=False, BGR=False, save=True):
     # Save image crop as {file} with crop size multiple {gain} and {pad} pixels. Save and/or return crop
-    xyxy = torch.Tensor(xyxy).view(-1, 4)
-    b = xyxy2xywh(xyxy)  # boxes
+    b = xyxy2xywh(xyxy.view(-1, 4))  # boxes
     if square:
         b[:, 2:] = b[:, 2:].max(1)[0].unsqueeze(1)  # attempt rectangle to square
     b[:, 2:] = b[:, 2:] * gain + pad  # box wh * gain + pad
@@ -275,7 +277,13 @@ def plot_images(
         images *= 255  # de-normalise (optional)
 
     # Build Image
-    mosaic = np.full((int(ns * h), int(ns * w), 3), 255, dtype=np.uint8)  # init
+    ch = images[0].shape[0]
+    mosaic = np.full((int(ns * h), int(ns * w), ch), 255, dtype=np.uint8)  # init
+
+    # add okuda: color for multi channels
+    grid_color = (0,) * ch
+    txt_color = (255,) * ch
+
     for i, im in enumerate(images):
         if i == max_subplots:  # if last batch has fewer images than we expect
             break
@@ -295,9 +303,9 @@ def plot_images(
     annotator = Annotator(mosaic, line_width=round(fs / 10), font_size=fs, pil=True, example=names)
     for i in range(i + 1):
         x, y = int(w * (i // ns)), int(h * (i % ns))  # block origin
-        annotator.rectangle([x, y, x + w, y + h], None, (255, 255, 255), width=2)  # borders
+        annotator.rectangle([x, y, x + w, y + h], None, grid_color, width=2)  # borders
         if paths:
-            annotator.text((x + 5, y + 5 + h), text=Path(paths[i]).name[:40], txt_color=(220, 220, 220))  # filenames
+            annotator.text((x + 5, y + 5 + h), text=Path(paths[i]).name[:40], txt_color=txt_color)  # filenames
         if len(cls) > 0:
             idx = batch_idx == i
 
@@ -316,22 +324,25 @@ def plot_images(
             boxes[[1, 3]] += y
             for j, box in enumerate(boxes.T.tolist()):
                 c = classes[j]
-                color = colors(c)
+                if ch == 1 or ch == 2:
+                    color = (0,) * ch
+                else:
+                    color = (0,) * (ch - 3) + colors(c)
                 c = names[c] if names else c
                 if labels or conf[j] > 0.25:  # 0.25 conf thresh
                     label = f"{c}" if labels else f"{c} {conf[j]:.1f}"
-                    annotator.box_label(box, label, color=color)
+                    annotator.box_label(box, label, color=color, txt_color=txt_color)
 
             # Plot masks
             if len(masks):
-                if masks.max() > 1.0:  # mean that masks are overlap
+                if idx.shape[0] == masks.shape[0]:  # overlap_masks=False
+                    image_masks = masks[idx]
+                else:  # overlap_masks=True
                     image_masks = masks[[i]]  # (1, 640, 640)
                     nl = idx.sum()
                     index = np.arange(nl).reshape(nl, 1, 1) + 1
                     image_masks = np.repeat(image_masks, nl, axis=0)
                     image_masks = np.where(image_masks == index, 1.0, 0.0)
-                else:
-                    image_masks = masks[idx]
 
                 im = np.asarray(annotator.im).copy()
                 for j, box in enumerate(boxes.T.tolist()):
@@ -349,7 +360,21 @@ def plot_images(
                                 im[y : y + h, x : x + w, :][mask] * 0.4 + np.array(color) * 0.6
                             )
                 annotator.fromarray(im)
-    annotator.im.save(fname)  # save
+
+    # add okuda : multi channels img save
+    if ch == 2:
+        fname = str(fname)
+        mosaic_ir, mosaic = annotator.im.split()
+        mosaic.save(fname[:-4] + "_rgb.jpg")
+        mosaic_ir.save(fname[:-4] + "_fir.jpg")
+    elif ch == 4:
+        fname = str(fname)
+        mosaic_ir, r, g, b = annotator.im.split()
+        mosaic = Image.merge("RGB", (r, g, b))
+        mosaic.save(fname[:-4] + "_rgb.jpg")
+        mosaic_ir.save(fname[:-4] + "_fir.jpg")
+    else:
+        annotator.im.save(fname)  # save
 
 
 def plot_results(file="path/to/results.csv", dir="", segment=False):

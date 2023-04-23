@@ -8,13 +8,43 @@ import thop
 import torch
 import torch.nn as nn
 
-from ultralytics.nn.modules import (C1, C2, C3, C3TR, SPP, SPPF, Bottleneck, BottleneckCSP, C2f, C3Ghost, C3x, Classify,
-                                    Concat, Conv, ConvTranspose, Detect, DWConv, DWConvTranspose2d, Ensemble, Focus,
-                                    GhostBottleneck, GhostConv, Segment)
-from ultralytics.yolo.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, RANK, colorstr, yaml_load
+from ultralytics.nn.modules import (
+    C1,
+    C2,
+    C3,
+    C3TR,
+    SPP,
+    SPPF,
+    Bottleneck,
+    BottleneckCSP,
+    C2f,
+    C3Ghost,
+    C3x,
+    Classify,
+    Concat,
+    Conv,
+    ConvTranspose,
+    Detect,
+    DWConv,
+    DWConvTranspose2d,
+    Ensemble,
+    Focus,
+    GhostBottleneck,
+    GhostConv,
+    Segment,
+)
+from ultralytics.yolo.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, RANK, colorstr, emojis, yaml_load
 from ultralytics.yolo.utils.checks import check_requirements, check_yaml
-from ultralytics.yolo.utils.torch_utils import (fuse_conv_and_bn, fuse_deconv_and_bn, initialize_weights,
-                                                intersect_dicts, make_divisible, model_info, scale_img, time_sync)
+from ultralytics.yolo.utils.torch_utils import (
+    fuse_conv_and_bn,
+    fuse_deconv_and_bn,
+    initialize_weights,
+    intersect_dicts,
+    make_divisible,
+    model_info,
+    scale_img,
+    time_sync,
+)
 
 
 class BaseModel(nn.Module):
@@ -58,7 +88,7 @@ class BaseModel(nn.Module):
             x = m(x)  # run
             y.append(x if m.i in self.save else None)  # save output
             if visualize:
-                LOGGER.info('visualize feature not yet supported')
+                LOGGER.info("visualize feature not yet supported")
                 # TODO: feature_visualization(x, m.type, m.i, save_dir=visualize)
         return x
 
@@ -76,14 +106,14 @@ class BaseModel(nn.Module):
             None
         """
         c = m == self.model[-1]  # is final layer, copy input as inplace fix
-        o = thop.profile(m, inputs=(x.clone() if c else x,), verbose=False)[0] / 1E9 * 2 if thop else 0  # FLOPs
+        o = thop.profile(m, inputs=[x.clone() if c else x], verbose=False)[0] / 1e9 * 2 if thop else 0  # FLOPs
         t = time_sync()
         for _ in range(10):
             m(x.clone() if c else x)
         dt.append((time_sync() - t) * 100)
         if m == self.model[0]:
             LOGGER.info(f"{'time (ms)':>10s} {'GFLOPs':>10s} {'params':>10s}  module")
-        LOGGER.info(f'{dt[-1]:10.2f} {o:10.2f} {m.np:10.0f}  {m.type}')
+        LOGGER.info(f"{dt[-1]:10.2f} {o:10.2f} {m.np:10.0f}  {m.type}")
         if c:
             LOGGER.info(f"{sum(dt):10.2f} {'-':>10s} {'-':>10s}  Total")
 
@@ -97,13 +127,13 @@ class BaseModel(nn.Module):
         """
         if not self.is_fused():
             for m in self.model.modules():
-                if isinstance(m, (Conv, DWConv)) and hasattr(m, 'bn'):
+                if isinstance(m, (Conv, DWConv)) and hasattr(m, "bn"):
                     m.conv = fuse_conv_and_bn(m.conv, m.bn)  # update conv
-                    delattr(m, 'bn')  # remove batchnorm
+                    delattr(m, "bn")  # remove batchnorm
                     m.forward = m.forward_fuse  # update forward
-                if isinstance(m, ConvTranspose) and hasattr(m, 'bn'):
+                if isinstance(m, ConvTranspose) and hasattr(m, "bn"):
                     m.conv_transpose = fuse_deconv_and_bn(m.conv_transpose, m.bn)
-                    delattr(m, 'bn')  # remove batchnorm
+                    delattr(m, "bn")  # remove batchnorm
                     m.forward = m.forward_fuse  # update forward
             self.info()
 
@@ -119,7 +149,7 @@ class BaseModel(nn.Module):
         Returns:
             (bool): True if the number of BatchNorm layers in the model is less than the threshold, False otherwise.
         """
-        bn = tuple(v for k, v in nn.__dict__.items() if 'Norm' in k)  # normalization layers, i.e. BatchNorm2d()
+        bn = tuple(v for k, v in nn.__dict__.items() if "Norm" in k)  # normalization layers, i.e. BatchNorm2d()
         return sum(isinstance(v, bn) for v in self.modules()) < thresh  # True if < 'thresh' BatchNorm layers in model
 
     def info(self, verbose=False, imgsz=640):
@@ -159,23 +189,23 @@ class BaseModel(nn.Module):
             weights (str): The weights to load into the model.
         """
         # Force all tasks to implement this function
-        raise NotImplementedError('This function needs to be implemented by derived classes!')
+        raise NotImplementedError("This function needs to be implemented by derived classes!")
 
 
 class DetectionModel(BaseModel):
     # YOLOv8 detection model
-    def __init__(self, cfg='yolov8n.yaml', ch=3, nc=None, verbose=True):  # model, input channels, number of classes
+    def __init__(self, cfg="yolov8n.yaml", ch=3, nc=None, verbose=True):  # model, input channels, number of classes
         super().__init__()
         self.yaml = cfg if isinstance(cfg, dict) else yaml_load(check_yaml(cfg), append_filename=True)  # cfg dict
 
         # Define model
-        ch = self.yaml['ch'] = self.yaml.get('ch', ch)  # input channels
-        if nc and nc != self.yaml['nc']:
+        ch = self.yaml["ch"] = self.yaml.get("ch", ch)  # input channels
+        if nc and nc != self.yaml["nc"]:
             LOGGER.info(f"Overriding model.yaml nc={self.yaml['nc']} with nc={nc}")
-            self.yaml['nc'] = nc  # override yaml value
+            self.yaml["nc"] = nc  # override yaml value
         self.model, self.save = parse_model(deepcopy(self.yaml), ch=ch, verbose=verbose)  # model, savelist
-        self.names = {i: f'{i}' for i in range(self.yaml['nc'])}  # default names dict
-        self.inplace = self.yaml.get('inplace', True)
+        self.names = {i: f"{i}" for i in range(self.yaml["nc"])}  # default names dict
+        self.inplace = self.yaml.get("inplace", True)
 
         # Build strides
         m = self.model[-1]  # Detect()
@@ -191,7 +221,7 @@ class DetectionModel(BaseModel):
         initialize_weights(self)
         if verbose:
             self.info()
-            LOGGER.info('')
+            LOGGER.info("")
 
     def forward(self, x, augment=False, profile=False, visualize=False):
         if augment:
@@ -226,9 +256,9 @@ class DetectionModel(BaseModel):
     def _clip_augmented(self, y):
         # Clip YOLOv5 augmented inference tails
         nl = self.model[-1].nl  # number of detection layers (P3-P5)
-        g = sum(4 ** x for x in range(nl))  # grid points
+        g = sum(4**x for x in range(nl))  # grid points
         e = 1  # exclude layer count
-        i = (y[0].shape[-1] // g) * sum(4 ** x for x in range(e))  # indices
+        i = (y[0].shape[-1] // g) * sum(4**x for x in range(e))  # indices
         y[0] = y[0][..., :-i]  # large
         i = (y[-1].shape[-1] // g) * sum(4 ** (nl - 1 - x) for x in range(e))  # indices
         y[-1] = y[-1][..., i:]  # small
@@ -239,40 +269,37 @@ class DetectionModel(BaseModel):
         csd = intersect_dicts(csd, self.state_dict())  # intersect
         self.load_state_dict(csd, strict=False)  # load
         if verbose and RANK == -1:
-            LOGGER.info(f'Transferred {len(csd)}/{len(self.model.state_dict())} items from pretrained weights')
+            LOGGER.info(f"Transferred {len(csd)}/{len(self.model.state_dict())} items from pretrained weights")
 
 
 class SegmentationModel(DetectionModel):
     # YOLOv8 segmentation model
-    def __init__(self, cfg='yolov8n-seg.yaml', ch=3, nc=None, verbose=True):
+    def __init__(self, cfg="yolov8n-seg.yaml", ch=3, nc=None, verbose=True):
         super().__init__(cfg, ch, nc, verbose)
 
     def _forward_augment(self, x):
-        raise NotImplementedError('WARNING ⚠️ SegmentationModel has not supported augment inference yet!')
+        raise NotImplementedError("WARNING ⚠️ SegmentationModel has not supported augment inference yet!")
 
 
 class ClassificationModel(BaseModel):
     # YOLOv8 classification model
-    def __init__(self,
-                 cfg=None,
-                 model=None,
-                 ch=3,
-                 nc=1000,
-                 cutoff=10,
-                 verbose=True):  # yaml, model, channels, number of classes, cutoff index, verbose flag
+    def __init__(
+        self, cfg=None, model=None, ch=3, nc=1000, cutoff=10, verbose=True
+    ):  # yaml, model, channels, number of classes, cutoff index, verbose flag
         super().__init__()
         self._from_detection_model(model, nc, cutoff) if model is not None else self._from_yaml(cfg, ch, nc, verbose)
 
     def _from_detection_model(self, model, nc=1000, cutoff=10):
         # Create a YOLOv5 classification model from a YOLOv5 detection model
         from ultralytics.nn.autobackend import AutoBackend
+
         if isinstance(model, AutoBackend):
             model = model.model  # unwrap DetectMultiBackend
         model.model = model.model[:cutoff]  # backbone
         m = model.model[-1]  # last layer
-        ch = m.conv.in_channels if hasattr(m, 'conv') else m.cv1.conv.in_channels  # ch into module
+        ch = m.conv.in_channels if hasattr(m, "conv") else m.cv1.conv.in_channels  # ch into module
         c = Classify(ch, nc)  # Classify()
-        c.i, c.f, c.type = m.i, m.f, 'models.common.Classify'  # index, from, type
+        c.i, c.f, c.type = m.i, m.f, "models.common.Classify"  # index, from, type
         model.model[-1] = c  # replace
         self.model = model.model
         self.stride = model.stride
@@ -282,17 +309,17 @@ class ClassificationModel(BaseModel):
     def _from_yaml(self, cfg, ch, nc, verbose):
         self.yaml = cfg if isinstance(cfg, dict) else yaml_load(check_yaml(cfg), append_filename=True)  # cfg dict
         # Define model
-        ch = self.yaml['ch'] = self.yaml.get('ch', ch)  # input channels
-        if nc and nc != self.yaml['nc']:
+        ch = self.yaml["ch"] = self.yaml.get("ch", ch)  # input channels
+        if nc and nc != self.yaml["nc"]:
             LOGGER.info(f"Overriding model.yaml nc={self.yaml['nc']} with nc={nc}")
-            self.yaml['nc'] = nc  # override yaml value
+            self.yaml["nc"] = nc  # override yaml value
         self.model, self.save = parse_model(deepcopy(self.yaml), ch=ch, verbose=verbose)  # model, savelist
         self.stride = torch.Tensor([1])  # no stride constraints
-        self.names = {i: f'{i}' for i in range(self.yaml['nc'])}  # default names dict
+        self.names = {i: f"{i}" for i in range(self.yaml["nc"])}  # default names dict
         self.info()
 
     def load(self, weights):
-        model = weights['model'] if isinstance(weights, dict) else weights  # torchvision models are not dicts
+        model = weights["model"] if isinstance(weights, dict) else weights  # torchvision models are not dicts
         csd = model.float().state_dict()
         csd = intersect_dicts(csd, self.state_dict())  # intersect
         self.load_state_dict(csd, strict=False)  # load
@@ -300,7 +327,7 @@ class ClassificationModel(BaseModel):
     @staticmethod
     def reshape_outputs(model, nc):
         # Update a TorchVision classification model to class count 'n' if required
-        name, m = list((model.model if hasattr(model, 'model') else model).named_children())[-1]  # last module
+        name, m = list((model.model if hasattr(model, "model") else model).named_children())[-1]  # last module
         if isinstance(m, Classify):  # YOLO Classify() head
             if m.linear.out_features != nc:
                 m.linear = nn.Linear(m.linear.in_features, nc)
@@ -338,16 +365,27 @@ def torch_safe_load(weight):
 
     file = attempt_download_asset(weight)  # search online if missing locally
     try:
-        return torch.load(file, map_location='cpu'), file  # load
-    except ModuleNotFoundError as e:
-        if e.name == 'omegaconf':  # e.name is missing module name
-            LOGGER.warning(f'WARNING ⚠️ {weight} requires {e.name}, which is not in ultralytics requirements.'
-                           f'\nAutoInstall will run now for {e.name} but this feature will be removed in the future.'
-                           f'\nRecommend fixes are to train a new model using updated ultralytics package or to '
-                           f'download updated models from https://github.com/ultralytics/assets/releases/tag/v0.0.0')
-        if e.name != 'models':
-            check_requirements(e.name)  # install missing module
-        return torch.load(file, map_location='cpu'), file  # load
+        return torch.load(file, map_location="cpu"), file  # load
+    except ModuleNotFoundError as e:  # e.name is missing module name
+        if e.name == "models":
+            raise TypeError(
+                emojis(
+                    f"ERROR ❌️ {weight} appears to be an Ultralytics YOLOv5 model originally trained "
+                    f"with https://github.com/ultralytics/yolov5.\nThis model is NOT forwards compatible with "
+                    f"YOLOv8 at https://github.com/ultralytics/ultralytics."
+                    f"\nRecommend fixes are to train a new model using the latest 'ultralytics' package or to "
+                    f"run a command with an official YOLOv8 model, i.e. 'yolo predict model=yolov8n.pt'"
+                )
+            ) from e
+        LOGGER.warning(
+            f"WARNING ⚠️ {weight} appears to require '{e.name}', which is not in ultralytics requirements."
+            f"\nAutoInstall will run now for '{e.name}' but this feature will be removed in the future."
+            f"\nRecommend fixes are to train a new model using the latest 'ultralytics' package or to "
+            f"run a command with an official YOLOv8 model, i.e. 'yolo predict model=yolov8n.pt'"
+        )
+        check_requirements(e.name)  # install missing module
+
+        return torch.load(file, map_location="cpu"), file  # load
 
 
 def attempt_load_weights(weights, device=None, inplace=True, fuse=False):
@@ -356,25 +394,25 @@ def attempt_load_weights(weights, device=None, inplace=True, fuse=False):
     ensemble = Ensemble()
     for w in weights if isinstance(weights, list) else [weights]:
         ckpt, w = torch_safe_load(w)  # load ckpt
-        args = {**DEFAULT_CFG_DICT, **ckpt['train_args']}  # combine model and default args, preferring model args
-        model = (ckpt.get('ema') or ckpt['model']).to(device).float()  # FP32 model
+        args = {**DEFAULT_CFG_DICT, **ckpt["train_args"]}  # combine model and default args, preferring model args
+        model = (ckpt.get("ema") or ckpt["model"]).to(device).float()  # FP32 model
 
         # Model compatibility updates
         model.args = args  # attach args to model
         model.pt_path = w  # attach *.pt file path to model
         model.task = guess_model_task(model)
-        if not hasattr(model, 'stride'):
-            model.stride = torch.tensor([32.])
+        if not hasattr(model, "stride"):
+            model.stride = torch.tensor([32.0])
 
         # Append
-        ensemble.append(model.fuse().eval() if fuse and hasattr(model, 'fuse') else model.eval())  # model in eval mode
+        ensemble.append(model.fuse().eval() if fuse and hasattr(model, "fuse") else model.eval())  # model in eval mode
 
     # Module compatibility updates
     for m in ensemble.modules():
         t = type(m)
         if t in (nn.Hardswish, nn.LeakyReLU, nn.ReLU, nn.ReLU6, nn.SiLU, Detect, Segment):
             m.inplace = inplace  # torch 1.7.0 compatibility
-        elif t is nn.Upsample and not hasattr(m, 'recompute_scale_factor'):
+        elif t is nn.Upsample and not hasattr(m, "recompute_scale_factor"):
             m.recompute_scale_factor = None  # torch 1.11.0 compatibility
 
     # Return model
@@ -382,35 +420,35 @@ def attempt_load_weights(weights, device=None, inplace=True, fuse=False):
         return ensemble[-1]
 
     # Return ensemble
-    LOGGER.info(f'Ensemble created with {weights}\n')
-    for k in 'names', 'nc', 'yaml':
+    LOGGER.info(f"Ensemble created with {weights}\n")
+    for k in "names", "nc", "yaml":
         setattr(ensemble, k, getattr(ensemble[0], k))
     ensemble.stride = ensemble[torch.argmax(torch.tensor([m.stride.max() for m in ensemble])).int()].stride
-    assert all(ensemble[0].nc == m.nc for m in ensemble), f'Models differ in class counts: {[m.nc for m in ensemble]}'
+    assert all(ensemble[0].nc == m.nc for m in ensemble), f"Models differ in class counts: {[m.nc for m in ensemble]}"
     return ensemble
 
 
 def attempt_load_one_weight(weight, device=None, inplace=True, fuse=False):
     # Loads a single model weights
     ckpt, weight = torch_safe_load(weight)  # load ckpt
-    args = {**DEFAULT_CFG_DICT, **ckpt['train_args']}  # combine model and default args, preferring model args
-    model = (ckpt.get('ema') or ckpt['model']).to(device).float()  # FP32 model
+    args = {**DEFAULT_CFG_DICT, **ckpt["train_args"]}  # combine model and default args, preferring model args
+    model = (ckpt.get("ema") or ckpt["model"]).to(device).float()  # FP32 model
 
     # Model compatibility updates
     model.args = {k: v for k, v in args.items() if k in DEFAULT_CFG_KEYS}  # attach args to model
     model.pt_path = weight  # attach *.pt file path to model
     model.task = guess_model_task(model)
-    if not hasattr(model, 'stride'):
-        model.stride = torch.tensor([32.])
+    if not hasattr(model, "stride"):
+        model.stride = torch.tensor([32.0])
 
-    model = model.fuse().eval() if fuse and hasattr(model, 'fuse') else model.eval()  # model in eval mode
+    model = model.fuse().eval() if fuse and hasattr(model, "fuse") else model.eval()  # model in eval mode
 
     # Module compatibility updates
     for m in model.modules():
         t = type(m)
         if t in (nn.Hardswish, nn.LeakyReLU, nn.ReLU, nn.ReLU6, nn.SiLU, Detect, Segment):
             m.inplace = inplace  # torch 1.7.0 compatibility
-        elif t is nn.Upsample and not hasattr(m, 'recompute_scale_factor'):
+        elif t is nn.Upsample and not hasattr(m, "recompute_scale_factor"):
             m.recompute_scale_factor = None  # torch 1.11.0 compatibility
 
     # Return model and ckpt
@@ -421,14 +459,14 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
     # Parse a YOLO model.yaml dictionary
     if verbose:
         LOGGER.info(f"\n{'':>3}{'from':>20}{'n':>3}{'params':>10}  {'module':<45}{'arguments':<30}")
-    nc, gd, gw, act = d['nc'], d['depth_multiple'], d['width_multiple'], d.get('activation')
+    nc, gd, gw, act = d["nc"], d["depth_multiple"], d["width_multiple"], d.get("activation")
     if act:
         Conv.default_act = eval(act)  # redefine default activation, i.e. Conv.default_act = nn.SiLU()
         if verbose:
             LOGGER.info(f"{colorstr('activation:')} {act}")  # print
     ch = [ch]
     layers, save, c2 = [], [], ch[-1]  # layers, savelist, ch out
-    for i, (f, n, m, args) in enumerate(d['backbone'] + d['head']):  # from, number, module, args
+    for i, (f, n, m, args) in enumerate(d["backbone"] + d["head"]):  # from, number, module, args
         m = eval(m) if isinstance(m, str) else m  # eval strings
         for j, a in enumerate(args):
             # TODO: re-implement with eval() removal if possible
@@ -437,22 +475,41 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
                 args[j] = eval(a) if isinstance(a, str) else a  # eval strings
 
         n = n_ = max(round(n * gd), 1) if n > 1 else n  # depth gain
-        if m in {
-                Classify, Conv, ConvTranspose, GhostConv, Bottleneck, GhostBottleneck, SPP, SPPF, DWConv, Focus,
-                BottleneckCSP, C1, C2, C2f, C3, C3TR, C3Ghost, nn.ConvTranspose2d, DWConvTranspose2d, C3x}:
+        if m in (
+            Classify,
+            Conv,
+            ConvTranspose,
+            GhostConv,
+            Bottleneck,
+            GhostBottleneck,
+            SPP,
+            SPPF,
+            DWConv,
+            Focus,
+            BottleneckCSP,
+            C1,
+            C2,
+            C2f,
+            C3,
+            C3TR,
+            C3Ghost,
+            nn.ConvTranspose2d,
+            DWConvTranspose2d,
+            C3x,
+        ):
             c1, c2 = ch[f], args[0]
             if c2 != nc:  # if c2 not equal to number of classes (i.e. for Classify() output)
                 c2 = make_divisible(c2 * gw, 8)
 
             args = [c1, c2, *args[1:]]
-            if m in {BottleneckCSP, C1, C2, C2f, C3, C3TR, C3Ghost, C3x}:
+            if m in (BottleneckCSP, C1, C2, C2f, C3, C3TR, C3Ghost, C3x):
                 args.insert(2, n)  # number of repeats
                 n = 1
         elif m is nn.BatchNorm2d:
             args = [ch[f]]
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
-        elif m in {Detect, Segment}:
+        elif m in (Detect, Segment):
             args.append([ch[x] for x in f])
             if m is Segment:
                 args[2] = make_divisible(args[2] * gw, 8)
@@ -460,11 +517,11 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             c2 = ch[f]
 
         m_ = nn.Sequential(*(m(*args) for _ in range(n))) if n > 1 else m(*args)  # module
-        t = str(m)[8:-2].replace('__main__.', '')  # module type
+        t = str(m)[8:-2].replace("__main__.", "")  # module type
         m.np = sum(x.numel() for x in m_.parameters())  # number params
         m_.i, m_.f, m_.type = i, f, t  # attach index, 'from' index, type
         if verbose:
-            LOGGER.info(f'{i:>3}{str(f):>20}{n_:>3}{m.np:10.0f}  {t:<45}{str(args):<30}')  # print
+            LOGGER.info(f"{i:>3}{str(f):>20}{n_:>3}{m.np:10.0f}  {t:<45}{str(args):<30}")  # print
         save.extend(x % i for x in ([f] if isinstance(f, int) else f) if x != -1)  # append to savelist
         layers.append(m_)
         if i == 0:
@@ -489,13 +546,13 @@ def guess_model_task(model):
 
     def cfg2task(cfg):
         # Guess from YAML dictionary
-        m = cfg['head'][-1][-2].lower()  # output module name
-        if m in ['classify', 'classifier', 'cls', 'fc']:
-            return 'classify'
-        if m in ['detect']:
-            return 'detect'
-        if m in ['segment']:
-            return 'segment'
+        m = cfg["head"][-1][-2].lower()  # output module name
+        if m in ("classify", "classifier", "cls", "fc"):
+            return "classify"
+        if m == "detect":
+            return "detect"
+        if m == "segment":
+            return "segment"
 
     # Guess from model cfg
     if isinstance(model, dict):
@@ -504,32 +561,34 @@ def guess_model_task(model):
 
     # Guess from PyTorch model
     if isinstance(model, nn.Module):  # PyTorch model
-        for x in 'model.args', 'model.model.args', 'model.model.model.args':
+        for x in "model.args", "model.model.args", "model.model.model.args":
             with contextlib.suppress(Exception):
-                return eval(x)['task']
-        for x in 'model.yaml', 'model.model.yaml', 'model.model.model.yaml':
+                return eval(x)["task"]
+        for x in "model.yaml", "model.model.yaml", "model.model.model.yaml":
             with contextlib.suppress(Exception):
                 return cfg2task(eval(x))
 
         for m in model.modules():
             if isinstance(m, Detect):
-                return 'detect'
+                return "detect"
             elif isinstance(m, Segment):
-                return 'segment'
+                return "segment"
             elif isinstance(m, Classify):
-                return 'classify'
+                return "classify"
 
     # Guess from model filename
     if isinstance(model, (str, Path)):
         model = Path(model)
-        if '-seg' in model.stem or 'segment' in model.parts:
-            return 'segment'
-        elif '-cls' in model.stem or 'classify' in model.parts:
-            return 'classify'
-        elif 'detect' in model.parts:
-            return 'detect'
+        if "-seg" in model.stem or "segment" in model.parts:
+            return "segment"
+        elif "-cls" in model.stem or "classify" in model.parts:
+            return "classify"
+        elif "detect" in model.parts:
+            return "detect"
 
     # Unable to determine task from model
-    LOGGER.warning("WARNING ⚠️ Unable to automatically guess model task, assuming 'task=detect'. "
-                   "Explicitly define task for your model, i.e. 'task=detect', 'task=segment' or 'task=classify'.")
-    return 'detect'  # assume detect
+    LOGGER.warning(
+        "WARNING ⚠️ Unable to automatically guess model task, assuming 'task=detect'. "
+        "Explicitly define task for your model, i.e. 'task=detect', 'task=segment' or 'task=classify'."
+    )
+    return "detect"  # assume detect

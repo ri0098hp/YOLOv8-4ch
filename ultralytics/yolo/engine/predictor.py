@@ -32,7 +32,6 @@ from collections import defaultdict
 from pathlib import Path
 
 import cv2
-import torch
 
 from ultralytics.nn.autobackend import AutoBackend
 from ultralytics.yolo.cfg import get_cfg
@@ -93,6 +92,7 @@ class BasePredictor:
         self.data_path = None
         self.source_type = None
         self.batch = None
+        self.ch = None
         self.callbacks = defaultdict(list, callbacks.default_callbacks)  # add callbacks
         callbacks.add_integration_callbacks(self)
 
@@ -121,6 +121,12 @@ class BasePredictor:
             pass
 
     def setup_source(self, source):
+        if self.args.get("ch"):
+            self.ch = self.args.get("ch")
+        elif self.model.pt is True:
+            self.ch = self.model.model.yaml["ch"]
+        else:
+            self.ch = 4
         self.imgsz = check_imgsz(self.args.imgsz, stride=self.model.stride, min_dim=2)  # check image size
         if self.args.task == "classify":
             transforms = getattr(self.model.model, "transforms", classify_transforms(self.imgsz[0]))
@@ -128,6 +134,7 @@ class BasePredictor:
             transforms = None
         self.dataset = load_inference_source(
             source=source,
+            ch=self.ch,
             transforms=transforms,
             imgsz=self.imgsz,
             vid_stride=self.args.vid_stride,
@@ -153,7 +160,9 @@ class BasePredictor:
             (self.save_dir / "labels" if self.args.save_txt else self.save_dir).mkdir(parents=True, exist_ok=True)
         # warmup model
         if not self.done_warmup:
-            self.model.warmup(imgsz=(1 if self.model.pt or self.model.triton else self.dataset.bs, 3, *self.imgsz))
+            self.model.warmup(
+                imgsz=(1 if self.model.pt or self.model.triton else self.dataset.bs, self.ch, *self.imgsz)
+            )
             self.done_warmup = True
 
         self.seen, self.windows, self.dt, self.batch = 0, [], (ops.Profile(), ops.Profile(), ops.Profile()), None
@@ -180,7 +189,13 @@ class BasePredictor:
             self.run_callbacks("on_predict_postprocess_end")
 
             # visualize, save, write results
-            for i in range(len(im)):
+            n = len(im)
+            for i in range(n):
+                self.results[i].speed = {
+                    "preprocess": self.dt[0].dt * 1e3 / n,
+                    "inference": self.dt[1].dt * 1e3 / n,
+                    "postprocess": self.dt[2].dt * 1e3 / n,
+                }
                 p, im0 = (
                     (path[i], im0s[i].copy())
                     if self.source_type.webcam or self.source_type.from_img
@@ -195,6 +210,9 @@ class BasePredictor:
                     self.show(p)
 
                 if self.args.save:
+                    if self.ch == 4:
+                        (self.save_dir / "RGB").mkdir(exist_ok=True)
+                        (self.save_dir / "FIR").mkdir(exist_ok=True)
                     self.save_preds(vid_cap, i, str(self.save_dir / p.name))
             self.run_callbacks("on_predict_batch_end")
             yield from self.results
@@ -242,7 +260,13 @@ class BasePredictor:
         im0 = self.annotator.result()
         # save imgs
         if self.dataset.mode == "image":
-            cv2.imwrite(save_path, im0)
+            if self.ch == 4:
+                save_path = Path(save_path)
+                b, g, r, img_fir = cv2.split(im0)
+                cv2.imwrite(str(save_path.parent / "RGB" / save_path.name), cv2.merge((b, g, r)))
+                cv2.imwrite(str(save_path.parent / "FIR" / save_path.name), img_fir)
+            else:
+                cv2.imwrite(save_path, im0)
         else:  # 'video' or 'stream'
             if self.vid_path[idx] != save_path:  # new video
                 self.vid_path[idx] = save_path

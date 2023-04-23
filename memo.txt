@@ -1,19 +1,28 @@
-[train]
-  yolo detect train data=data/fujinolab-all.yaml model=yolov8s.yaml exist_ok
+[build]
+pip install -e '.[dev]'
 
-  [multi gpu training]
-    python -m torch.distributed.run --nproc_per_node 2 train.py --batch-size 16 --device 0,1 --data data/fujinolab-all.yaml
+[train]
+  yolo detect train
 
 [val]
-  python val.py --weights weights/fujinolab-all.pt --data data/fujinolab-all.yaml --exist-ok
+  yolo detect val model=fujinolab-all-4ch.pt data=data/fujinolab-all.yaml exist_ok
 
 [detect]
-  yolo predict model=yolov8n.pt source="https://ultralytics.com/images/bus.jpg" save=True
+  yolo detect predict model=fujinolab-all-4ch.pt source=datasets/demo save=True
+
+[export]
+ yolo export model=fujinolab-all-4ch.pt format=engine ch=0 device=0
 
 [debug]
-python -m torch.distributed.run --nproc_per_node 2 train.py --cache --batch-size 16 --epochs 2 --device 0,1 --hyp data/hyps/custom-hyps.yaml --exist-ok
+  yolo cfg=cfg/test.yaml
 
 [datase symlink (容量を圧縮)]
 find ../fujinolab-all -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
 
-comitid: 3765f4f
+[tasker]
+params=(day night summer mid winter)
+params=(1ch 3ch 4ch)
+for param in ${params[@]}
+do
+  yolo cfg=cfg/custom/fujinolab-all-${param}.yaml name=fujinolab-all-${param};
+done

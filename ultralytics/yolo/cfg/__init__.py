@@ -24,8 +24,7 @@ from ultralytics.yolo.utils import (
 )
 
 CLI_HELP_MSG = f"""
-    Arguments received: {str(['yolo'] + sys.argv[1:])}. Note that Ultralytics 'yolo' commands use the following syntax:
-
+        Arguments received: {str(['yolo'] + sys.argv[1:])}. Ultralytics 'yolo' commands use the following syntax:
         yolo TASK MODE ARGS
 
         Where   TASK (optional) is one of [detect, segment, classify]
@@ -73,6 +72,7 @@ CFG_FRACTION_KEYS = (
     "hsv_h",
     "hsv_s",
     "hsv_v",
+    "hsv_ir",
     "translate",
     "scale",
     "perspective",
@@ -83,6 +83,8 @@ CFG_FRACTION_KEYS = (
     "copy_paste",
     "conf",
     "iou",
+    "neg_ratio_train",  # add by okuda
+    "neg_ratio_val",  # add by okuda
 )  # fractional floats limited to 0.0 - 1.0
 CFG_INT_KEYS = (
     "epochs",
@@ -98,6 +100,8 @@ CFG_INT_KEYS = (
     "workspace",
     "nbs",
     "save_period",
+    "pos_imgs_train",  # add by okuda
+    "pos_imgs_val",  # add by okuda
 )
 CFG_BOOL_KEYS = (
     "save",
@@ -134,11 +138,13 @@ CFG_BOOL_KEYS = (
     "simplify",
     "nms",
     "v5loader",
+    "save_all",
 )
 
 # Define valid tasks and modes
 TASKS = "detect", "segment", "classify"
 MODES = "train", "val", "predict", "export", "track", "benchmark"
+USER_BOOL_STINGS = "save_all"  # add by okuda
 
 
 def cfg2dict(cfg):
@@ -174,7 +180,7 @@ def get_cfg(cfg: Union[str, Path, Dict, SimpleNamespace] = DEFAULT_CFG_DICT, ove
     # Merge overrides
     if overrides:
         overrides = cfg2dict(overrides)
-        check_cfg_mismatch(cfg, overrides)
+        # check_cfg_mismatch(cfg, overrides)
         cfg = {**cfg, **overrides}  # merge cfg and overrides dicts (prefer overrides)
 
     # Special handling for numeric project/names
@@ -221,6 +227,7 @@ def check_cfg_mismatch(base: Dict, custom: Dict, e=None):
         - custom (Dict): a dictionary of custom configuration options
         - base (Dict): a dictionary of base configuration options
     """
+    return
     base, custom = (set(x.keys()) for x in (base, custom))
     mismatched = [x for x in custom if x not in base]
     if mismatched:
@@ -300,6 +307,9 @@ def entrypoint(debug=""):
         if a.startswith("--"):
             LOGGER.warning(f"WARNING ⚠️ '{a}' does not require leading dashes '--', updating to '{a[2:]}'.")
             a = a[2:]
+        if a.endswith(","):
+            LOGGER.warning(f"WARNING ⚠️ '{a}' does not require trailing comma ',', updating to '{a[:-1]}'.")
+            a = a[:-1]
         if "=" in a:
             try:
                 re.sub(r" *= *", "=", a)  # remove spaces around equals sign
@@ -336,11 +346,13 @@ def entrypoint(debug=""):
                 f"'{colorstr('red', 'bold', a)}' is a valid YOLO argument but is missing an '=' sign "
                 f"to set its value, i.e. try '{a}={DEFAULT_CFG_DICT[a]}'\n{CLI_HELP_MSG}"
             )
+        elif a in USER_BOOL_STINGS:
+            overrides[a] = True  # auto-False for default bool args, i.e. 'yolo show' sets show=True
         else:
             check_cfg_mismatch(full_args_dict, {a: ""})
 
-    # Defaults
-    task2data = dict(detect="coco128.yaml", segment="coco128-seg.yaml", classify="imagenet100")
+    # Check keys
+    check_cfg_mismatch(full_args_dict, overrides)
 
     # Mode
     mode = overrides.get("mode", None)
@@ -354,6 +366,11 @@ def entrypoint(debug=""):
         checks.check_yolo()
         return
 
+    # Task
+    task = overrides.get("task")
+    if task and task not in TASKS:
+        raise ValueError(f"Invalid 'task={task}'. Valid tasks are {TASKS}.\n{CLI_HELP_MSG}")
+
     # Model
     model = overrides.pop("model", DEFAULT_CFG.model)
     if model is None:
@@ -362,14 +379,15 @@ def entrypoint(debug=""):
     from ultralytics.yolo.engine.model import YOLO
 
     overrides["model"] = model
-    model = YOLO(model)
+    model = YOLO(model, task=task)
 
-    # Task
-    task = overrides.get("task", None)
-    if task is not None and task not in TASKS:
-        raise ValueError(f"Invalid 'task={task}'. Valid tasks are {TASKS}.\n{CLI_HELP_MSG}")
-    else:
-        model.task = task
+    # Task Update
+    if task and task != model.task:
+        LOGGER.warning(
+            f"WARNING ⚠️ conflicting 'task={task}' passed with 'task={model.task}' model. " f"This may produce errors."
+        )
+    task = task or model.task
+    overrides["task"] = task
 
     # Mode
     if mode in {"predict", "track"} and "source" not in overrides:
@@ -381,8 +399,9 @@ def entrypoint(debug=""):
         LOGGER.warning(f"WARNING ⚠️ 'source' is missing. Using default 'source={overrides['source']}'.")
     elif mode in ("train", "val"):
         if "data" not in overrides:
-            overrides["data"] = task2data.get(overrides["task"], DEFAULT_CFG.data)
-            LOGGER.warning(f"WARNING ⚠️ 'data' is missing. Using {model.task} default 'data={overrides['data']}'.")
+            task2data = dict(detect="coco128.yaml", segment="coco128-seg.yaml", classify="imagenet100")
+            overrides["data"] = task2data.get(task or DEFAULT_CFG.task, DEFAULT_CFG.data)
+            LOGGER.warning(f"WARNING ⚠️ 'data' is missing. Using default 'data={overrides['data']}'.")
     elif mode == "export":
         if "format" not in overrides:
             overrides["format"] = DEFAULT_CFG.format or "torchscript"

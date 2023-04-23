@@ -18,7 +18,6 @@ from typing import Union
 import cv2
 import numpy as np
 import pandas as pd
-import requests
 import torch
 import yaml
 
@@ -244,6 +243,24 @@ def is_docker() -> bool:
         return False
 
 
+def is_online() -> bool:
+    """
+    Check internet connectivity by attempting to connect to a known online host.
+    Returns:
+        bool: True if connection is successful, False otherwise.
+    """
+    import socket
+
+    with contextlib.suppress(Exception):
+        host = socket.gethostbyname("www.github.com")
+        socket.create_connection((host, 80), timeout=2)
+        return True
+    return False
+
+
+ONLINE = is_online()
+
+
 def is_pip_package(filepath: str = __name__) -> bool:
     """
     Determines if the file at the given filepath is part of a pip package.
@@ -352,22 +369,6 @@ def get_git_branch():
             origin = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
             return origin.decode().strip()
     return None  # if not git dir or on error
-
-
-def get_latest_pypi_version(package_name="ultralytics"):
-    """
-    Returns the latest version of a PyPI package without downloading or installing it.
-
-    Parameters:
-        package_name (str): The name of the package to find the latest version for.
-
-    Returns:
-        str: The latest version of the package.
-    """
-    response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
-    if response.status_code == 200:
-        return response.json()["info"]["version"]
-    return None
 
 
 def get_default_args(func):
@@ -525,15 +526,12 @@ def set_sentry():
         and RANK in {-1, 0}
         and Path(sys.argv[0]).name == "yolo"
         and not TESTS_RUNNING
+        and ONLINE
         and (
             (is_pip_package() and not is_git_dir())
-            or (
-                get_git_origin_url() == "https://github.com/ultralytics/ultralytics.git" and get_git_branch() == "main"
-            )
+            or (get_git_origin_url() == "https://github.com/ultralytics/ultralytics.git" and get_git_branch() == "main")
         )
     ):
-
-        import hashlib
 
         import sentry_sdk  # noqa
 
@@ -616,7 +614,7 @@ def set_settings(kwargs, file=USER_CONFIG_DIR / "settings.yaml"):
 # Run below code on yolo/utils init ------------------------------------------------------------------------------------
 
 # Set logger
-set_logging(LOGGING_NAME)  # run before defining LOGGER
+set_logging(LOGGING_NAME, verbose=VERBOSE)  # run before defining LOGGER
 LOGGER = logging.getLogger(LOGGING_NAME)  # define globally (used in train.py, val.py, detect.py, etc.)
 if WINDOWS:
     for fn in LOGGER.info, LOGGER.warning:

@@ -1,25 +1,45 @@
 # Ultralytics YOLO 🚀, GPL-3.0 license
 
+import os
 from itertools import repeat
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
 
+import cv2
+import numpy as np
+import torch
 import torchvision
 from tqdm import tqdm
 
 from ..utils import NUM_THREADS, TQDM_BAR_FORMAT, is_dir_writeable
-from .augment import *
+from .augment import Compose, Format, Instances, LetterBox, classify_albumentations, classify_transforms, v8_transforms
 from .base import BaseDataset
-from .utils import HELP_URL, LOCAL_RANK, get_hash, img2label_paths, verify_image_label
+from .utils import HELP_URL, LOCAL_RANK, LOGGER, get_hash, verify_image_label
 
 
 class YOLODataset(BaseDataset):
     cache_version = "1.0.1"  # dataset labels *.cache version, >= 1.0.0 for YOLOv8
     rand_interp_methods = [cv2.INTER_NEAREST, cv2.INTER_LINEAR, cv2.INTER_CUBIC, cv2.INTER_AREA, cv2.INTER_LANCZOS4]
-    """YOLO Dataset.
+    """
+    Dataset class for loading images object detection and/or segmentation labels in YOLO format.
     Args:
-        img_path (str): image path.
-        prefix (str): prefix.
+        img_path (str): path to the folder containing images.
+        imgsz (int): image size (default: 640).
+        cache (bool): if True, a cache file of the labels is created to speed up future creation of dataset instances
+        (default: False).
+        augment (bool): if True, data augmentation is applied (default: True).
+        hyp (dict): hyperparameters to apply data augmentation (default: None).
+        prefix (str): prefix to print in log messages (default: '').
+        rect (bool): if True, rectangular training is used (default: False).
+        batch_size (int): size of batches (default: None).
+        stride (int): stride (default: 32).
+        pad (float): padding (default: 0.0).
+        single_cls (bool): if True, single class training is used (default: False).
+        use_segments (bool): if True, segmentation masks are used as labels (default: False).
+        use_keypoints (bool): if True, keypoints are used as labels (default: False).
+        names (list): class names (default: None).
+    Returns:
+        A PyTorch dataset object that can be used for training an object detection or segmentation model.
     """
 
     def __init__(
@@ -42,11 +62,22 @@ class YOLODataset(BaseDataset):
         self.use_segments = use_segments
         self.use_keypoints = use_keypoints
         self.names = names
+        self.data_path = img_path["data_path"]
+        self.rgb_folder = img_path.get("rgb_folder")
+        self.fir_folder = img_path.get("fir_folder")
+        self.labels_folder = img_path["labels_folder"]
+        self.is_train = "train" if "train" in prefix else "val"
+        self.ch = img_path["ch"]
         assert not (self.use_segments and self.use_keypoints), "Can not use both segments and keypoints."
         super().__init__(img_path, imgsz, cache, augment, hyp, prefix, rect, batch_size, stride, pad, single_cls)
 
     def cache_labels(self, path=Path("./labels.cache")):
-        # Cache dataset labels, check images and read shapes
+        """Cache dataset labels, check images and read shapes.
+        Args:
+            path (Path): path where to save the cache file (default: Path('./labels.cache')).
+        Returns:
+            (dict): labels.
+        """
         x = {"labels": []}
         nm, nf, ne, nc, msgs = 0, 0, 0, 0, []  # number missing, found, empty, corrupt, messages
         desc = f"{self.prefix}Scanning {path.parent / path.stem}..."
@@ -105,8 +136,17 @@ class YOLODataset(BaseDataset):
         return x
 
     def get_labels(self):
-        self.label_files = img2label_paths(self.im_files)
-        cache_path = Path(self.label_files[0]).parent.with_suffix(".cache")
+        # define base folder of pathes
+        self.label_files = []
+        base = self.fir_folder if self.ch == 1 else self.rgb_folder
+        for f in self.im_files:
+            # change path image folder to label folder
+            x = f.replace(os.sep + base + os.sep, os.sep + self.labels_folder + os.sep)
+            # change path img file to txt file
+            label_fp = x.replace(os.path.splitext(x)[-1], ".txt")
+            self.label_files.append(label_fp)
+
+        cache_path = Path(self.data_path) / "cache" / f"{self.is_train}_labels.cache"
         try:
             cache, exists = np.load(str(cache_path), allow_pickle=True).item(), True  # load dict
             assert cache["version"] == self.cache_version  # matches current version
@@ -122,9 +162,7 @@ class YOLODataset(BaseDataset):
             if cache["msgs"]:
                 LOGGER.info("\n".join(cache["msgs"]))  # display warnings
         if nf == 0:  # number of labels found
-            raise FileNotFoundError(
-                f"{self.prefix}No labels found in {cache_path}, can not start training. {HELP_URL}"
-            )
+            raise FileNotFoundError(f"{self.prefix}No labels found in {cache_path}, can not start training. {HELP_URL}")
 
         # Read cache
         [cache.pop(k) for k in ("hash", "version", "msgs")]  # remove items
@@ -132,9 +170,8 @@ class YOLODataset(BaseDataset):
         self.im_files = [lb["im_file"] for lb in labels]  # update im_files
 
         # Check if the dataset is all boxes or all segments
-        len_cls = sum(len(lb["cls"]) for lb in labels)
-        len_boxes = sum(len(lb["bboxes"]) for lb in labels)
-        len_segments = sum(len(lb["segments"]) for lb in labels)
+        lengths = ((len(lb["cls"]), len(lb["bboxes"]), len(lb["segments"])) for lb in labels)
+        len_cls, len_boxes, len_segments = (sum(x) for x in zip(*lengths))
         if len_segments and len_boxes != len_segments:
             LOGGER.warning(
                 f"WARNING ⚠️ Box and segment counts should be equal, but got len(segments) = {len_segments}, "

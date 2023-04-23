@@ -174,7 +174,7 @@ class LoadScreenshots:
 
 class LoadImages:
     # YOLOv8 image/video dataloader, i.e. `yolo predict source=image.jpg/vid.mp4`
-    def __init__(self, path, imgsz=640, stride=32, auto=True, transforms=None, vid_stride=1):
+    def __init__(self, path, ch=3, imgsz=640, stride=32, auto=True, transforms=None, vid_stride=1):
         if isinstance(path, str) and Path(path).suffix == ".txt":  # *.txt file with img/vid/dir on each line
             path = Path(path).read_text().rsplit()
         files = []
@@ -182,6 +182,11 @@ class LoadImages:
             p = str(Path(p).resolve())
             if "*" in p:
                 files.extend(sorted(glob.glob(p, recursive=True)))  # glob
+            elif os.path.isdir(Path(p) / "RGB") or os.path.isdir(Path(p) / "FIR"):
+                if ch == 1:
+                    files.extend(sorted(glob.glob(os.path.join(p, "FIR", "*.*"))))  # FIR dir
+                else:
+                    files.extend(sorted(glob.glob(os.path.join(p, "RGB", "*.*"))))  # RGB dir
             elif os.path.isdir(p):
                 files.extend(sorted(glob.glob(os.path.join(p, "*.*"))))  # dir
             elif os.path.isfile(p):
@@ -193,6 +198,7 @@ class LoadImages:
         videos = [x for x in files if x.split(".")[-1].lower() in VID_FORMATS]
         ni, nv = len(images), len(videos)
 
+        self.ch = ch
         self.imgsz = imgsz
         self.stride = stride
         self.files = images + videos
@@ -245,16 +251,27 @@ class LoadImages:
         else:
             # Read image
             self.count += 1
-            im0 = cv2.imread(path)  # BGR
+            if self.ch == 1:
+                im0 = cv2.imread(path, 0)  # grayscale
+            elif self.ch == 3:
+                im0 = cv2.imread(path)
+            else:
+                img_rgb = cv2.imread(path)
+                img_ir = cv2.imread(path.replace(os.sep + "RGB" + os.sep, os.sep + "FIR" + os.sep), 0)
+                # merge the file for 4 channel
+                im0 = cv2.merge((img_rgb, img_ir))
+
             if im0 is None:
                 raise FileNotFoundError(f"Image Not Found {path}")
-            s = f"image {self.count}/{self.nf} {path}: "
+            s = f"{self.ch}ch image {self.count}/{self.nf} {path.split(os.sep)[-1]}: "
 
         if self.transforms:
             im = self.transforms(im0)  # transforms
         else:
             im = LetterBox(self.imgsz, self.auto, stride=self.stride)(image=im0)
-            im = im.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
+            if self.ch == 1:
+                im = np.expand_dims(im, axis=2)
+            im = im.transpose((2, 0, 1))[::-1].copy()  # HWC to CHW, BGR to RGB
             im = np.ascontiguousarray(im)  # contiguous
 
         return path, im, im0, self.cap, s

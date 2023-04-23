@@ -1,13 +1,20 @@
-YOLOv3-4ch
+YOLOv8-4ch
 ==========
+# DEMO
+https://user-images.githubusercontent.com/104181368/222668654-0efb9323-4e6a-408c-90a1-a6807b9d8e40.mp4
+
+# Original
+ This is forked repo from (ultralytics/ultralytics) on commit 74e4c94.  
+ Catch up to changes [here](https://github.com/ultralytics/ultralytics/compare/74e4c94...main).
 
 # Features
-YOLOv3 をRGB-FIR向けに拡張したもの. 次の機能をオリジナルから追加している.
-- 1ch, 2ch, 3ch, 4chの学習・テストに対応
-- 4chの推論に対応
-- データセットの読み込みを確認できるツール `check_dataset.py`
-- テスト結果をsvg, csvで保存
-- テスト結果の画像を全て書き出し
+YOLOv8 をRGB-FIR向けに拡張したもの. 次の機能をオリジナルから追加している.
+- [x] 1ch, 2ch, 3ch, 4chの学習・テストに対応
+- [x] 4chの推論に対応
+- [x] TensorRT, ONNX, OpenVINOのエクスポートに対応
+- [x] データセットの読み込みを確認、cfgの設定をできるツール `check_dataset.py`
+- [x] テスト結果をsvg, csvで保存
+- [x] テスト結果の画像を全て書き出し
 
 # TODO
 基本的にはissueに投げる.  
@@ -35,7 +42,7 @@ git pull --rebase origin main
 3. データセットをdatasetフォルダーに入れる. [dataloader](utils/datasets.py) を魔改造してるため次のようなディレクトリ構造推奨...  
   シンボリックリンクでも認識可能なのでデータフォルダを作った後, フォルダごとにリンクを作るとスペースを節約できる.
   ```
-  <dataset>
+  <datasets>
   ├── fujinolab-all
   │   ├── 20180903_1113
   │   │   ├── FIR
@@ -51,7 +58,7 @@ git pull --rebase origin main
   │       ├── RGB_labels
   │       └── RGB_raw
   ├── fujinolab-day
-  │   └── 20180903_1113  <-シンボリックリンク
+  │   └── 20180903_1113  <-シンボリックリンク推奨
   │       ├── FIR
   │       ├── FIR_labels
   │       ├── RGB
@@ -60,24 +67,37 @@ git pull --rebase origin main
   │   
   └── kaist-all
       ├── train
-      │   ├── FIR
-      │   ├── FIR_labels
-      │   └── RGB
+      │   ├── set00
+      │   │   ├──V000
+      │   │   │  ├── labels
+      │   │   │  ├── person
+      │   │   │  ├── lwir
+      │   │   │  └── visible
+      │   │   └──V001
+      │   │      ├── labels
+      │   │      ├── person
+      │   │      ├── lwir
+      │   │      └── visible
+      │   └── set01
+      │   
       └── val
-          ├── FIR
-          ├── FIR_labels
-          ├── RGB
-          └── RGB_labels
+          ├── set06
+          │   ├──V000
+          │   │  ├── labels
+          │   │  ├── person
+          │   │  ├── lwir
+          │   │  └── visible
+          │   └──V001
+          │      ├── labels
+          │      ├── person
+          │      ├── lwir
+          │      └── visible
+          └── set07
   ```
-
-4. 必要に応じてオンラインで学習状況を確認できる [wandb](https://wandb.ai/home) に登録してログインキーを登録する. 詳細は[公式レポ](https://github.com/ultralytics/yolov5/issues/1289)参照.  
-今まで通りtensor boradを使うなら[次の起動時](#起動)に`wandb off`をターミナルで実行. また [tools.sh](tools.sh) にてwandb関連のマウントを削除.  
-削除: ~~`--mount type=bind,source="$(pwd)"/wandb,target=/usr/src/app/wandb \`~~  
-削除: ~~`--mount type=bind,source=${HOME}${USERPROFILE}/.netrc,target=/root/.netrc \`~~
 
 # Usage
 ## 通常モード
-  ### 起動
+  ### コンテナ起動
   次のコマンドを実行.
   ```bash
   ./tools.sh -r
@@ -91,18 +111,47 @@ git pull --rebase origin main
   [ここ](memo.txt)を参照. 基本的にはdataオプションとbatch-sizeオプション, epochsオプションで変更すればよい.  
   以下例...
   ```bash
-  python train.py --data [データyamlへのパス] --hyps [パラメータyamlへのパス] --batch-size [n (自動推定:-1)] --epochs [エポック数]
+  yolo detect train data=[yamlへのパス] model=[yamlまたはptへのパス]
   ```
 
   ### テスト
   [ここ](memo.txt)を参照. 基本的にはdataオプションと重みファイルオプションで変更すればよい. スライド用の画像を探す場合はsave-allオプションが便利.  
   以下例...
   ```bash
-  python val.py --weights [重みファイルへのパス] --data [データyamlへのパス] --save-all
+  yolo detect val model=[重みファイルへのパス] data=[データyamlへのパス] save-all
   ```
 
   ### 検知
-  準備中
+  ```bash
+  yolo detect predict model=[重みファイルへのパス] source=[データフォルダ] [検知結果画像を出力する場合は"save"]
+  ```
 
+  ## モデル変換
+  NVIDIAデバイス向けのTensorRTやIntelデバイス向けのOpenVINO, オープンソース(主にAMDデバイス向け)のONNXへの変換を行うことができる.
+  ```bash
+  yolo export model=[重みファイルへのパス] format=[フォーマット]
+  ```
+  なおformatは[engine, openvino, onnx, tflite]など [[詳細](https://docs.ultralytics.com/modes/export/)].
 ## デバッグモード
-準備中
+  ### Dockerイメージをビルド
+  次のコマンドを実行.
+  ```bash
+  ./tools.sh -c
+  ```
+  ### コンテナ起動
+  次のコマンドを実行.
+  ```bash
+  ./tools.sh -d
+  ```
+
+  ### データセットの準備
+  [ここ](data/fujinolab-all.yaml)を参考にディレクトリとクラスを指定.  
+  なおRGB画像、FIR画像、ラベルファイルは全て同じ名前を持っている必要がある (RGBを基準に出ディレクトリを置換している)
+
+  ### 一連のテスト
+  [ここ](memo.txt)を参照. 基本的にはdataオプションとbatch-sizeオプション, epochsオプションで変更すればよい.  
+  場合によってはdataやモデル名を指定して変更すること. test時には2000枚ほどを使用して訓練が行われる.
+  以下例...
+  ```bash
+  yolo cfg=cfg/test.yaml
+  ```

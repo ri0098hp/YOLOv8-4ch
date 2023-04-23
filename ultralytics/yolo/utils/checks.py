@@ -16,6 +16,7 @@ import cv2
 import numpy as np
 import pkg_resources as pkg
 import psutil
+import requests
 import torch
 from matplotlib import font_manager
 
@@ -31,6 +32,7 @@ from ultralytics.yolo.utils import (
     is_colab,
     is_docker,
     is_jupyter,
+    is_online,
 )
 
 
@@ -134,6 +136,31 @@ def check_version(
     return result
 
 
+def check_latest_pypi_version(package_name="ultralytics"):
+    """
+    Returns the latest version of a PyPI package without downloading or installing it.
+    Parameters:
+        package_name (str): The name of the package to find the latest version for.
+    Returns:
+        str: The latest version of the package.
+    """
+    response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
+    if response.status_code == 200:
+        return response.json()["info"]["version"]
+    return None
+
+
+def check_pip_update():
+    from ultralytics import __version__
+
+    latest = check_latest_pypi_version()
+    if pkg.parse_version(__version__) < pkg.parse_version(latest):
+        LOGGER.info(
+            f"New https://pypi.org/project/ultralytics/{latest} available 😃 "
+            f"Update with 'pip install -U ultralytics'"
+        )
+
+
 def check_font(font="Arial.ttf"):
     """
     Find font locally or download to user's configuration directory if it does not already exist.
@@ -161,22 +188,6 @@ def check_font(font="Arial.ttf"):
     if downloads.is_url(url):
         downloads.safe_download(url=url, file=file)
         return file
-
-
-def check_online() -> bool:
-    """
-    Check internet connectivity by attempting to connect to a known online host.
-
-    Returns:
-        bool: True if connection is successful, False otherwise.
-    """
-    import socket
-
-    with contextlib.suppress(Exception):
-        host = socket.gethostbyname("www.github.com")
-        socket.create_connection((host, 80), timeout=2)
-        return True
-    return False
 
 
 def check_python(minimum: str = "3.7.0") -> bool:
@@ -223,7 +234,7 @@ def check_requirements(requirements=ROOT.parent / "requirements.txt", exclude=()
     if s and install and AUTOINSTALL:  # check environment variable
         LOGGER.info(f"{prefix} YOLOv8 requirement{'s' * (n > 1)} {s}not found, attempting AutoUpdate...")
         try:
-            assert check_online(), "AutoUpdate skipped (offline)"
+            assert is_online(), "AutoUpdate skipped (offline)"
             LOGGER.info(subprocess.check_output(f"pip install {s} {cmds}", shell=True).decode())
             s = (
                 f"{prefix} {n} package{'s' * (n > 1)} updated per {file or requirements}\n"
@@ -234,7 +245,7 @@ def check_requirements(requirements=ROOT.parent / "requirements.txt", exclude=()
             LOGGER.warning(f"{prefix} ❌ {e}")
 
 
-def check_suffix(file="yolov8n.pt", suffix=(".pt",), msg=""):
+def check_suffix(file="yolov8n.pt", suffix=".pt", msg=""):
     # Check file(s) for acceptable suffix
     if file and suffix:
         if isinstance(suffix, str):
@@ -245,13 +256,13 @@ def check_suffix(file="yolov8n.pt", suffix=(".pt",), msg=""):
                 assert s in suffix, f"{msg}{f} acceptable suffix is {suffix}"
 
 
-def check_yolov5u_filename(file: str):
+def check_yolov5u_filename(file: str, verbose: bool = True):
     # Replace legacy YOLOv5 filenames with updated YOLOv5u filenames
     if "yolov3" in file or "yolov5" in file and "u" not in file:
         original_file = file
         file = re.sub(r"(.*yolov5([nsmlx]))\.", "\\1u.", file)  # i.e. yolov5n.pt -> yolov5nu.pt
         file = re.sub(r"(.*yolov3(|-tiny|-spp))\.", "\\1u.", file)  # i.e. yolov3-spp.pt -> yolov3-sppu.pt
-        if file != original_file:
+        if file != original_file and verbose:
             LOGGER.info(
                 f"PRO TIP 💡 Replace 'model={original_file}' with new 'model={file}'.\nYOLOv5 'u' models are "
                 f"trained with https://github.com/ultralytics/ultralytics and feature improved performance vs "

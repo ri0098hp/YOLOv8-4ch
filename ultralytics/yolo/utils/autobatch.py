@@ -12,13 +12,13 @@ from ultralytics.yolo.utils import LOGGER, colorstr
 from ultralytics.yolo.utils.torch_utils import profile
 
 
-def check_train_batch_size(model, imgsz=640, amp=True):
+def check_train_batch_size(model, imgsz=640, amp=True, ch=3):
     # Check YOLOv5 training batch size
     with torch.cuda.amp.autocast(amp):
-        return autobatch(deepcopy(model).train(), imgsz)  # compute optimal batch size
+        return autobatch(deepcopy(model).train(), imgsz, ch=ch)  # compute optimal batch size
 
 
-def autobatch(model, imgsz=640, fraction=0.7, batch_size=16):
+def autobatch(model, imgsz=640, fraction=0.7, batch_size=16, ch=3):
     # Automatically estimate best YOLOv5 batch size to use `fraction` of available CUDA memory
     # Usage:
     #     import torch
@@ -54,7 +54,7 @@ def autobatch(model, imgsz=640, fraction=0.7, batch_size=16):
     # Profile batch sizes
     batch_sizes = [1, 2, 4, 8, 16]
     try:
-        img = [torch.empty(b, 3, imgsz, imgsz) for b in batch_sizes]
+        img = [torch.empty(b, ch, imgsz, imgsz) for b in batch_sizes]
         results = profile(img, model, n=3, device=device)
 
         # Fit a solution

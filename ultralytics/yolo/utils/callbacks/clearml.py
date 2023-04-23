@@ -36,7 +36,7 @@ def on_pretrain_routine_start(trainer):
 
 def on_train_epoch_end(trainer):
     if trainer.epoch == 1:
-        _log_images({f.stem: str(f) for f in trainer.save_dir.glob("train_batch*.jpg")}, "Mosaic", trainer.epoch)
+        _log_images({f.stem: str(f) for f in trainer.save_dir.glob("**/train_batch*.jpg")}, "Mosaic", trainer.epoch)
 
 
 def on_fit_epoch_end(trainer):
@@ -54,6 +54,7 @@ def on_train_end(trainer):
     task = Task.current_task()
     if task:
         task.update_output_model(model_path=str(trainer.best), model_name=trainer.args.name, auto_delete_file=False)
+        _log_images({f.stem: str(f) for f in trainer.save_dir.glob("**/val_*.jpg")}, "Validation", trainer.epoch)
 
 
 callbacks = (

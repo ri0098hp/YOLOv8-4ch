@@ -195,23 +195,23 @@ class DetectionValidator(BaseValidator):
             )[0]
         )
 
-    def plot_val_samples(self, batch, ni):
+    def plot_val_samples(self, batch, ni, fname="val_batch_labels.jpg"):
         plot_images(
             batch["img"],
             batch["batch_idx"],
             batch["cls"].squeeze(-1),
             batch["bboxes"],
             paths=batch["im_file"],
-            fname=self.save_dir / f"val_batch{ni}_labels.jpg",
+            fname=fname,
             names=self.names,
         )
 
-    def plot_predictions(self, batch, preds, ni):
+    def plot_predictions(self, batch, preds, ni, fname="val_batch_pred.jpg"):
         plot_images(
             batch["img"],
             *output_to_target(preds, max_det=15),
             paths=batch["im_file"],
-            fname=self.save_dir / f"val_batch{ni}_pred.jpg",
+            fname=fname,
             names=self.names,
         )  # pred
 
@@ -246,15 +246,11 @@ class DetectionValidator(BaseValidator):
                 pred = anno.loadRes(str(pred_json))  # init predictions api (must pass string, not Path)
                 eval = COCOeval(anno, pred, "bbox")
                 if self.is_coco:
-                    eval.params.imgIds = [
-                        int(Path(x).stem) for x in self.dataloader.dataset.im_files
-                    ]  # images to eval
+                    eval.params.imgIds = [int(Path(x).stem) for x in self.dataloader.dataset.im_files]  # images to eval
                 eval.evaluate()
                 eval.accumulate()
                 eval.summarize()
-                stats[self.metrics.keys[-1]], stats[self.metrics.keys[-2]] = eval.stats[
-                    :2
-                ]  # update mAP50-95 and mAP50
+                stats[self.metrics.keys[-1]], stats[self.metrics.keys[-2]] = eval.stats[:2]  # update mAP50-95 and mAP50
             except Exception as e:
                 LOGGER.warning(f"pycocotools unable to run: {e}")
         return stats

@@ -1,4 +1,4 @@
-data_path: dataset/fujinolab-all # データセットのrootフォルダ
+data_path: datasets/fujinolab-all # データセットのrootフォルダ
 rgb_folder: RGB_homo # RGB画像があるフォルダ名
 fir_folder: FIR # FIR画像があるフォルダ名
 labels_folder: FIR_labels # ラベルがあるフォルダ名

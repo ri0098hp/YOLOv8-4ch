@@ -4,48 +4,39 @@
 
 # Start FROM NVIDIA PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
 # FROM docker.io/pytorch/pytorch:latest
-FROM pytorch/pytorch:latest
+FROM nvcr.io/nvidia/pytorch:23.03-py3
 RUN rm -rf /opt/pytorch
-ARG UID=3983
-ARG GID=3983
-RUN useradd -u $UID -o -m fujinolab
-RUN groupmod -g $GID -o fujinolab
+
+# rootless user
+ARG USER=suwako
+RUN useradd -m -d /home/$USER -s /bin/bash $USER
+WORKDIR /home/$USER/workspace
 
 # Downloads to user config dir
-ADD https://ultralytics.com/assets/Arial.ttf https://ultralytics.com/assets/Arial.Unicode.ttf /root/.config/Ultralytics/
+ADD https://ultralytics.com/assets/Arial.ttf https://ultralytics.com/assets/Arial.Unicode.ttf /home/$USER/.config/Ultralytics/
 
 # Install linux packages
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt update
-RUN TZ=Etc/UTC apt install -y tzdata
-RUN apt install --no-install-recommends -y gcc git zip curl htop libgl1-mesa-glx libglib2.0-0 libpython3-dev gnupg g++
-# RUN alias python=python3
-
-# Security updates
-# https://security.snyk.io/vuln/SNYK-UBUNTU1804-OPENSSL-3314796
-RUN apt upgrade --no-install-recommends -y openssl
-
-# Create working directory
-RUN mkdir -p /usr/src/ultralytics
-WORKDIR /usr/src/ultralytics
-
-# Copy contents
-# (issues as not a .git directory)
-COPY . /usr/src/ultralytics
-# RUN git clone https://github.com/ultralytics/ultralytics /usr/src/ultralytics
+RUN apt-get update &&\
+  apt-get -y upgrade
+RUN apt-get install --no-install-recommends -y gcc git zip curl htop libgl1-mesa-glx libglib2.0-0 libpython3-dev gnupg g++ screen
 
 # Install pip packages
-COPY requirements.txt .
+USER $USER
 RUN python3 -m pip install --upgrade pip wheel
-RUN pip install --no-cache albumentations comet gsutil notebook
-RUN pip install -e '.[dev]'
-RUN rm -rf ultralytics.egg-info
+RUN pip install -U Pillow opencv-python albumentations comet clearml gsutil notebook
 
 # Set environment variables
 ENV OMP_NUM_THREADS=1
 
 # Cleanup
 ENV DEBIAN_FRONTEND teletype
+
+# Add binary path
+ENV PATH=$PATH:/home/$USER/.local/bin
+
+# Copy files
+COPY docker/.screenrc /home/$USER
 
 
 # Usage Examples -------------------------------------------------------------------------------------------------------

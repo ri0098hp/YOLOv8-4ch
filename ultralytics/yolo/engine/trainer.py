@@ -147,6 +147,7 @@ class BaseTrainer:
             raise FileNotFoundError(emojis(f"Dataset '{self.args.data}' error ❌ {e}")) from e
 
         self.data_dict = self.get_dataset(self.data)
+        self.ch = self.args.get("ch") if self.args.get("ch") else self.data_dict.get("ch")
         self.ema = None
 
         # Optimization utils init
@@ -230,7 +231,7 @@ class BaseTrainer:
         # Batch size
         if self.batch_size == -1:
             if RANK == -1:  # single-GPU only, estimate best batch size
-                self.batch_size = check_train_batch_size(self.model, self.args.imgsz, self.amp)
+                self.batch_size = check_train_batch_size(self.model, self.args.imgsz, self.amp, self.ch)
             else:
                 SyntaxError(
                     "batch=-1 to use AutoBatch is only available in Single-GPU training. "
@@ -264,7 +265,7 @@ class BaseTrainer:
             metric_keys = self.validator.metrics.keys + self.label_loss_items(prefix="val")
             self.metrics = dict(zip(metric_keys, [0] * len(metric_keys)))  # TODO: init metrics for plot_results()?
             self.ema = ModelEMA(self.model)
-            if self.args.plots:
+            if self.args.plots and not self.args.v5loader:
                 self.plot_training_labels()
         self.resume_training(ckpt)
         self.scheduler.last_epoch = self.start_epoch - 1  # do not move
@@ -312,6 +313,7 @@ class BaseTrainer:
                 pbar = tqdm(enumerate(self.train_loader), total=nb, bar_format=TQDM_BAR_FORMAT)
             self.tloss = None
             self.optimizer.zero_grad()
+            os.makedirs(self.save_dir / "examples", exist_ok=True)
             for i, batch in pbar:
                 self.run_callbacks("on_train_batch_start")
                 # Warmup
@@ -357,7 +359,7 @@ class BaseTrainer:
                     )
                     self.run_callbacks("on_batch_end")
                     if self.args.plots and ni in self.plot_idx:
-                        self.plot_training_samples(batch, ni)
+                        self.plot_training_samples(batch, ni, fname=self.save_dir / "examples" / f"train_batch{ni}.jpg")
 
                 self.run_callbacks("on_train_batch_end")
 
@@ -367,7 +369,6 @@ class BaseTrainer:
             self.run_callbacks("on_train_epoch_end")
 
             if rank in {-1, 0}:
-
                 # Validation
                 self.ema.update_attr(self.model, include=["yaml", "nc", "args", "names", "stride", "class_weights"])
                 final_epoch = (epoch + 1 == self.epochs) or self.stopper.possible_stop
@@ -440,17 +441,18 @@ class BaseTrainer:
         """
         load/create/download model for any task.
         """
-        if isinstance(self.model, torch.nn.Module):  # if model is loaded beforehand. No setup needed
+        # if model is loaded beforehand. No setup needed
+        if isinstance(self.model, torch.nn.Module) and self.ch is None:
             return
-
         model, weights = self.model, None
         ckpt = None
         if str(model).endswith(".pt"):
             weights, ckpt = attempt_load_one_weight(model)
             cfg = ckpt["model"].yaml
         else:
-            cfg = model
-        self.model = self.get_model(cfg=cfg, weights=weights, verbose=RANK == -1)  # calls Model(cfg, weights)
+            cfg = self.args.model
+        # calls Model(cfg, weights)
+        self.model = self.get_model(cfg=cfg, weights=weights, verbose=RANK == -1)
         return ckpt
 
     def optimizer_step(self):
@@ -516,7 +518,7 @@ class BaseTrainer:
         return ""
 
     # TODO: may need to put these following functions into callback
-    def plot_training_samples(self, batch, ni):
+    def plot_training_samples(self, batch, ni, fname):
         pass
 
     def plot_training_labels(self):

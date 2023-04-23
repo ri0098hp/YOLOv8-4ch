@@ -1,6 +1,4 @@
-*
-!.gitignore
-!hyps
 !fujinolab-all.yaml
 !fujinolab-all-*ch.yaml
 !kaist-all.yaml
+!kaist-person.yaml

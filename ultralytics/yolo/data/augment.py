@@ -130,7 +130,10 @@ class Mosaic(BaseMixTransform):
 
             # place img in img4
             if i == 0:  # top left
-                img4 = np.full((s * 2, s * 2, img.shape[2]), 114, dtype=np.uint8)  # base image with 4 tiles
+                if self.dataset.ch == 1:
+                    img4 = np.full((s * 2, s * 2), 114, dtype=np.uint8)  # base image with 4 tiles
+                else:
+                    img4 = np.full((s * 2, s * 2, img.shape[2]), 114, dtype=np.uint8)  # base image with 4 tiles
                 x1a, y1a, x2a, y2a = max(xc - w, 0), max(yc - h, 0), xc, yc  # xmin, ymin, xmax, ymax (large image)
                 x1b, y1b, x2b, y2b = w - (x2a - x1a), h - (y2a - y1a), w, h  # xmin, ymin, xmax, ymax (small image)
             elif i == 1:  # top right
@@ -382,25 +385,38 @@ class RandomPerspective:
 
 
 class RandomHSV:
-    def __init__(self, hgain=0.5, sgain=0.5, vgain=0.5) -> None:
+    def __init__(self, hgain=0.5, sgain=0.5, vgain=0.5, irgain=0.5) -> None:
         self.hgain = hgain
         self.sgain = sgain
         self.vgain = vgain
+        self.irgain = irgain if irgain is not None else 0.0
 
     def __call__(self, labels):
         img = labels["img"]
-        if self.hgain or self.sgain or self.vgain:
-            r = np.random.uniform(-1, 1, 3) * [self.hgain, self.sgain, self.vgain] + 1  # random gains
-            hue, sat, val = cv2.split(cv2.cvtColor(img, cv2.COLOR_BGR2HSV))
+        if self.hgain or self.sgain or self.vgain or self.irgain:
+            r = np.random.uniform(-1, 1, 4) * [self.hgain, self.sgain, self.vgain, self.irgain] + 1  # random gains
             dtype = img.dtype  # uint8
 
             x = np.arange(0, 256, dtype=r.dtype)
             lut_hue = ((x * r[0]) % 180).astype(dtype)
             lut_sat = np.clip(x * r[1], 0, 255).astype(dtype)
             lut_val = np.clip(x * r[2], 0, 255).astype(dtype)
+            lut_gray = np.clip(x * r[3], 0, 255).astype(dtype)
 
-            im_hsv = cv2.merge((cv2.LUT(hue, lut_hue), cv2.LUT(sat, lut_sat), cv2.LUT(val, lut_val)))
-            cv2.cvtColor(im_hsv, cv2.COLOR_HSV2BGR, dst=img)  # no return needed
+            ch = 1 if len(img.shape) < 3 else img.shape[2]
+            if ch == 1:
+                img = cv2.LUT(img, lut_gray)
+            elif ch == 4:
+                b, g, r, ir = cv2.split(img)
+                img = cv2.merge((b, g, r))
+                hue, sat, val = cv2.split(cv2.cvtColor(img, cv2.COLOR_BGR2HSV))
+                im_hsv = cv2.merge((cv2.LUT(hue, lut_hue), cv2.LUT(sat, lut_sat), cv2.LUT(val, lut_val)))
+                cv2.cvtColor(im_hsv, cv2.COLOR_HSV2BGR, dst=img)
+                img = cv2.merge((img, cv2.LUT(ir, lut_gray)))
+            else:
+                hue, sat, val = cv2.split(cv2.cvtColor(img, cv2.COLOR_BGR2HSV))
+                im_hsv = cv2.merge((cv2.LUT(hue, lut_hue), cv2.LUT(sat, lut_sat), cv2.LUT(val, lut_val)))
+                cv2.cvtColor(im_hsv, cv2.COLOR_HSV2BGR, dst=img)
         return labels
 
 
@@ -550,6 +566,7 @@ class Albumentations:
 
             check_version(A.__version__, "1.0.3", hard=True)  # version requirement
 
+            # for rgb
             T = [
                 A.Blur(p=0.01),
                 A.MedianBlur(p=0.01),
@@ -560,6 +577,16 @@ class Albumentations:
                 A.ImageCompression(quality_lower=75, p=0.0),
             ]  # transforms
             self.transform = A.Compose(T, bbox_params=A.BboxParams(format="yolo", label_fields=["class_labels"]))
+            # for fir
+            T = [
+                A.Blur(p=0.01),
+                A.MedianBlur(p=0.01),
+                A.CLAHE(p=0.01),
+                A.RandomBrightnessContrast(p=0.0),
+                A.RandomGamma(p=0.0),
+                A.ImageCompression(quality_lower=75, p=0.0),
+            ]  # transforms
+            self.transform_gray = A.Compose(T, bbox_params=A.BboxParams(format="yolo", label_fields=["class_labels"]))
 
             LOGGER.info(prefix + ", ".join(f"{x}".replace("always_apply=False, ", "") for x in T if x.p))
         except ImportError:  # package not installed, skip
@@ -569,6 +596,7 @@ class Albumentations:
 
     def __call__(self, labels):
         im = labels["img"]
+        ch = 1 if len(im.shape) < 3 else im.shape[2]
         cls = labels["cls"]
         if len(cls):
             labels["instances"].convert_bbox("xywh")
@@ -576,7 +604,17 @@ class Albumentations:
             bboxes = labels["instances"].bboxes
             # TODO: add supports of segments and keypoints
             if self.transform and random.random() < self.p:
-                new = self.transform(image=im, bboxes=bboxes, class_labels=cls)  # transformed
+                if ch == 1:
+                    new = self.transform_gray(image=im, bboxes=bboxes, class_labels=cls)  # transformed
+                elif ch == 3:
+                    new = self.transform(image=im, bboxes=bboxes, class_labels=cls)  # transformed
+                else:
+                    b, g, r, im_fir = cv2.split(im)
+                    im_rgb = cv2.merge((b, g, r))
+                    new = self.transform(image=im_rgb, bboxes=bboxes, class_labels=cls)
+                    new_fir = self.transform_gray(image=im_fir, bboxes=bboxes, class_labels=cls)
+                    new["image"] = cv2.merge((new["image"], new_fir["image"]))
+
                 if len(new["class_labels"]) > 0:  # skip update if no bbox in new im
                     labels["img"] = new["image"]
                     labels["cls"] = np.array(new["class_labels"])
@@ -638,7 +676,8 @@ class Format:
     def _format_img(self, img):
         if len(img.shape) < 3:
             img = np.expand_dims(img, -1)
-        img = np.ascontiguousarray(img.transpose(2, 0, 1)[::-1])
+        img = img.transpose((2, 0, 1))[::-1].copy()  # HWC to CHW, BGRg to gRGB
+        img = np.ascontiguousarray(img)
         img = torch.from_numpy(img)
         return img
 
@@ -676,7 +715,7 @@ def v8_transforms(dataset, imgsz, hyp):
             pre_transform,
             MixUp(dataset, pre_transform=pre_transform, p=hyp.mixup),
             Albumentations(p=1.0),
-            RandomHSV(hgain=hyp.hsv_h, sgain=hyp.hsv_s, vgain=hyp.hsv_v),
+            RandomHSV(hgain=hyp.hsv_h, sgain=hyp.hsv_s, vgain=hyp.hsv_v, irgain=hyp.get("hsv_ir")),
             RandomFlip(direction="vertical", p=hyp.flipud),
             RandomFlip(direction="horizontal", p=hyp.fliplr),
         ]
@@ -721,8 +760,8 @@ def classify_albumentations(
                 if vflip > 0:
                     T += [A.VerticalFlip(p=vflip)]
                 if jitter > 0:
-                    color_jitter = (float(jitter),) * 3  # repeat value for brightness, contrast, saturation, 0 hue
-                    T += [A.ColorJitter(*color_jitter, 0)]
+                    jitter = float(jitter)
+                    T += [A.ColorJitter(jitter, jitter, jitter, 0)]  # brightness, contrast, saturation, 0 hue
         else:  # Use fixed crop for eval set (reproducibility)
             T = [A.SmallestMaxSize(max_size=size), A.CenterCrop(height=size, width=size)]
         T += [A.Normalize(mean=mean, std=std), ToTensorV2()]  # Normalize and convert to Tensor

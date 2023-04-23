@@ -1,0 +1,30 @@
+# Encoding
+defutf8 on
+defencoding utf8
+encoding utf8 utf8
+
+# Prefix Key
+escape ^Tt
+
+# set scrollback
+defscrollback 1000000
+termcapinfo xterm* ti@:te@
+
+# Delete sartt up screen
+startup_message off
+vbell off
+
+# Enable Auto detach
+autodetach on
+altscreen on
+
+# logging
+log on
+deflog on
+logfile "/Users/YourName/screen/log/screen-%Y%m%d-%n.log"
+
+
+# Show date and screen list
+hardstatus alwayslastline "%{= rw} %H %{= wk}%-Lw%{= bw}%n%f* %t%{= wk}%+Lw %{= wk}%=%{= gk} %y/%m/%d %c "
+
+shell $SHELL

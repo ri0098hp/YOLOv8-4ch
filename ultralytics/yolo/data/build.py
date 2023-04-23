@@ -167,7 +167,7 @@ def check_source(source):
     return source, webcam, screenshot, from_img, in_memory
 
 
-def load_inference_source(source=None, transforms=None, imgsz=640, vid_stride=1, stride=32, auto=True):
+def load_inference_source(source=None, ch=3, transforms=None, imgsz=640, vid_stride=1, stride=32, auto=True):
     """
     TODO: docs
     """
@@ -189,7 +189,7 @@ def load_inference_source(source=None, transforms=None, imgsz=640, vid_stride=1,
         dataset = LoadPilAndNumpy(source, imgsz=imgsz, stride=stride, auto=auto, transforms=transforms)
     else:
         dataset = LoadImages(
-            source, imgsz=imgsz, stride=stride, auto=auto, transforms=transforms, vid_stride=vid_stride
+            source, ch=ch, imgsz=imgsz, stride=stride, auto=auto, transforms=transforms, vid_stride=vid_stride
         )
 
     setattr(dataset, "source_type", source_type)  # attach source types
