@@ -1,0 +1,19 @@
+{
+  "name": "YOLOv8",
+  "dockerComposeFile": [
+    "../docker-compose.yaml"
+  ],
+  "service": "main",
+  "workspaceFolder": "/home/suwako/workspace/yolov8-okuda.code-workspace",
+  "remoteUser": "suwako",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.flake8",
+        "ms-python.isort"
+      ]
+    }
+  }
+}
