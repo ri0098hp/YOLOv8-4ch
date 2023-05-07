@@ -46,6 +46,8 @@ from ultralytics.yolo.utils.torch_utils import (
     time_sync,
 )
 
+from ..yolo.utils.plotting import feature_visualization
+
 
 class BaseModel(nn.Module):
     """
@@ -88,8 +90,7 @@ class BaseModel(nn.Module):
             x = m(x)  # run
             y.append(x if m.i in self.save else None)  # save output
             if visualize:
-                LOGGER.info("visualize feature not yet supported")
-                # TODO: feature_visualization(x, m.type, m.i, save_dir=visualize)
+                feature_visualization(x, m.type, m.i, save_dir=visualize)
         return x
 
     def _profile_one_layer(self, m, x, dt):
