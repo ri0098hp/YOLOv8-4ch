@@ -420,6 +420,26 @@ class RandomHSV:
         return labels
 
 
+class InvertColor:
+    def __init__(self, p=0.0) -> None:
+        assert 0 <= p <= 1.0
+        self.p = p
+
+    def __call__(self, labels):
+        if random.random() < self.p:
+            img = labels["img"]
+            ch = 1 if len(img.shape) < 3 else img.shape[2]
+            if ch == 1:
+                img = cv2.bitwise_not(img)
+            elif ch == 4:
+                b, g, r, ir = cv2.split(img)
+                img = cv2.merge((b, g, r))
+                ir = cv2.bitwise_not(ir)
+                img = cv2.merge((img, ir))
+            labels["img"] = img
+        return labels
+
+
 class RandomFlip:
     def __init__(self, p=0.5, direction="horizontal") -> None:
         assert direction in [
@@ -716,6 +736,7 @@ def v8_transforms(dataset, imgsz, hyp):
             MixUp(dataset, pre_transform=pre_transform, p=hyp.mixup),
             Albumentations(p=1.0),
             RandomHSV(hgain=hyp.hsv_h, sgain=hyp.hsv_s, vgain=hyp.hsv_v, irgain=hyp.get("hsv_ir")),
+            InvertColor(p=hyp.flipir),
             RandomFlip(direction="vertical", p=hyp.flipud),
             RandomFlip(direction="horizontal", p=hyp.fliplr),
         ]

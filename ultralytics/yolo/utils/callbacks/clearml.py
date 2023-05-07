@@ -54,6 +54,7 @@ def on_train_end(trainer):
     task = Task.current_task()
     if task:
         task.update_output_model(model_path=str(trainer.best), model_name=trainer.args.name, auto_delete_file=False)
+        task.upload_artifact("local file", artifact_object=str(list(trainer.save_dir.glob("events.out.tfevents*"))[0]))
         _log_images({f.stem: str(f) for f in trainer.save_dir.glob("**/val_*.jpg")}, "Validation", trainer.epoch)
 
 

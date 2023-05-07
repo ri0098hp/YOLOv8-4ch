@@ -83,6 +83,7 @@ translate: 0.0  # image translation (+/- fraction)
 scale: 0.0  # image scale (+/- gain)
 shear: 0.0  # image shear (+/- deg)
 perspective: 0.0  # image perspective (+/- fraction), range 0-0.001
+flipir: 0.0 # fir image flip black and white (probability)
 flipud: 0.0  # image flip up-down (probability)
 fliplr: 0.5  # image flip left-right (probability)
 mosaic: 1.0  # image mosaic (probability)

@@ -19,7 +19,7 @@ ADD https://ultralytics.com/assets/Arial.ttf https://ultralytics.com/assets/Aria
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update &&\
   apt-get -y upgrade
-RUN apt-get install --no-install-recommends -y gcc git zip curl htop libgl1-mesa-glx libglib2.0-0 libpython3-dev gnupg g++ screen
+RUN apt-get install --no-install-recommends -y gcc git zip curl htop libgl1-mesa-glx libglib2.0-0 libpython3-dev gnupg g++ screena
 
 # Install pip packages
 USER $USER
