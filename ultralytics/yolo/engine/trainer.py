@@ -148,6 +148,7 @@ class BaseTrainer:
 
         self.data_dict = self.get_dataset(self.data)
         self.ch = self.args.get("ch") if self.args.get("ch") else self.data_dict.get("ch")
+        self.data_dict["ch"] = self.ch
         self.ema = None
 
         # Optimization utils init
