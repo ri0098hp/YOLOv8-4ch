@@ -1,0 +1,83 @@
+name: Build and Release
+
+on: [ workflow_dispatch ]
+
+jobs:
+  create-release:
+    name: Create a Tag
+    outputs:
+      release_tag: ${{ steps.release_tag.outputs.release_tag }}
+      upload_url: ${{ steps.create_release.outputs.upload_url}}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TZ: 'Asia/Tokyo'
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # 前回のリリースタグを取得する
+      - name: Get previous tag
+        id: pre_tag
+        run: |
+          echo "pre_tag=$(curl -H 'Accept: application/vnd.github.v3+json' -H 'Authorization: token ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)" >> $GITHUB_OUTPUT
+
+      # タグを生成する 「{YYYY.MM.DD}」
+      - name: Generate Release Tag
+        id: release_tag
+        run: |
+          today=$(date +'%Y.%m.%d')
+          echo "release_tag=v$today" >> $GITHUB_OUTPUT
+
+      - name: Delete Existing Tag
+        uses: dev-drprasad/delete-tag-and-release@v1.0
+        if: steps.pre_tag.outputs.pre_tag == steps.release_tag.outputs.release_tag
+        with:
+          tag_name: ${{ steps.release_tag.outputs.release_tag }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          delete_release: true
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ steps.release_tag.outputs.release_tag }}
+          tag_name: ${{ steps.release_tag.outputs.release_tag }}
+          generate_release_notes: true
+
+  release-binary:
+    name: Build and Release Binary
+    needs: create-release
+
+    runs-on: ubuntu-latest
+    steps:
+    # Buid Whlees
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install Pipenv
+      run: |
+        pip install --upgrade pip
+        pip install pipenv
+
+    - name: Install Dependencies
+      run: pipenv install --skip-lock --system
+
+    - name: Build Wheel
+      run: python setup.py bdist_wheel
+
+    # Upload files
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      with:
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
+        asset_path: ./dist/ultralytics-8.0.48-py3-none-any.whl
+        asset_name: ultralytics-${{ needs.create-release.outputs.release_tag }}-py3-none-any.whl
+        asset_content_type: application/octet-stream

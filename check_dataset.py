@@ -13,7 +13,7 @@ def main():
     pprint(glob.glob("data/*.yaml"))
     data_name = input("name of data: ")
 
-    cfg = f"cfg/{data_name}.yaml"
+    cfg = f"cfg/custom/{data_name}.yaml"
     if not os.path.exists(cfg):
         cfg = "cfg/yolov8.yaml"
     args = get_cfg(cfg, None)

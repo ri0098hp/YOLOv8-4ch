@@ -91,9 +91,9 @@ mixup: 0.0 # image mixup (probability)
 copy_paste: 0.0 # segment copy-paste (probability)
 
 pos_imgs_train: 1000 # number of images for train (optionally)
-neg_ratio_train: 0.5 # ratio of non-labeled images to labeled ones (optionally)
+neg_ratio_train: 0.1 # ratio of non-labeled images to labeled ones (optionally)
 pos_imgs_val: 1000 # number of images for val (optionally)
-neg_ratio_val: 1.0 # ratio of non-labeled images to labeled ones (optionally)
+neg_ratio_val: 0.1 # ratio of non-labeled images to labeled ones (optionally)
 
 # Custom config.yaml ---------------------------------------------------------------------------------------------------
 cfg: # for overriding defaults.yaml

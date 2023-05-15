@@ -80,11 +80,13 @@ class BaseDataset(Dataset):
             # negative imgs
             neg_id = [i for i, label in enumerate(self.labels) if not label["bboxes"].any()]  # missed labels
             neg_num = len(neg_id)  # number of missed labels
+            emsg = f"neg_ratio_train must be less than {neg_num / (pos_num + neg_num)}"
+            print(prefix + emsg)
             if hyp.get("neg_ratio_train"):
-                target_num = pos_num * hyp.get("neg_ratio_train")
-                assert (
-                    target_num <= neg_num
-                ), f"{prefix}please check your neg_ratio_train, must be less than {neg_num/pos_num}"
+                r = hyp.get("neg_ratio_train")
+                assert 1 - r > 0, emsg
+                target_num = int(pos_num * (r / (1 - r)))
+                assert target_num <= neg_num, emsg
                 random.seed(hyp.get("seed") + 3 + RANK)
                 # 現在の有効ラベル群から消去したいラベル, "現在のラベル数-有効ラベル数*指定比率" 個分をポインタで指定
                 idx = random.sample(neg_id, int(neg_num - target_num))
@@ -110,11 +112,13 @@ class BaseDataset(Dataset):
             # negative imgs
             neg_id = [i for i, label in enumerate(self.labels) if not label["bboxes"].any()]  # missed labels
             neg_num = len(neg_id)  # number of missed labels
+            emsg = f"neg_ratio_val must be less than {neg_num / (pos_num + neg_num)}"
+            print(prefix + emsg)
             if hyp.get("neg_ratio_val"):
-                target_num = pos_num * hyp.get("neg_ratio_val")
-                assert (
-                    target_num <= neg_num
-                ), f"{prefix}please check your neg_ratio_train, must be less than {neg_num/pos_num}"
+                r = hyp.get("neg_ratio_val")
+                assert 1 - r > 0, emsg
+                target_num = int(pos_num * (r / (1 - r)))
+                assert target_num <= neg_num, emsg
                 random.seed(hyp.get("seed") + 5 + RANK)
                 # 現在の有効ラベル群から消去したいラベル, "現在のラベル数-有効ラベル数*指定比率" 個分をポインタで指定
                 idx = random.sample(neg_id, int(neg_num - target_num))
