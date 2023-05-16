@@ -29,3 +29,13 @@ do
     yolo cfg=cfg/custom/fujinolab-${cond}.yaml neg_ratio_train=0.5 ch=${model} name=fujinolab-${cond}-${model}ch;
   done;
 done
+
+conds=(day night hot inter cold)
+models=(day night hot inter cold time season)
+for cond in ${conds[@]}
+do
+  for model in ${models[@]}
+  do
+    yolo detect val data=data/fujinolab-${cond}.yaml model=runs/detect/fujinolab-${model}-4ch/weights/best.pt project=runs/val name=${cond}-by-${model};
+  done;
+done

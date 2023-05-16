@@ -4,9 +4,10 @@ on: [ workflow_dispatch ]
 
 jobs:
   create-release:
-    name: Create a Tag
+    name: Create Release
     outputs:
       release_tag: ${{ steps.release_tag.outputs.release_tag }}
+      today: ${{ steps.release_tag.outputs.today }}
       upload_url: ${{ steps.create_release.outputs.upload_url}}
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -22,10 +23,11 @@ jobs:
           echo "pre_tag=$(curl -H 'Accept: application/vnd.github.v3+json' -H 'Authorization: token ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)" >> $GITHUB_OUTPUT
 
       # タグを生成する 「{YYYY.MM.DD}」
-      - name: Generate Release Tag
+      - name: Generate Tag
         id: release_tag
         run: |
           today=$(date +'%Y.%m.%d')
+          echo "today=$today" >> $GITHUB_OUTPUT
           echo "release_tag=v$today" >> $GITHUB_OUTPUT
 
       - name: Delete Existing Tag
@@ -45,7 +47,7 @@ jobs:
           generate_release_notes: true
 
   release-binary:
-    name: Build and Release Binary
+    name: Build and Upload Wheel
     needs: create-release
 
     runs-on: ubuntu-latest
@@ -54,18 +56,17 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
+    - name: Find and Replace Versions
+      uses: jacobtomlinson/gha-find-replace@v3
+      with:
+        find: "([0-9]+\.){1}[0-9]+(\.[0-9]+)?"
+        replace: "${{ needs.create-release.outputs.today }}"
+        include: ultralytics/__init__.py
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-
-    - name: Install Pipenv
-      run: |
-        pip install --upgrade pip
-        pip install pipenv
-
-    - name: Install Dependencies
-      run: pipenv install --skip-lock --system
 
     - name: Build Wheel
       run: python setup.py bdist_wheel
@@ -78,6 +79,6 @@ jobs:
 
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: ./dist/ultralytics-8.0.48-py3-none-any.whl
-        asset_name: ultralytics-${{ needs.create-release.outputs.release_tag }}-py3-none-any.whl
+        asset_path: ./dist/ultralytics-${{ needs.create-release.outputs.today }}-py3-none-any.whl
+        asset_name: ultralytics-${{ needs.create-release.outputs.today }}-py3-none-any.whl
         asset_content_type: application/octet-stream

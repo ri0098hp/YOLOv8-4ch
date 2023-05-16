@@ -137,7 +137,7 @@ class BaseValidator:
             if not pt:
                 self.args.rect = False
             self.data["ch"] = self.args.get("ch") if self.args.get("ch") else self.data.get("ch")
-            self.dataloader = self.dataloader or self.get_dataloader(self.data.get(self.args.split), self.args.batch)
+            self.dataloader = self.dataloader or self.get_dataloader(self.data, self.args.batch)
             model.eval()
             model.warmup(imgsz=(1 if pt else self.args.batch, model.model.yaml["ch"], imgsz, imgsz))  # warmup
 
