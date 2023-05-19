@@ -11,8 +11,6 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    ports:
-      - '8888:8888'
     ipc: host
     ulimits:
       memlock: -1

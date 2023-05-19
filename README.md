@@ -3,6 +3,17 @@ YOLOv8-4ch
 # DEMO
 https://user-images.githubusercontent.com/104181368/222668654-0efb9323-4e6a-408c-90a1-a6807b9d8e40.mp4
 
+| Best Model | Device          | Format        | Speed/Image | FPS  | AP@All |
+| ---------- | --------------- | ------------- | ----------- | ---- | ------ |
+| YOLOv8s    | RTX3090         | PyTorch       | 2.7 ms      | 370  | 0.842  |
+|            |                 | TensorRT      | 2.6 ms      | 384  | -      |
+|            |                 | TensorRT FP16 | 1.1 ms      | 909  | 0.840  |
+|            | Jetson AGX Orin | PyTorch       | 8.9 ms      | 112  | -      |
+|            |                 | TensorRT      | 3.0 ms      | 333  | -      |
+|            | Intel i7-12700  | PyTorch       | 189.5 ms    | 5.2  | -      |
+|            |                 | OpenVINO      | 63.1 ms     | 15.8 | -      |
+|            |                 | ONNX          | 47.5 ms     | 21.0 | -      |
+
 # Original
  This is forked repo from (ultralytics/ultralytics) on commit 74e4c94.  
  Catch up to changes [here](https://github.com/ultralytics/ultralytics/compare/74e4c94...main).

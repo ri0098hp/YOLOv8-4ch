@@ -1,5 +1,6 @@
 runs/*
 data/*
+weights/*
 test
 datasets/*
 cfg/*
