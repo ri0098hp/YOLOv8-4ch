@@ -5,6 +5,7 @@
     }
   ],
   "settings": {
+    "python.terminal.activateEnvironment": true,
     "python.formatting.provider": "black", // フォーマッターをblackに設定
     "python.linting.pylintEnabled": false, // pyLintをオフに
     "python.linting.flake8Enabled": true, // flake8をオンに
@@ -13,7 +14,6 @@
     "editor.formatOnSave": true, // 保存時にフォーマットをオンに
     "editor.formatOnType": true, // タイピング時にフォーマットをオンに
     "editor.formatOnPaste": false, // 貼り付け時のフォーマットはオフに
-    "python.terminal.activateEnvironment": false,
     "python.formatting.blackArgs": [
       "--line-length",
       "120"

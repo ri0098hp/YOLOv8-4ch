@@ -12,7 +12,9 @@
         "ms-python.python",
         "ms-python.flake8",
         "ms-python.isort",
-        "ms-toolsai.jupyter"
+        "ms-toolsai.jupyter",
+        "yzhang.markdown-all-in-one",
+        "DavidAnson.vscode-markdownlint"
       ]
     }
   }
