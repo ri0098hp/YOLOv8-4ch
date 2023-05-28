@@ -1,4 +1,4 @@
-# Ultralytics YOLO 🚀, GPL-3.0 license
+# Ultralytics YOLO 🚀, AGPL-3.0 license
 import contextlib
 import glob
 import inspect
@@ -8,7 +8,6 @@ import platform
 import re
 import shutil
 import subprocess
-import urllib
 from pathlib import Path
 from typing import Optional
 
@@ -23,16 +22,20 @@ from matplotlib import font_manager
 from ultralytics.yolo.utils import (
     AUTOINSTALL,
     LOGGER,
+    ONLINE,
     ROOT,
     USER_CONFIG_DIR,
     TryExcept,
+    clean_url,
     colorstr,
     downloads,
     emojis,
     is_colab,
     is_docker,
-    is_jupyter,
+    is_kaggle,
     is_online,
+    is_pip_package,
+    url2file,
 )
 
 
@@ -59,13 +62,13 @@ def check_imgsz(imgsz, stride=32, min_dim=1, max_dim=2, floor=0):
     stride, update it to the nearest multiple of the stride that is greater than or equal to the given floor value.
 
     Args:
-        imgsz (int or List[int]): Image size.
+        imgsz (int) or (cList[int]): Image size.
         stride (int): Stride value.
         min_dim (int): Minimum number of dimensions.
         floor (int): Minimum allowed value for image size.
 
     Returns:
-        List[int]: Updated image size.
+        (List[int]): Updated image size.
     """
     # Convert stride to integer if it is a tensor
     stride = int(stride.max() if isinstance(stride, torch.Tensor) else stride)
@@ -124,7 +127,7 @@ def check_version(
         verbose (bool): If True, print warning message if minimum version is not met.
 
     Returns:
-        bool: True if minimum version is met, False otherwise.
+        (bool): True if minimum version is met, False otherwise.
     """
     current, minimum = (pkg.parse_version(x) for x in (current, minimum))
     result = (current == minimum) if pinned else (current >= minimum)  # bool
@@ -139,26 +142,40 @@ def check_version(
 def check_latest_pypi_version(package_name="ultralytics"):
     """
     Returns the latest version of a PyPI package without downloading or installing it.
+
     Parameters:
         package_name (str): The name of the package to find the latest version for.
+
     Returns:
-        str: The latest version of the package.
+        (str): The latest version of the package.
     """
-    response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
-    if response.status_code == 200:
-        return response.json()["info"]["version"]
+    with contextlib.suppress(Exception):
+        requests.packages.urllib3.disable_warnings()  # Disable the InsecureRequestWarning
+        response = requests.get(f"https://pypi.org/pypi/{package_name}/json", timeout=3)
+        if response.status_code == 200:
+            return response.json()["info"]["version"]
     return None
 
 
-def check_pip_update():
-    from ultralytics import __version__
+def check_pip_update_available():
+    """
+    Checks if a new version of the ultralytics package is available on PyPI.
 
-    latest = check_latest_pypi_version()
-    if pkg.parse_version(__version__) < pkg.parse_version(latest):
-        LOGGER.info(
-            f"New https://pypi.org/project/ultralytics/{latest} available 😃 "
-            f"Update with 'pip install -U ultralytics'"
-        )
+    Returns:
+        (bool): True if an update is available, False otherwise.
+    """
+    if ONLINE and is_pip_package():
+        with contextlib.suppress(Exception):
+            from ultralytics import __version__
+
+            latest = check_latest_pypi_version()
+            if pkg.parse_version(__version__) < pkg.parse_version(latest):  # update is available
+                LOGGER.info(
+                    f"New https://pypi.org/project/ultralytics/{latest} available 😃 "
+                    f"Update with 'pip install -U ultralytics'"
+                )
+                return True
+    return False
 
 
 def check_font(font="Arial.ttf"):
@@ -205,7 +222,16 @@ def check_python(minimum: str = "3.7.0") -> bool:
 
 @TryExcept()
 def check_requirements(requirements=ROOT.parent / "requirements.txt", exclude=(), install=True, cmds=""):
-    # Check installed dependencies meet YOLOv5 requirements (pass *.txt file or list of packages or single package str)
+    """
+    Check if installed dependencies meet YOLOv8 requirements and attempt to auto-update if needed.
+
+    Args:
+        requirements (Union[Path, str, List[str]]): Path to a requirements.txt file, a single package requirement as a
+            string, or a list of package requirements as strings.
+        exclude (Tuple[str]): Tuple of package names to exclude from checking.
+        install (bool): If True, attempt to auto-update packages that don't meet requirements.
+        cmds (str): Additional commands to pass to the pip install command when auto-updating.
+    """
     prefix = colorstr("red", "bold", "requirements:")
     check_python()  # check python version
     file = None
@@ -217,8 +243,8 @@ def check_requirements(requirements=ROOT.parent / "requirements.txt", exclude=()
     elif isinstance(requirements, str):
         requirements = [requirements]
 
-    s = ""
-    n = 0
+    s = ""  # console string
+    n = 0  # number of packages updates
     for r in requirements:
         try:
             pkg.require(r)
@@ -232,10 +258,10 @@ def check_requirements(requirements=ROOT.parent / "requirements.txt", exclude=()
                 n += 1
 
     if s and install and AUTOINSTALL:  # check environment variable
-        LOGGER.info(f"{prefix} YOLOv8 requirement{'s' * (n > 1)} {s}not found, attempting AutoUpdate...")
+        LOGGER.info(f"{prefix} Ultralytics requirement{'s' * (n > 1)} {s}not found, attempting AutoUpdate...")
         try:
             assert is_online(), "AutoUpdate skipped (offline)"
-            LOGGER.info(subprocess.check_output(f"pip install {s} {cmds}", shell=True).decode())
+            LOGGER.info(subprocess.check_output(f"pip install --no-cache {s} {cmds}", shell=True).decode())
             s = (
                 f"{prefix} {n} package{'s' * (n > 1)} updated per {file or requirements}\n"
                 f"{prefix} ⚠️ {colorstr('bold', 'Restart runtime or rerun command for updates to take effect')}\n"
@@ -246,22 +272,23 @@ def check_requirements(requirements=ROOT.parent / "requirements.txt", exclude=()
 
 
 def check_suffix(file="yolov8n.pt", suffix=".pt", msg=""):
-    # Check file(s) for acceptable suffix
+    """Check file(s) for acceptable suffix."""
     if file and suffix:
         if isinstance(suffix, str):
-            suffix = [suffix]
+            suffix = (suffix,)
         for f in file if isinstance(file, (list, tuple)) else [file]:
-            s = Path(f).suffix.lower()  # file suffix
+            s = Path(f).suffix.lower().strip()  # file suffix
             if len(s):
-                assert s in suffix, f"{msg}{f} acceptable suffix is {suffix}"
+                assert s in suffix, f"{msg}{f} acceptable suffix is {suffix}, not {s}"
 
 
 def check_yolov5u_filename(file: str, verbose: bool = True):
-    # Replace legacy YOLOv5 filenames with updated YOLOv5u filenames
-    if "yolov3" in file or "yolov5" in file and "u" not in file:
+    """Replace legacy YOLOv5 filenames with updated YOLOv5u filenames."""
+    if ("yolov3" in file or "yolov5" in file) and "u" not in file:
         original_file = file
-        file = re.sub(r"(.*yolov5([nsmlx]))\.", "\\1u.", file)  # i.e. yolov5n.pt -> yolov5nu.pt
-        file = re.sub(r"(.*yolov3(|-tiny|-spp))\.", "\\1u.", file)  # i.e. yolov3-spp.pt -> yolov3-sppu.pt
+        file = re.sub(r"(.*yolov5([nsmlx]))\.pt", "\\1u.pt", file)  # i.e. yolov5n.pt -> yolov5nu.pt
+        file = re.sub(r"(.*yolov5([nsmlx])6)\.pt", "\\1u.pt", file)  # i.e. yolov5n6.pt -> yolov5n6u.pt
+        file = re.sub(r"(.*yolov3(|-tiny|-spp))\.pt", "\\1u.pt", file)  # i.e. yolov3-spp.pt -> yolov3-sppu.pt
         if file != original_file and verbose:
             LOGGER.info(
                 f"PRO TIP 💡 Replace 'model={original_file}' with new 'model={file}'.\nYOLOv5 'u' models are "
@@ -271,18 +298,18 @@ def check_yolov5u_filename(file: str, verbose: bool = True):
     return file
 
 
-def check_file(file, suffix="", download=True):
-    # Search/download file (if necessary) and return path
+def check_file(file, suffix="", download=True, hard=True):
+    """Search/download file (if necessary) and return path."""
     check_suffix(file, suffix)  # optional
-    file = str(file)  # convert to string
+    file = str(file).strip()  # convert to string and strip spaces
     file = check_yolov5u_filename(file)  # yolov5n -> yolov5nu
     if not file or ("://" not in file and Path(file).exists()):  # exists ('://' check required in Windows Python<3.10)
         return file
     elif download and file.lower().startswith(("https://", "http://", "rtsp://", "rtmp://")):  # download
         url = file  # warning: Pathlib turns :// -> :/
-        file = Path(urllib.parse.unquote(file).split("?")[0]).name  # '%2F' to '/', split https://url.com/file.txt?auth
+        file = url2file(file)  # '%2F' to '/', split https://url.com/file.txt?auth
         if Path(file).exists():
-            LOGGER.info(f"Found {url} locally at {file}")  # file already exists
+            LOGGER.info(f"Found {clean_url(url)} locally at {file}")  # file already exists
         else:
             downloads.safe_download(url=url, file=file, unzip=False)
         return file
@@ -290,23 +317,22 @@ def check_file(file, suffix="", download=True):
         files = []
         for d in "models", "datasets", "tracker/cfg", "yolo/cfg":  # search directories
             files.extend(glob.glob(str(ROOT / d / "**" / file), recursive=True))  # find file
-        if not files:
+        if not files and hard:
             raise FileNotFoundError(f"'{file}' does not exist")
-        elif len(files) > 1:
+        elif len(files) > 1 and hard:
             raise FileNotFoundError(f"Multiple files match '{file}', specify exact path: {files}")
-        return files[0]  # return file
+        return files[0] if len(files) else []  # return file
 
 
-def check_yaml(file, suffix=(".yaml", ".yml")):
-    # Search/download YAML file (if necessary) and return path, checking suffix
-    return check_file(file, suffix)
+def check_yaml(file, suffix=(".yaml", ".yml"), hard=True):
+    """Search/download YAML file (if necessary) and return path, checking suffix."""
+    return check_file(file, suffix, hard=hard)
 
 
 def check_imshow(warn=False):
-    # Check if environment supports image displays
+    """Check if environment supports image displays."""
     try:
-        assert not is_jupyter()
-        assert not is_docker()
+        assert not any((is_colab(), is_kaggle(), is_docker()))
         cv2.imshow("test", np.zeros((1, 1, 3)))
         cv2.waitKey(1)
         cv2.destroyAllWindows()
@@ -319,6 +345,7 @@ def check_imshow(warn=False):
 
 
 def check_yolo(verbose=True, device=""):
+    """Return a human-readable YOLO software and hardware summary."""
     from ultralytics.yolo.utils.torch_utils import select_device
 
     if is_colab():
@@ -351,7 +378,12 @@ def git_describe(path=ROOT):  # path must be a directory
 
 
 def print_args(args: Optional[dict] = None, show_file=True, show_func=False):
-    # Print function arguments (optional args dict)
+    """Print function arguments (optional args dict)."""
+
+    def strip_auth(v):
+        """Clean longer Ultralytics HUB URLs by stripping potential authentication information."""
+        return clean_url(v) if (isinstance(v, str) and v.startswith("http") and len(v) > 100) else v
+
     x = inspect.currentframe().f_back  # previous frame
     file, _, func, _, _ = inspect.getframeinfo(x)
     if args is None:  # get args automatically
@@ -362,4 +394,4 @@ def print_args(args: Optional[dict] = None, show_file=True, show_func=False):
     except ValueError:
         file = Path(file).stem
     s = (f"{file}: " if show_file else "") + (f"{func}: " if show_func else "")
-    LOGGER.info(colorstr(s) + ", ".join(f"{k}={v}" for k, v in args.items()))
+    LOGGER.info(colorstr(s) + ", ".join(f"{k}={strip_auth(v)}" for k, v in args.items()))

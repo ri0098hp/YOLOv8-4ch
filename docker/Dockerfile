@@ -4,7 +4,7 @@
 
 # Start FROM NVIDIA PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
 # FROM docker.io/pytorch/pytorch:latest
-FROM nvcr.io/nvidia/pytorch:23.03-py3
+FROM nvcr.io/nvidia/pytorch:23.04-py3
 RUN rm -rf /opt/pytorch
 
 # rootless user
@@ -19,12 +19,12 @@ ADD https://ultralytics.com/assets/Arial.ttf https://ultralytics.com/assets/Aria
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update &&\
   apt-get -y upgrade
-RUN apt-get install --no-install-recommends -y gcc git zip curl htop libusb-1.0-0 libgl1-mesa-glx libglib2.0-0 libpython3-dev gnupg g++ screen rename python3-tkinter
+RUN apt-get install --no-install-recommends -y gcc git zip curl htop libusb-1.0-0 libgl1-mesa-glx libglib2.0-0 libpython3-dev gnupg g++ screen rename python3-tk
 
 # Install pip packages
 USER $USER
 RUN python3 -m pip install --upgrade pip wheel
-RUN pip install -U Pillow opencv-python albumentations comet clearml gsutil notebook black flake8 isort
+RUN pip install -U onnxsim onnxruntime-gpu Pillow opencv-python albumentations comet clearml gsutil notebook black flake8 isort
 # Set environment variables
 ENV OMP_NUM_THREADS=1
 

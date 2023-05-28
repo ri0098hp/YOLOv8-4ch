@@ -1,4 +1,4 @@
-# Ultralytics YOLO 🚀, GPL-3.0 license
+# Ultralytics YOLO 🚀, AGPL-3.0 license
 """
 Train a model on a dataset
 
@@ -8,9 +8,8 @@ Usage:
 import os
 import subprocess
 import time
-from collections import defaultdict
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import numpy as np
@@ -28,11 +27,14 @@ from ultralytics.yolo.data.utils import check_cls_dataset, check_det_dataset
 from ultralytics.yolo.utils import (
     DEFAULT_CFG,
     LOGGER,
+    ONLINE,
     RANK,
+    ROOT,
     SETTINGS,
     TQDM_BAR_FORMAT,
     __version__,
     callbacks,
+    clean_url,
     colorstr,
     emojis,
     yaml_save,
@@ -89,7 +91,7 @@ class BaseTrainer:
         csv (Path): Path to results CSV file.
     """
 
-    def __init__(self, cfg=DEFAULT_CFG, overrides=None):
+    def __init__(self, cfg=DEFAULT_CFG, overrides=None, _callbacks=None):
         """
         Initializes the BaseTrainer class.
 
@@ -103,6 +105,7 @@ class BaseTrainer:
         self.validator = None
         self.model = None
         self.metrics = None
+        self.plots = {}
         init_seeds(self.args.seed + 1 + RANK, deterministic=self.args.deterministic)
 
         # Dirs
@@ -112,10 +115,10 @@ class BaseTrainer:
             self.save_dir = Path(self.args.save_dir)
         else:
             self.save_dir = Path(
-                increment_path(Path(project) / name, exist_ok=self.args.exist_ok if RANK in {-1, 0} else True)
+                increment_path(Path(project) / name, exist_ok=self.args.exist_ok if RANK in (-1, 0) else True)
             )
         self.wdir = self.save_dir / "weights"  # weights dir
-        if RANK in {-1, 0}:
+        if RANK in (-1, 0):
             self.wdir.mkdir(parents=True, exist_ok=True)  # make dir
             self.args.save_dir = str(self.save_dir)
             yaml_save(self.save_dir / "args.yaml", vars(self.args))  # save run args
@@ -129,12 +132,10 @@ class BaseTrainer:
             print_args(vars(self.args))
 
         # Device
-        self.amp = self.device.type != "cpu"
-        self.scaler = amp.GradScaler(enabled=self.amp)
         if self.device.type == "cpu":
             self.args.workers = 0  # faster CPU training as time dominated by inference, not dataloading
 
-        # Model and Dataloaders.
+        # Model and Dataset
         self.model = self.args.model
         try:
             if self.args.task == "classify":
@@ -144,7 +145,7 @@ class BaseTrainer:
                 if "yaml_file" in self.data:
                     self.args.data = self.data["yaml_file"]  # for validating 'yolo train data=url.zip' usage
         except Exception as e:
-            raise FileNotFoundError(emojis(f"Dataset '{self.args.data}' error ❌ {e}")) from e
+            raise RuntimeError(emojis(f"Dataset '{clean_url(self.args.data)}' error ❌ {e}")) from e
 
         self.data_dict = self.get_dataset(self.data)
         self.ch = self.args.get("ch") if self.args.get("ch") else self.data_dict.get("ch")
@@ -165,8 +166,8 @@ class BaseTrainer:
         self.plot_idx = [0, 1, 2]
 
         # Callbacks
-        self.callbacks = defaultdict(list, callbacks.default_callbacks)  # add callbacks
-        if RANK in {0, -1}:
+        self.callbacks = _callbacks or callbacks.get_default_callbacks()
+        if RANK in (-1, 0):
             callbacks.add_integration_callbacks(self)
 
     def add_callback(self, event: str, callback):
@@ -182,11 +183,12 @@ class BaseTrainer:
         self.callbacks[event] = [callback]
 
     def run_callbacks(self, event: str):
+        """Run all existing callbacks associated with a particular event."""
         for callback in self.callbacks.get(event, []):
             callback(self)
 
     def train(self):
-        # Allow device='', device=None on Multi-GPU systems to default to device=0
+        """Allow device='', device=None on Multi-GPU systems to default to device=0."""
         if isinstance(self.args.device, int) or self.args.device:  # i.e. device=0 or device=[0,1,2,3]
             world_size = torch.cuda.device_count()
         elif torch.cuda.is_available():  # i.e. device=None or device=''
@@ -196,7 +198,12 @@ class BaseTrainer:
 
         # Run subprocess if DDP training, else train normally
         if world_size > 1 and "LOCAL_RANK" not in os.environ:
-            cmd, file = generate_ddp_command(world_size, self)  # security vulnerability in Snyk scans
+            # Argument checks
+            if self.args.rect:
+                LOGGER.warning("WARNING ⚠️ 'rect=True' is incompatible with Multi-GPU training, setting rect=False")
+                self.args.rect = False
+            # Command
+            cmd, file = generate_ddp_command(world_size, self)
             try:
                 LOGGER.info(f"Running DDP command {cmd}")
                 subprocess.run(cmd, check=True)
@@ -205,27 +212,42 @@ class BaseTrainer:
             finally:
                 ddp_cleanup(self, str(file))
         else:
-            self._do_train(RANK, world_size)
+            self._do_train(world_size)
 
-    def _setup_ddp(self, rank, world_size):
-        # os.environ['MASTER_ADDR'] = 'localhost'
-        # os.environ['MASTER_PORT'] = '9020'
-        torch.cuda.set_device(rank)
-        self.device = torch.device("cuda", rank)
-        LOGGER.info(f"DDP settings: RANK {rank}, WORLD_SIZE {world_size}, DEVICE {self.device}")
-        dist.init_process_group("nccl" if dist.is_nccl_available() else "gloo", rank=rank, world_size=world_size)
+    def _setup_ddp(self, world_size):
+        """Initializes and sets the DistributedDataParallel parameters for training."""
+        torch.cuda.set_device(RANK)
+        self.device = torch.device("cuda", RANK)
+        LOGGER.info(f"DDP settings: RANK {RANK}, WORLD_SIZE {world_size}, DEVICE {self.device}")
+        os.environ["NCCL_BLOCKING_WAIT"] = "1"  # set to enforce timeout
+        dist.init_process_group(
+            "nccl" if dist.is_nccl_available() else "gloo",
+            timeout=timedelta(seconds=3600),
+            rank=RANK,
+            world_size=world_size,
+        )
 
-    def _setup_train(self, rank, world_size):
+    def _setup_train(self, world_size):
         """
         Builds dataloaders and optimizer on correct rank process.
         """
-        # model
+        # Model
         self.run_callbacks("on_pretrain_routine_start")
         ckpt = self.setup_model()
         self.model = self.model.to(self.device)
         self.set_model_attributes()
+        # Check AMP
+        self.amp = torch.tensor(self.args.amp).to(self.device)  # True or False
+        if self.amp and RANK in (-1, 0):  # Single-GPU and DDP
+            callbacks_backup = callbacks.default_callbacks.copy()  # backup callbacks as check_amp() resets them
+            self.amp = torch.tensor(check_amp(self.model), device=self.device)
+            callbacks.default_callbacks = callbacks_backup  # restore callbacks
+        if RANK > -1:  # DDP
+            dist.broadcast(self.amp, src=0)  # broadcast the tensor from rank 0 to all other ranks (returns None)
+        self.amp = bool(self.amp)  # as boolean
+        self.scaler = amp.GradScaler(enabled=self.amp)
         if world_size > 1:
-            self.model = DDP(self.model, device_ids=[rank])
+            self.model = DDP(self.model, device_ids=[RANK])
         # Check imgsz
         gs = max(int(self.model.stride.max() if hasattr(self.model, "stride") else 32), 32)  # grid size (max stride)
         self.args.imgsz = check_imgsz(self.args.imgsz, stride=gs, floor=gs, max_dim=1)
@@ -257,10 +279,10 @@ class BaseTrainer:
         self.scheduler = lr_scheduler.LambdaLR(self.optimizer, lr_lambda=self.lf)
         self.stopper, self.stop = EarlyStopping(patience=self.args.patience), False
 
-        # dataloaders
+        # Dataloaders
         batch_size = self.batch_size // world_size if world_size > 1 else self.batch_size
-        self.train_loader = self.get_dataloader(self.data_dict, batch_size=batch_size, rank=rank, mode="train")
-        if rank in {0, -1}:
+        self.train_loader = self.get_dataloader(self.data_dict, batch_size=batch_size, rank=RANK, mode="train")
+        if RANK in (-1, 0):
             self.test_loader = self.get_dataloader(self.data_dict, batch_size=batch_size * 2, rank=-1, mode="val")
             self.validator = self.get_validator()
             metric_keys = self.validator.metrics.keys + self.label_loss_items(prefix="val")
@@ -272,11 +294,12 @@ class BaseTrainer:
         self.scheduler.last_epoch = self.start_epoch - 1  # do not move
         self.run_callbacks("on_pretrain_routine_end")
 
-    def _do_train(self, rank=-1, world_size=1):
+    def _do_train(self, world_size=1):
+        """Train completed, evaluate and plot if specified by arguments."""
         if world_size > 1:
-            self._setup_ddp(rank, world_size)
+            self._setup_ddp(world_size)
 
-        self._setup_train(rank, world_size)
+        self._setup_train(world_size)
 
         self.epoch_time = None
         self.epoch_time_start = time.time()
@@ -294,11 +317,12 @@ class BaseTrainer:
         if self.args.close_mosaic:
             base_idx = (self.epochs - self.args.close_mosaic) * nb
             self.plot_idx.extend([base_idx, base_idx + 1, base_idx + 2])
+        epoch = self.epochs  # predefine for resume fully trained model edge cases
         for epoch in range(self.start_epoch, self.epochs):
             self.epoch = epoch
             self.run_callbacks("on_train_epoch_start")
             self.model.train()
-            if rank != -1:
+            if RANK != -1:
                 self.train_loader.sampler.set_epoch(epoch)
             pbar = enumerate(self.train_loader)
             # Update dataloader attributes (optional)
@@ -308,8 +332,9 @@ class BaseTrainer:
                     self.train_loader.dataset.mosaic = False
                 if hasattr(self.train_loader.dataset, "close_mosaic"):
                     self.train_loader.dataset.close_mosaic(hyp=self.args)
+                self.train_loader.reset()
 
-            if rank in {-1, 0}:
+            if RANK in (-1, 0):
                 LOGGER.info(self.progress_string())
                 pbar = tqdm(enumerate(self.train_loader), total=nb, bar_format=TQDM_BAR_FORMAT)
             self.tloss = None
@@ -323,7 +348,7 @@ class BaseTrainer:
                     xi = [0, nw]  # x interp
                     self.accumulate = max(1, np.interp(ni, xi, [1, self.args.nbs / self.batch_size]).round())
                     for j, x in enumerate(self.optimizer.param_groups):
-                        # bias lr falls from 0.1 to lr0, all other lrs rise from 0.0 to lr0
+                        # Bias lr falls from 0.1 to lr0, all other lrs rise from 0.0 to lr0
                         x["lr"] = np.interp(
                             ni, xi, [self.args.warmup_bias_lr if j == 0 else 0.0, x["initial_lr"] * self.lf(epoch)]
                         )
@@ -333,9 +358,8 @@ class BaseTrainer:
                 # Forward
                 with torch.cuda.amp.autocast(self.amp):
                     batch = self.preprocess_batch(batch)
-                    preds = self.model(batch["img"])
-                    self.loss, self.loss_items = self.criterion(preds, batch)
-                    if rank != -1:
+                    self.loss, self.loss_items = de_parallel(self.model).loss(batch)
+                    if RANK != -1:
                         self.loss *= world_size
                     self.tloss = (
                         (self.tloss * i + self.loss_items) / (i + 1) if self.tloss is not None else self.loss_items
@@ -353,7 +377,7 @@ class BaseTrainer:
                 mem = f"{torch.cuda.memory_reserved() / 1E9 if torch.cuda.is_available() else 0:.3g}G"  # (GB)
                 loss_len = self.tloss.shape[0] if len(self.tloss.size()) else 1
                 losses = self.tloss if loss_len > 1 else torch.unsqueeze(self.tloss, 0)
-                if rank in {-1, 0}:
+                if RANK in (-1, 0):
                     pbar.set_description(
                         ("%11s" * 2 + "%11.4g" * (2 + loss_len))
                         % (f"{epoch + 1}/{self.epochs}", mem, *losses, batch["cls"].shape[0], batch["img"].shape[-1])
@@ -369,7 +393,7 @@ class BaseTrainer:
             self.scheduler.step()
             self.run_callbacks("on_train_epoch_end")
 
-            if rank in {-1, 0}:
+            if RANK in (-1, 0):
                 # Validation
                 self.ema.update_attr(self.model, include=["yaml", "nc", "args", "names", "stride", "class_weights"])
                 final_epoch = (epoch + 1 == self.epochs) or self.stopper.possible_stop
@@ -388,6 +412,7 @@ class BaseTrainer:
             self.epoch_time = tnow - self.epoch_time_start
             self.epoch_time_start = tnow
             self.run_callbacks("on_fit_epoch_end")
+            torch.cuda.empty_cache()  # clears GPU vRAM at end of epoch, can help with out of memory errors
 
             # Early Stopping
             if RANK != -1:  # if DDP training
@@ -398,7 +423,7 @@ class BaseTrainer:
             if self.stop:
                 break  # must break all DDP ranks
 
-        if rank in {-1, 0}:
+        if RANK in (-1, 0):
             # Do final val with best.pt
             LOGGER.info(
                 f"\n{epoch - self.start_epoch + 1} epochs completed in "
@@ -412,6 +437,7 @@ class BaseTrainer:
         self.run_callbacks("teardown")
 
     def save_model(self):
+        """Save model checkpoints based on various conditions."""
         ckpt = {
             "epoch": self.epoch,
             "best_fitness": self.best_fitness,
@@ -424,15 +450,22 @@ class BaseTrainer:
             "version": __version__,
         }
 
+        # Use dill (if exists) to serialize the lambda functions where pickle does not do this
+        try:
+            import dill as pickle
+        except ImportError:
+            import pickle
+
         # Save last, best and delete
-        torch.save(ckpt, self.last)
+        torch.save(ckpt, self.last, pickle_module=pickle)
         if self.best_fitness == self.fitness:
-            torch.save(ckpt, self.best)
+            torch.save(ckpt, self.best, pickle_module=pickle)
         if (self.epoch > 0) and (self.save_period > 0) and (self.epoch % self.save_period == 0):
-            torch.save(ckpt, self.wdir / f"epoch{self.epoch}.pt")
+            torch.save(ckpt, self.wdir / f"epoch{self.epoch}.pt", pickle_module=pickle)
         del ckpt
 
-    def get_dataset(self, data):
+    @staticmethod
+    def get_dataset(data):
         """
         Get train, val path from data dict if it exists. Returns None if data format is not recognized.
         """
@@ -442,9 +475,9 @@ class BaseTrainer:
         """
         load/create/download model for any task.
         """
-        # if model is loaded beforehand. No setup needed
-        if isinstance(self.model, torch.nn.Module) and self.ch is None:
+        if isinstance(self.model, torch.nn.Module) and self.ch is None:  # if model is loaded beforehand. No setup needed
             return
+
         model, weights = self.model, None
         ckpt = None
         if str(model).endswith(".pt"):
@@ -452,11 +485,11 @@ class BaseTrainer:
             cfg = ckpt["model"].yaml
         else:
             cfg = self.args.model
-        # calls Model(cfg, weights)
-        self.model = self.get_model(cfg=cfg, weights=weights, verbose=RANK == -1)
+        self.model = self.get_model(cfg=cfg, weights=weights, verbose=RANK == -1)  # calls Model(cfg, weights)
         return ckpt
 
     def optimizer_step(self):
+        """Perform a single step of the training optimizer with gradient clipping and EMA update."""
         self.scaler.unscale_(self.optimizer)  # unscale gradients
         torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=10.0)  # clip gradients
         self.scaler.step(self.optimizer)
@@ -482,9 +515,11 @@ class BaseTrainer:
         return metrics, fitness
 
     def get_model(self, cfg=None, weights=None, verbose=True):
+        """Get model and raise NotImplementedError for loading cfg files."""
         raise NotImplementedError("This task trainer doesn't support loading cfg files")
 
     def get_validator(self):
+        """Returns a NotImplementedError when the get_validator function is called."""
         raise NotImplementedError("get_validator function not implemented in trainer")
 
     def get_dataloader(self, dataset_path, batch_size=16, rank=0, mode="train"):
@@ -493,11 +528,9 @@ class BaseTrainer:
         """
         raise NotImplementedError("get_dataloader function not implemented in trainer")
 
-    def criterion(self, preds, batch):
-        """
-        Returns loss and individual loss items as Tensor.
-        """
-        raise NotImplementedError("criterion function not implemented in trainer")
+    def build_dataset(self, img_path, mode="train", batch=None):
+        """Build dataset"""
+        raise NotImplementedError("build_dataset function not implemented in trainer")
 
     def label_loss_items(self, loss_items=None, prefix="train"):
         """
@@ -513,19 +546,24 @@ class BaseTrainer:
         self.model.names = self.data["names"]
 
     def build_targets(self, preds, targets):
+        """Builds target tensors for training YOLO model."""
         pass
 
     def progress_string(self):
+        """Returns a string describing training progress."""
         return ""
 
     # TODO: may need to put these following functions into callback
-    def plot_training_samples(self, batch, ni, fname):
+    def plot_training_samples(self, batch, ni):
+        """Plots training samples during YOLOv5 training."""
         pass
 
     def plot_training_labels(self):
+        """Plots training labels for YOLO model."""
         pass
 
     def save_metrics(self, metrics):
+        """Saves training metrics to a CSV file."""
         keys, vals = list(metrics.keys()), list(metrics.values())
         n = len(metrics) + 1  # number of cols
         s = "" if self.csv.exists() else (("%23s," * n % tuple(["epoch"] + keys)).rstrip(",") + "\n")  # header
@@ -533,9 +571,15 @@ class BaseTrainer:
             f.write(s + ("%23.5g," * n % tuple([self.epoch] + vals)).rstrip(",") + "\n")
 
     def plot_metrics(self):
+        """Plot and display metrics visually."""
         pass
 
+    def on_plot(self, name, data=None):
+        """Registers plots (e.g. to be consumed in callbacks)"""
+        self.plots[name] = {"data": data, "timestamp": time.time()}
+
     def final_eval(self):
+        """Performs final evaluation and validation for object detection YOLO model."""
         for f in self.last, self.best:
             if f.exists():
                 strip_optimizer(f)  # strip optimizers
@@ -546,15 +590,19 @@ class BaseTrainer:
                     self.run_callbacks("on_fit_epoch_end")
 
     def check_resume(self):
+        """Check if resume checkpoint exists and update arguments accordingly."""
         resume = self.args.resume
         if resume:
             try:
-                last = Path(
-                    check_file(resume)
-                    if isinstance(resume, (str, Path)) and Path(resume).exists()
-                    else get_latest_run()
-                )
-                self.args = get_cfg(attempt_load_weights(last).args)
+                exists = isinstance(resume, (str, Path)) and Path(resume).exists()
+                last = Path(check_file(resume) if exists else get_latest_run())
+
+                # Check that resume data YAML exists, otherwise strip to force re-download of dataset
+                ckpt_args = attempt_load_weights(last).args
+                if not Path(ckpt_args["data"]).exists():
+                    ckpt_args["data"] = self.args.data
+
+                self.args = get_cfg(ckpt_args)
                 self.args.model, resume = str(last), True  # reinstate
             except Exception as e:
                 raise FileNotFoundError(
@@ -564,6 +612,7 @@ class BaseTrainer:
         self.resume = resume
 
     def resume_training(self, ckpt):
+        """Resume YOLO training from given epoch and best fitness."""
         if ckpt is None:
             return
         best_fitness = 0.0
@@ -577,7 +626,7 @@ class BaseTrainer:
         if self.resume:
             assert start_epoch > 0, (
                 f"{self.args.model} training to {self.epochs} epochs is finished, nothing to resume.\n"
-                f"Start a new training without --resume, i.e. 'yolo task=... mode=train model={self.args.model}'"
+                f"Start a new training without resuming, i.e. 'yolo train model={self.args.model}'"
             )
             LOGGER.info(
                 f"Resuming training from {self.args.model} from epoch {start_epoch + 1} to {self.epochs} total epochs"
@@ -611,15 +660,19 @@ class BaseTrainer:
         Returns:
             optimizer (torch.optim.Optimizer): the built optimizer
         """
+
         g = [], [], []  # optimizer parameter groups
         bn = tuple(v for k, v in nn.__dict__.items() if "Norm" in k)  # normalization layers, i.e. BatchNorm2d()
-        for v in model.modules():
-            if hasattr(v, "bias") and isinstance(v.bias, nn.Parameter):  # bias (no decay)
-                g[2].append(v.bias)
-            if isinstance(v, bn):  # weight (no decay)
-                g[1].append(v.weight)
-            elif hasattr(v, "weight") and isinstance(v.weight, nn.Parameter):  # weight (with decay)
-                g[0].append(v.weight)
+
+        for module_name, module in model.named_modules():
+            for param_name, param in module.named_parameters(recurse=False):
+                fullname = f"{module_name}.{param_name}" if module_name else param_name
+                if "bias" in fullname:  # bias (no decay)
+                    g[2].append(param)
+                elif isinstance(module, bn):  # weight (no decay)
+                    g[1].append(param)
+                else:  # weight (with decay)
+                    g[0].append(param)
 
         if name == "Adam":
             optimizer = torch.optim.Adam(g[2], lr=lr, betas=(momentum, 0.999))  # adjust beta1 to momentum
@@ -639,3 +692,55 @@ class BaseTrainer:
             f"{len(g[1])} weight(decay=0.0), {len(g[0])} weight(decay={decay}), {len(g[2])} bias"
         )
         return optimizer
+
+
+def check_amp(model):
+    """
+    This function checks the PyTorch Automatic Mixed Precision (AMP) functionality of a YOLOv8 model.
+    If the checks fail, it means there are anomalies with AMP on the system that may cause NaN losses or zero-mAP
+    results, so AMP will be disabled during training.
+
+    Args:
+        model (nn.Module): A YOLOv8 model instance.
+
+    Returns:
+        (bool): Returns True if the AMP functionality works correctly with YOLOv8 model, else False.
+
+    Raises:
+        AssertionError: If the AMP checks fail, indicating anomalies with the AMP functionality on the system.
+    """
+    device = next(model.parameters()).device  # get model device
+    if device.type in ("cpu", "mps"):
+        return False  # AMP only used on CUDA devices
+
+    def amp_allclose(m, im):
+        """All close FP32 vs AMP results."""
+        a = m(im, device=device, verbose=False)[0].boxes.data  # FP32 inference
+        with torch.cuda.amp.autocast(True):
+            b = m(im, device=device, verbose=False)[0].boxes.data  # AMP inference
+        del m
+        return a.shape == b.shape and torch.allclose(a, b.float(), atol=0.5)  # close to 0.5 absolute tolerance
+
+    f = ROOT / "assets/bus.jpg"  # image to check
+    im = f if f.exists() else "https://ultralytics.com/images/bus.jpg" if ONLINE else np.ones((640, 640, 3))
+    prefix = colorstr("AMP: ")
+    LOGGER.info(f"{prefix}running Automatic Mixed Precision (AMP) checks with YOLOv8n...")
+    warning_msg = "Setting 'amp=True'. If you experience zero-mAP or NaN losses you can disable AMP with amp=False."
+    try:
+        from ultralytics import YOLO
+
+        assert amp_allclose(YOLO("yolov8n.pt"), im)
+        LOGGER.info(f"{prefix}checks passed ✅")
+    except ConnectionError:
+        LOGGER.warning(f"{prefix}checks skipped ⚠️, offline and unable to download YOLOv8n. {warning_msg}")
+    except (AttributeError, ModuleNotFoundError):
+        LOGGER.warning(
+            f"{prefix}checks skipped ⚠️. Unable to load YOLOv8n due to possible Ultralytics package modifications. {warning_msg}"
+        )
+    except AssertionError:
+        LOGGER.warning(
+            f"{prefix}checks failed ❌. Anomalies were detected with AMP on your system that may lead to "
+            f"NaN losses or zero-mAP results, so AMP will be disabled during training."
+        )
+        return False
+    return True

@@ -25,12 +25,10 @@ verbose: True # whether to print verbose output
 seed: 0 # random seed for reproducibility
 deterministic: True # whether to enable deterministic mode
 single_cls: False # train multi-class data as single-class
-image_weights: False # use weighted image selection for training
 rect: False # support rectangular training if mode='train', support rectangular evaluation if mode='val'
 cos_lr: False # use cosine learning rate scheduler
 close_mosaic: 10 # disable mosaic augmentation for final 10 epochs
 resume: False # resume training from last checkpoint
-min_memory: False # minimize memory footprint loss function, choices=[False, True, <roll_out_thr>]
 # Segmentation
 overlap_mask: True # masks should overlap during training (segment train only)
 mask_ratio: 4 # mask downsample ratio (segment train only)
@@ -71,7 +69,6 @@ warmup_bias_lr: 0.1 # warmup initial bias lr
 box: 7.5 # box loss gain
 cls: 0.5 # cls loss gain (scale with pixels)
 dfl: 1.5 # dfl loss gain
-fl_gamma: 0.0 # focal loss gamma (efficientDet default gamma=1.5)
 label_smoothing: 0.0 # label smoothing (fraction)
 nbs: 64 # nominal batch size
 hsv_h: 0.015 # image HSV-Hue augmentation (fraction)

@@ -1,14 +1,24 @@
-# Ultralytics YOLO 🚀, GPL-3.0 license
+# Ultralytics YOLO 🚀, AGPL-3.0 license
 
-import lap
 import numpy as np
 import scipy
 from scipy.spatial.distance import cdist
 
 from .kalman_filter import chi2inv95
 
+try:
+    import lap  # for linear_assignment
+
+    assert lap.__version__  # verify package is not directory
+except (ImportError, AssertionError, AttributeError):
+    from ultralytics.yolo.utils.checks import check_requirements
+
+    check_requirements("lap>=0.4")  # install
+    import lap
+
 
 def merge_matches(m1, m2, shape):
+    """Merge two sets of matches and return matched and unmatched indices."""
     O, P, Q = shape
     m1 = np.asarray(m1)
     m2 = np.asarray(m2)
@@ -26,6 +36,7 @@ def merge_matches(m1, m2, shape):
 
 
 def _indices_to_matches(cost_matrix, indices, thresh):
+    """_indices_to_matches: Return matched and unmatched indices given a cost matrix, indices, and a threshold."""
     matched_cost = cost_matrix[tuple(zip(*indices))]
     matched_mask = matched_cost <= thresh
 
@@ -36,15 +47,26 @@ def _indices_to_matches(cost_matrix, indices, thresh):
     return matches, unmatched_a, unmatched_b
 
 
-def linear_assignment(cost_matrix, thresh):
+def linear_assignment(cost_matrix, thresh, use_lap=True):
+    """Linear assignment implementations with scipy and lap.lapjv."""
     if cost_matrix.size == 0:
         return np.empty((0, 2), dtype=int), tuple(range(cost_matrix.shape[0])), tuple(range(cost_matrix.shape[1]))
-    matches, unmatched_a, unmatched_b = [], [], []
-    cost, x, y = lap.lapjv(cost_matrix, extend_cost=True, cost_limit=thresh)
-    matches.extend([ix, mx] for ix, mx in enumerate(x) if mx >= 0)
-    unmatched_a = np.where(x < 0)[0]
-    unmatched_b = np.where(y < 0)[0]
-    matches = np.asarray(matches)
+
+    if use_lap:
+        _, x, y = lap.lapjv(cost_matrix, extend_cost=True, cost_limit=thresh)
+        matches = [[ix, mx] for ix, mx in enumerate(x) if mx >= 0]
+        unmatched_a = np.where(x < 0)[0]
+        unmatched_b = np.where(y < 0)[0]
+    else:
+        # Scipy linear sum assignment is NOT working correctly, DO NOT USE
+        y, x = scipy.optimize.linear_sum_assignment(cost_matrix)  # row y, col x
+        matches = np.asarray([[i, x] for i, x in enumerate(x) if cost_matrix[i, x] <= thresh])
+        unmatched = np.ones(cost_matrix.shape)
+        for i, xi in matches:
+            unmatched[i, xi] = 0.0
+        unmatched_a = np.where(unmatched.all(1))[0]
+        unmatched_b = np.where(unmatched.all(0))[0]
+
     return matches, unmatched_a, unmatched_b
 
 
@@ -121,11 +143,12 @@ def embedding_distance(tracks, detections, metric="cosine"):
     # for i, track in enumerate(tracks):
     # cost_matrix[i, :] = np.maximum(0.0, cdist(track.smooth_feat.reshape(1,-1), det_features, metric))
     track_features = np.asarray([track.smooth_feat for track in tracks], dtype=np.float32)
-    cost_matrix = np.maximum(0.0, cdist(track_features, det_features, metric))  # Nomalized features
+    cost_matrix = np.maximum(0.0, cdist(track_features, det_features, metric))  # Normalized features
     return cost_matrix
 
 
 def gate_cost_matrix(kf, cost_matrix, tracks, detections, only_position=False):
+    """Apply gating to the cost matrix based on predicted tracks and detected objects."""
     if cost_matrix.size == 0:
         return cost_matrix
     gating_dim = 2 if only_position else 4
@@ -138,6 +161,7 @@ def gate_cost_matrix(kf, cost_matrix, tracks, detections, only_position=False):
 
 
 def fuse_motion(kf, cost_matrix, tracks, detections, only_position=False, lambda_=0.98):
+    """Fuse motion between tracks and detections with gating and Kalman filtering."""
     if cost_matrix.size == 0:
         return cost_matrix
     gating_dim = 2 if only_position else 4
@@ -151,6 +175,7 @@ def fuse_motion(kf, cost_matrix, tracks, detections, only_position=False, lambda
 
 
 def fuse_iou(cost_matrix, tracks, detections):
+    """Fuses ReID and IoU similarity matrices to yield a cost matrix for object tracking."""
     if cost_matrix.size == 0:
         return cost_matrix
     reid_sim = 1 - cost_matrix
@@ -163,6 +188,7 @@ def fuse_iou(cost_matrix, tracks, detections):
 
 
 def fuse_score(cost_matrix, detections):
+    """Fuses cost matrix with detection scores to produce a single similarity matrix."""
     if cost_matrix.size == 0:
         return cost_matrix
     iou_sim = 1 - cost_matrix
@@ -173,11 +199,24 @@ def fuse_score(cost_matrix, detections):
 
 
 def bbox_ious(box1, box2, eps=1e-7):
-    """Boxes are x1y1x2y2
-    box1:       np.array of shape(nx4)
-    box2:       np.array of shape(mx4)
-    returns:    np.array of shape(nxm)
     """
+    Calculate the Intersection over Union (IoU) between pairs of bounding boxes.
+
+    Args:
+        box1 (np.array): A numpy array of shape (n, 4) representing 'n' bounding boxes.
+                         Each row is in the format (x1, y1, x2, y2).
+        box2 (np.array): A numpy array of shape (m, 4) representing 'm' bounding boxes.
+                         Each row is in the format (x1, y1, x2, y2).
+        eps (float, optional): A small constant to prevent division by zero. Defaults to 1e-7.
+
+    Returns:
+        (np.array): A numpy array of shape (n, m) representing the IoU scores for each pair
+                    of bounding boxes from box1 and box2.
+
+    Note:
+        The bounding box coordinates are expected to be in the format (x1, y1, x2, y2).
+    """
+
     # Get the coordinates of bounding boxes
     b1_x1, b1_y1, b1_x2, b1_y2 = box1.T
     b2_x1, b2_y1, b2_x2, b2_y2 = box2.T

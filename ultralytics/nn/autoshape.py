@@ -1,4 +1,4 @@
-# Ultralytics YOLO 🚀, GPL-3.0 license
+# Ultralytics YOLO 🚀, AGPL-3.0 license
 """
 Common modules
 """
@@ -8,7 +8,6 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-import pandas as pd
 import requests
 import torch
 import torch.nn as nn
@@ -25,7 +24,8 @@ from ultralytics.yolo.utils.torch_utils import copy_attr, smart_inference_mode
 
 
 class AutoShape(nn.Module):
-    # YOLOv8 input-robust model wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS
+    """YOLOv8 input-robust model wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS."""
+
     conf = 0.25  # NMS confidence threshold
     iou = 0.45  # NMS IoU threshold
     agnostic = False  # NMS class-agnostic
@@ -35,6 +35,7 @@ class AutoShape(nn.Module):
     amp = False  # Automatic Mixed Precision (AMP) inference
 
     def __init__(self, model, verbose=True):
+        """Initializes object and copies attributes from model object."""
         super().__init__()
         if verbose:
             LOGGER.info("Adding AutoShape... ")
@@ -48,7 +49,7 @@ class AutoShape(nn.Module):
             m.export = True  # do not output loss values
 
     def _apply(self, fn):
-        # Apply to(), cpu(), cuda(), half() to model tensors that are not parameters or registered buffers
+        """Apply to(), cpu(), cuda(), half() to model tensors that are not parameters or registered buffers."""
         self = super()._apply(fn)
         if self.pt:
             m = self.model.model.model[-1] if self.dmb else self.model.model[-1]  # Detect()
@@ -60,7 +61,7 @@ class AutoShape(nn.Module):
 
     @smart_inference_mode()
     def forward(self, ims, size=640, augment=False, profile=False):
-        # Inference from various sources. For size(height=640, width=1280), RGB images example inputs are:
+        """Inference from various sources. For size(height=640, width=1280), RGB images example inputs are:."""
         #   file:        ims = 'data/images/zidane.jpg'  # str or PosixPath
         #   URI:             = 'https://ultralytics.com/images/zidane.jpg'
         #   OpenCV:          = cv2.imread('image.jpg')[:,:,::-1]  # HWC BGR to RGB x(640,1280,3)
@@ -98,9 +99,7 @@ class AutoShape(nn.Module):
                 g = max(size) / max(s)  # gain
                 shape1.append([y * g for y in s])
                 ims[i] = im if im.data.contiguous else np.ascontiguousarray(im)  # update
-            shape1 = (
-                [make_divisible(x, self.stride) for x in np.array(shape1).max(0)] if self.pt else size
-            )  # inf shape
+            shape1 = [make_divisible(x, self.stride) for x in np.array(shape1).max(0)] if self.pt else size  # inf shape
             x = [LetterBox(shape1, auto=False)(image=im)["img"] for im in ims]  # pad
             x = np.ascontiguousarray(np.array(x).transpose((0, 3, 1, 2)))  # stack and BHWC to BCHW
             x = torch.from_numpy(x).to(p.device).type_as(p) / 255  # uint8 to fp16/32
@@ -130,6 +129,7 @@ class AutoShape(nn.Module):
 class Detections:
     # YOLOv8 detections class for inference results
     def __init__(self, ims, pred, files, times=(0, 0, 0), names=None, shape=None):
+        """Initialize object attributes for YOLO detection results."""
         super().__init__()
         d = pred[0].device  # device
         gn = [torch.tensor([*(im.shape[i] for i in [1, 0, 1, 0]), 1, 1], device=d) for im in ims]  # normalizations
@@ -147,6 +147,7 @@ class Detections:
         self.s = tuple(shape)  # inference BCHW shape
 
     def _run(self, pprint=False, show=False, save=False, crop=False, render=False, labels=True, save_dir=Path("")):
+        """Return performance metrics and optionally cropped/save images or results."""
         s, crops = "", []
         for i, (im, pred) in enumerate(zip(self.ims, self.pred)):
             s += f"\nimage {i + 1}/{len(self.pred)}: {im.shape[0]}x{im.shape[1]} "  # string
@@ -195,32 +196,38 @@ class Detections:
             return crops
 
     def show(self, labels=True):
+        """Displays YOLO results with detected bounding boxes."""
         self._run(show=True, labels=labels)  # show results
 
     def save(self, labels=True, save_dir="runs/detect/exp", exist_ok=False):
+        """Save detection results with optional labels to specified directory."""
         save_dir = increment_path(save_dir, exist_ok, mkdir=True)  # increment save_dir
         self._run(save=True, labels=labels, save_dir=save_dir)  # save results
 
     def crop(self, save=True, save_dir="runs/detect/exp", exist_ok=False):
+        """Crops images into detections and saves them if 'save' is True."""
         save_dir = increment_path(save_dir, exist_ok, mkdir=True) if save else None
         return self._run(crop=True, save=save, save_dir=save_dir)  # crop results
 
     def render(self, labels=True):
+        """Renders detected objects and returns images."""
         self._run(render=True, labels=labels)  # render results
         return self.ims
 
     def pandas(self):
-        # return detections as pandas DataFrames, i.e. print(results.pandas().xyxy[0])
+        """Return detections as pandas DataFrames, i.e. print(results.pandas().xyxy[0])."""
+        import pandas
+
         new = copy(self)  # return copy
         ca = "xmin", "ymin", "xmax", "ymax", "confidence", "class", "name"  # xyxy columns
         cb = "xcenter", "ycenter", "width", "height", "confidence", "class", "name"  # xywh columns
         for k, c in zip(["xyxy", "xyxyn", "xywh", "xywhn"], [ca, ca, cb, cb]):
             a = [[x[:5] + [int(x[5]), self.names[int(x[5])]] for x in x.tolist()] for x in getattr(self, k)]  # update
-            setattr(new, k, [pd.DataFrame(x, columns=c) for x in a])
+            setattr(new, k, [pandas.DataFrame(x, columns=c) for x in a])
         return new
 
     def tolist(self):
-        # return a list of Detections objects, i.e. 'for result in results.tolist():'
+        """Return a list of Detections objects, i.e. 'for result in results.tolist():'."""
         r = range(self.n)  # iterable
         x = [Detections([self.ims[i]], [self.pred[i]], [self.files[i]], self.times, self.names, self.s) for i in r]
         # for d in x:
@@ -229,6 +236,7 @@ class Detections:
         return x
 
     def print(self):
+        """Print the results of the `self._run()` function."""
         LOGGER.info(self.__str__())
 
     def __len__(self):  # override len(results)
@@ -238,4 +246,5 @@ class Detections:
         return self._run(pprint=True)  # print results
 
     def __repr__(self):
+        """Returns a printable representation of the object."""
         return f"YOLOv8 {self.__class__} instance\n" + self.__str__()
