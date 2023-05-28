@@ -4,16 +4,18 @@
 
 <https://user-images.githubusercontent.com/104181368/222668654-0efb9323-4e6a-408c-90a1-a6807b9d8e40.mp4>
 
-| Best Model | Device          | Format        | Speed/Image | FPS  | AP@All |
-| ---------- | --------------- | ------------- | ----------- | ---- | ------ |
-| YOLOv8s    | RTX3090         | PyTorch       | 2.7 ms      | 370  | 0.842  |
-|            |                 | TensorRT      | 2.6 ms      | 384  | -      |
-|            |                 | TensorRT FP16 | 1.1 ms      | 909  | 0.840  |
-|            | Jetson AGX Orin | PyTorch       | 8.9 ms      | 112  | -      |
-|            |                 | TensorRT      | 3.0 ms      | 333  | -      |
-|            | Intel i7-12700  | PyTorch       | 189.5 ms    | 5.2  | -      |
-|            |                 | OpenVINO      | 63.1 ms     | 15.8 | -      |
-|            |                 | ONNX          | 47.5 ms     | 21.0 | -      |
+| Best Model    | Device          | Format        | Speed/Image | FPS  | AP@All |
+| ------------- | --------------- | ------------- | ----------- | ---- | ------ |
+| YOLOv8s       | RTX3090         | PyTorch       | 2.7 ms      | 370  | 0.842  |
+| (w/ augment)  |                 | TensorRT FP16 | 1.1 ms      | 909  | 0.840  |
+|               | Jetson AGX Orin | PyTorch       | 8.9 ms      | 112  | -      |
+|               |                 | TensorRT      | 3.0 ms      | 333  | -      |
+|               | Intel i7-12700  | PyTorch       | 189.5 ms    | 5.2  | -      |
+|               |                 | OpenVINO      | 63.1 ms     | 15.8 | -      |
+|               |                 | ONNX          | 47.5 ms     | 21.0 | -      |
+| w/o augment   | RTX3090         | PyTorch       | 1.8 ms      | 555  | 0.823  |
+| YOLOv8p2      | RTX3090         | PyTorch       | 1.4 ms      | 714  | 0.818  |
+| (w/o augment) |                 | TensorRT FP16 | 0.9 ms      | 1111 | 0.815  |
 
 ## Original
 

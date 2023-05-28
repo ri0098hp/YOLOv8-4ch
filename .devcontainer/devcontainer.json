@@ -14,7 +14,8 @@
         "ms-python.isort",
         "ms-toolsai.jupyter",
         "yzhang.markdown-all-in-one",
-        "DavidAnson.vscode-markdownlint"
+        "DavidAnson.vscode-markdownlint",
+        "TakumiI.markdowntable"
       ]
     }
   }
