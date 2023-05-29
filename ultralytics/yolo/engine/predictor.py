@@ -177,7 +177,7 @@ class BasePredictor:
 
         return log_string
 
-    def postprocess(self, preds, img, orig_img):
+    def postprocess(self, preds, img, orig_imgs):
         """Post-processes predictions for an image and returns them."""
         return preds
 
@@ -208,7 +208,9 @@ class BasePredictor:
             if self.args.task == "classify"
             else None
         )
-        self.dataset = load_inference_source(source=source, ch=self.ch, imgsz=self.imgsz, vid_stride=self.args.vid_stride)
+        self.dataset = load_inference_source(
+            source=source, ch=self.ch, imgsz=self.imgsz, vid_stride=self.args.vid_stride
+        )
         self.source_type = self.dataset.source_type
         if not getattr(self, "stream", True) and (
             self.dataset.mode == "stream"

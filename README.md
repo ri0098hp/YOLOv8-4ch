@@ -24,8 +24,8 @@
 
 ## Original
 
- This is forked repo from (ultralytics/ultralytics) on commit 6391c60.  
- Catch up to changes [here](https://github.com/ultralytics/ultralytics/compare/6391c60...main).
+ This is forked repo from (ultralytics/ultralytics) on commit a2bb42d.  
+ Catch up to changes [here](https://github.com/ultralytics/ultralytics/compare/a2bb42d...main).
 
 ## Features
 

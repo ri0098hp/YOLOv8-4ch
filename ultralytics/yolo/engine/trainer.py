@@ -358,7 +358,8 @@ class BaseTrainer:
                 # Forward
                 with torch.cuda.amp.autocast(self.amp):
                     batch = self.preprocess_batch(batch)
-                    self.loss, self.loss_items = de_parallel(self.model).loss(batch)
+                    preds = self.model(batch["img"])
+                    self.loss, self.loss_items = self.criterion(preds, batch)
                     if RANK != -1:
                         self.loss *= world_size
                     self.tloss = (
@@ -475,7 +476,9 @@ class BaseTrainer:
         """
         load/create/download model for any task.
         """
-        if isinstance(self.model, torch.nn.Module) and self.ch is None:  # if model is loaded beforehand. No setup needed
+        if (
+            isinstance(self.model, torch.nn.Module) and self.ch is None
+        ):  # if model is loaded beforehand. No setup needed
             return
 
         model, weights = self.model, None
@@ -531,6 +534,12 @@ class BaseTrainer:
     def build_dataset(self, img_path, mode="train", batch=None):
         """Build dataset"""
         raise NotImplementedError("build_dataset function not implemented in trainer")
+
+    def criterion(self, preds, batch):
+        """Compute the classification loss between predictions and true labels."""
+        loss = torch.nn.functional.cross_entropy(preds, batch["cls"], reduction="sum") / self.args.nbs
+        loss_items = loss.detach()
+        return loss, loss_items
 
     def label_loss_items(self, loss_items=None, prefix="train"):
         """
