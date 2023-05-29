@@ -13,9 +13,14 @@
 |               | Intel i7-12700  | PyTorch       | 189.5 ms    | 5.2  | -      |
 |               |                 | OpenVINO      | 63.1 ms     | 15.8 | -      |
 |               |                 | ONNX          | 47.5 ms     | 21.0 | -      |
-| w/o augment   | RTX3090         | PyTorch       | 1.8 ms      | 555  | 0.823  |
-| YOLOv8p2      | RTX3090         | PyTorch       | 1.4 ms      | 714  | 0.818  |
-| (w/o augment) |                 | TensorRT FP16 | 0.9 ms      | 1111 | 0.815  |
+| (w/o augment) | RTX3090         | PyTorch       | 2.9 ms      | 555  | 0.823  |
+| YOLOv8-c2     |                 |               | 2.1 ms      | 714  | 0.830  |
+| (w/ augment)  |                 | TensorRT FP16 | 0.8 ms      | 1111 | 0.815  |
+| YOLOv8-c4     |                 | PyTorch       | 3.6 ms      |      |        |
+| (w/ augment)  |                 | TensorRT FP16 | ms          |      | 0.823  |
+
+- 500 images are tested on Speed/Image, FPS
+- fujinolab-all are tested on AP@All
 
 ## Original
 

@@ -17,14 +17,17 @@ ADD https://ultralytics.com/assets/Arial.ttf https://ultralytics.com/assets/Aria
 
 # Install linux packages
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update &&\
-  apt-get -y upgrade
+RUN apt-get update \
+  && apt-get -y upgrade
 RUN apt-get install --no-install-recommends -y gcc git zip curl htop libusb-1.0-0 libgl1-mesa-glx libglib2.0-0 libpython3-dev gnupg g++ screen rename python3-tk
 
 # Install pip packages
 USER $USER
+COPY requirements.txt .
 RUN python3 -m pip install --upgrade pip wheel
-RUN pip install -U onnxsim onnxruntime-gpu Pillow opencv-python albumentations comet clearml gsutil notebook black flake8 isort
+RUN pip install nvidia-tensorrt --index-url https://pypi.ngc.nvidia.com \
+  && pip install -r requirements.txt
+RUN pip install --no-cache -U Pillow opencv-python
 # Set environment variables
 ENV OMP_NUM_THREADS=1
 
