@@ -137,6 +137,10 @@ class BaseTrainer:
 
         # Model and Dataset
         self.model = self.args.model
+        if str(self.model).endswith(".pt"):
+            self.is_pre = True
+        else:
+            self.is_pre = False
         try:
             if self.args.task == "classify":
                 self.data = check_cls_dataset(self.args.data)
@@ -148,8 +152,9 @@ class BaseTrainer:
             raise RuntimeError(emojis(f"Dataset '{clean_url(self.args.data)}' error ❌ {e}")) from e
 
         self.data_dict = self.get_dataset(self.data)
-        self.ch = self.args.get("ch") if self.args.get("ch") else self.data_dict.get("ch")
-        self.data_dict["ch"] = self.ch
+        if self.args.get("ch"):
+            self.data_dict["ch"] = self.args.get("ch")
+
         self.ema = None
 
         # Optimization utils init
@@ -476,7 +481,7 @@ class BaseTrainer:
         """
         load/create/download model for any task.
         """
-        if isinstance(self.model, torch.nn.Module):  # if model is loaded beforehand. No setup needed
+        if isinstance(self.model, torch.nn.Module) and self.is_pre:  # if model is loaded beforehand. No setup needed
             return
 
         model, weights = self.model, None

@@ -487,7 +487,7 @@ class YOLO:
         space["data"] = data
 
         # Define the trainable function with allocated resources
-        trainable_with_resources = tune.with_resources(_tune, {"cpu": 8, "gpu": gpu_per_trial if gpu_per_trial else 0})
+        trainable_with_resources = tune.with_resources(_tune, {"gpu": gpu_per_trial if gpu_per_trial else 0})
 
         # Define the ASHA scheduler for hyperparameter search
         asha_scheduler = ASHAScheduler(

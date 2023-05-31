@@ -1,3 +1,8 @@
+"""
+data/custom以下に設定したcfg.yamlを保存
+ベースとなるcfgはDEFAULT_CFGで変更可能
+"""
+
 import glob
 import os
 from pathlib import Path
@@ -8,14 +13,18 @@ from ultralytics.yolo.data.build import build_dataloader
 from ultralytics.yolo.data.utils import check_det_dataset
 from ultralytics.yolo.utils import yaml_save
 
+DEFAULT_CFG = "cfg/yolov8.yaml"
+ROOT_DIR = "/home/suwako/workspace"
+
 
 def main():
+    os.chdir(ROOT_DIR)
     pprint(glob.glob("data/*.yaml"))
     data_name = input("name of data: ")
 
     cfg = f"cfg/custom/{data_name}.yaml"
     if not os.path.exists(cfg):
-        cfg = "cfg/yolov8.yaml"
+        cfg = DEFAULT_CFG
     args = get_cfg(cfg, None)
 
     args.data = f"data/{data_name}.yaml"
