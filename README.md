@@ -37,6 +37,7 @@ YOLOv8 をRGB-FIR向けに拡張したもの. 次の機能をオリジナルか�
 - [x] データセットの読み込みを確認、cfgの設定をできるツール `check_dataset.py`
 - [x] テスト結果をsvg, csvで保存
 - [x] テスト結果の画像を全て書き出し
+- [x] pip installで利用可能にする
 
 ## TODO
 
@@ -49,11 +50,12 @@ git pull --rebase origin main
 
 ## 1. Installation
 
-以下の手法はYOLOの内部を弄る必要があるときである.  
-ただ利用するだけなら[Release](https://github.com/Rits-Fujinolab/YOLOv8-4ch/releases)にあるwhlファイルのURLをコピーして
+以下[1.1](#11-環境構築)以降の手法はYOLOの内部を弄る必要があるときである.  
+ただ利用するだけならまず[Actions](https://github.com/Rits-Fujinolab/YOLOv8-4ch/actions/workflows/release.yaml)で`Run workflow`を実行すれば, [Release](https://github.com/Rits-Fujinolab/YOLOv8-4ch/releases/latest)に最新のwhlファイルが実装される.  
+これをダウンロードしたのち
 
 ```bash
-pip install https://github.com/Rits-Fujinolab/YOLOv8-4ch/releases/download/v2023.05.16/ultralytics-2023.05.16-py3-none-any.whl
+pip install [whlファイル]
 ```
 
 でインストールをすればよい.

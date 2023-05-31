@@ -1,6 +1,7 @@
 runs/*
 data/*
 weights/*
+wandb
 test
 datasets/*
 cfg/*
