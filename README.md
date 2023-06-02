@@ -4,20 +4,20 @@
 
 <https://user-images.githubusercontent.com/104181368/222668654-0efb9323-4e6a-408c-90a1-a6807b9d8e40.mp4>
 
-| Best Model    | Device          | Format        | Speed/Image | FPS  | AP@All |
-| ------------- | --------------- | ------------- | ----------- | ---- | ------ |
-| YOLOv8s       | RTX3090         | PyTorch       | 2.7 ms      | 370  | 0.842  |
-| (w/ augment)  |                 | TensorRT FP16 | 1.1 ms      | 909  | 0.840  |
-|               | Jetson AGX Orin | PyTorch       | 8.9 ms      | 112  | -      |
-|               |                 | TensorRT      | 3.0 ms      | 333  | -      |
-|               | Intel i7-12700  | PyTorch       | 189.5 ms    | 5.2  | -      |
-|               |                 | OpenVINO      | 63.1 ms     | 15.8 | -      |
-|               |                 | ONNX          | 47.5 ms     | 21.0 | -      |
-| (w/o augment) | RTX3090         | PyTorch       | 2.9 ms      | 555  | 0.823  |
-| YOLOv8-c2     |                 |               | 2.1 ms      | 714  | 0.830  |
-| (w/ augment)  |                 | TensorRT FP16 | 0.8 ms      | 1111 | 0.815  |
-| YOLOv8-c4     |                 | PyTorch       | 3.6 ms      |      |        |
-| (w/ augment)  |                 | TensorRT FP16 | ms          |      | 0.823  |
+| Best Model    | Device           | Format        | Speed/Image | FPS  | AP@All |
+| ------------- | ---------------- | ------------- | ----------- | ---- | ------ |
+| YOLOv8s       | RTX3090          | PyTorch       | 2.7 ms      | 370  | 0.842  |
+| (w/ augment)  |                  | TensorRT FP16 | 1.1 ms      | 909  | 0.840  |
+|               | Jetson AGX  Orin | PyTorch       | 19.9 ms     | 112  | -      |
+|               |                  | TensorRT      | 3.0 ms      | 333  | -      |
+|               | Intel i7-12700   | PyTorch       | 189.5 ms    | 5.2  | -      |
+|               |                  | OpenVINO      | 63.1 ms     | 15.8 | -      |
+|               |                  | ONNX          | 47.5 ms     | 21.0 | -      |
+| (w/o augment) | RTX3090          | PyTorch       | 2.9 ms      | 555  | 0.823  |
+| YOLOv8-c2     |                  |               | 2.1 ms      | 714  | 0.830  |
+| (w/ augment)  |                  | TensorRT FP16 | 0.8 ms      | 1111 | 0.815  |
+| YOLOv8-c4     |                  | PyTorch       | 3.6 ms      |      |        |
+| (w/ augment)  |                  | TensorRT FP16 | ms          |      | 0.823  |
 
 - 500 images are tested on Speed/Image, FPS
 - fujinolab-all are tested on AP@All
@@ -91,6 +91,7 @@ pip install -e ".[dev]"
 ```
 
 ### 1.5 データセットを準備
+
 データセットをdatasetフォルダーに入れる.  
 [dataloader](utils/datasets.py) を魔改造してるため次のようなディレクトリ構造推奨...  
 シンボリックリンクでも認識可能なのでデータフォルダを作った後, フォルダごとにリンクを作るとスペースを節約できる.
@@ -208,4 +209,61 @@ model.train(data="data/fujinolab-all.yaml", epochs=3)  # train the model
 metrics = model.val()  # evaluate model performance on the validation set
 results = model("datasets/demo")  # predict on an image
 success = model.export(format="onnx")  # export the model to ONNX format
+```
+
+## 4. Jetson メモ
+
+YOLOv5のドキュメントを参照. [[Web](https://docs.ultralytics.com/yolov5/tutorials/running_on_jetson_nano/)]
+
+### 4.1 CUDA Pythonのビルド
+
+非常に時間がかかる.
+
+```bash
+wget https://github.com/Qengineering/Install-OpenCV-Jetson-Nano/raw/main/OpenCV-4-7-0.sh
+sudo chmod 755 ./OpenCV-4-7-0.sh
+```
+
+ダウンロードしたシェルスクリプトの17行目`sudo apt-get install -y python-dev python-numpy python-pip`を削除する.  
+その後実行 (30分くらい).  
+
+```bash
+./OpenCV-4-7-0.sh
+```
+
+### 4.2 環境構築
+
+Dockerを使っても良いがpipenvやvenvによる仮想化の方が処理速度的に便利.  
+`requirements.txt`を編集して`torch`, `torchvision`, `onnx-gpu`などGPU関連のパッケージをコメントアウトする.  
+その後環境を構築する.  
+なおtorchとtorchvisionはその時々によって変わるので公式HP参照.  
+[[JetPackとtorchのバージョン関係](https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform-release-notes/pytorch-jetson-rel.html#pytorch-jetson-rel)]
+[[torchのインストールURL一覧](https://developer.download.nvidia.cn/compute/redist/jp/)]
+[[torchとtorchvisionのバージョン関係](https://github.com/pytorch/vision#installation)]  
+
+1. 仮想環境の構築
+
+```bash
+pipenv --python /usr/bin/python3 --site-packages install
+```
+
+2. torchのインストール
+
+```bash
+pipenv install https://developer.download.nvidia.cn/compute/redist/jp/v511/pytorch/torch-2.0.0a0+fe05266f.nv23.04-cp38-cp38-linux_aarch64.whl
+```
+
+3. torchvisionのインストール (時間がかかる)
+
+```bash
+git clone --branch v0.15.2 https://github.com/pytorch/vision torchvision
+cd torchvision
+pipenv run python3 setup.py install
+cd .. && rm -rf torchvision
+```
+
+4. YOLOv8のインストール
+
+```bash
+pipenv install -e ".[dev]"
 ```
