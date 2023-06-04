@@ -162,7 +162,10 @@ class Mosaic(BaseMixTransform):
 
             # Place img in img4
             if i == 0:  # top left
-                img4 = np.full((s * 2, s * 2, img.shape[2]), 114, dtype=np.uint8)  # base image with 4 tiles
+                if self.dataset.ch == 1:
+                    img4 = np.full((s * 2, s * 2), 114, dtype=np.uint8)  # base image with 4 tiles
+                else:
+                    img4 = np.full((s * 2, s * 2, img.shape[2]), 114, dtype=np.uint8)  # base image with 4 tiles
                 x1a, y1a, x2a, y2a = max(xc - w, 0), max(yc - h, 0), xc, yc  # xmin, ymin, xmax, ymax (large image)
                 x1b, y1b, x2b, y2b = w - (x2a - x1a), h - (y2a - y1a), w, h  # xmin, ymin, xmax, ymax (small image)
             elif i == 1:  # top right
@@ -198,7 +201,10 @@ class Mosaic(BaseMixTransform):
 
             # Place img in img9
             if i == 0:  # center
-                img9 = np.full((s * 3, s * 3, img.shape[2]), 114, dtype=np.uint8)  # base image with 4 tiles
+                if self.dataset.ch == 1:
+                    img9 = np.full((s * 2, s * 2), 114, dtype=np.uint8)  # base image with 4 tiles
+                else:
+                    img9 = np.full((s * 2, s * 2, img.shape[2]), 114, dtype=np.uint8)  # base image with 4 tiles
                 h0, w0 = h, w
                 c = s, s, s + w, s + h  # xmin, ymin, xmax, ymax (base) coordinates
             elif i == 1:  # top

@@ -4,20 +4,23 @@
 
 <https://user-images.githubusercontent.com/104181368/222668654-0efb9323-4e6a-408c-90a1-a6807b9d8e40.mp4>
 
-| Best Model    | Device           | Format        | Speed/Image | FPS  | AP@All |
-| ------------- | ---------------- | ------------- | ----------- | ---- | ------ |
-| YOLOv8s       | RTX3090          | PyTorch       | 2.7 ms      | 370  | 0.842  |
-| (w/ augment)  |                  | TensorRT FP16 | 1.1 ms      | 909  | 0.840  |
-|               | Jetson AGX  Orin | PyTorch       | 19.9 ms     | 112  | -      |
-|               |                  | TensorRT      | 3.0 ms      | 333  | -      |
-|               | Intel i7-12700   | PyTorch       | 189.5 ms    | 5.2  | -      |
-|               |                  | OpenVINO      | 63.1 ms     | 15.8 | -      |
-|               |                  | ONNX          | 47.5 ms     | 21.0 | -      |
-| (w/o augment) | RTX3090          | PyTorch       | 2.9 ms      | 555  | 0.823  |
-| YOLOv8-c2     |                  |               | 2.1 ms      | 714  | 0.830  |
-| (w/ augment)  |                  | TensorRT FP16 | 0.8 ms      | 1111 | 0.815  |
-| YOLOv8-c4     |                  | PyTorch       | 3.6 ms      |      |        |
-| (w/ augment)  |                  | TensorRT FP16 | ms          |      | 0.823  |
+| Best Model    | Device            | Format        | Speed/Image | FPS  | AP@All |
+| ------------- | ----------------- | ------------- | ----------- | ---- | ------ |
+| YOLOv8s       | RTX3090           | PyTorch       | 2.7 ms      | 360  | 84.2   |
+| (w/ augment)  |                   | TensorRT FP16 | 1.1 ms      | 909  | 84.0   |
+|               | Colab (NVIDIA T4) | PyTorch       | 13.4 ms     | 74   | -      |
+|               |                   | TensorRT FP16 | 3.0 ms      | 333  | -      |
+|               | Jetson AGX  Orin  | PyTorch       | 19.9 ms     | 50   | -      |
+|               |                   | TensorRT      | 1.7 ms      | 588  | -      |
+|               | Intel i7-12700    | PyTorch       | 189.5 ms    | 5.2  | -      |
+|               |                   | ONNX          | 47.5 ms     | 21.0 | -      |
+| (w/o augment) | RTX3090           | PyTorch       | 2.8 ms      | 357  | 82.3   |
+| YOLOv8-2L     |                   | PyTorch       | 2.0 ms      | 500  | 81.8   |
+| (w/ augment)  |                   | TensorRT FP16 | 0.8 ms      | 1111 | 81.5   |
+| YOLOv8-3L     |                   | PyTorch       | 2.6 ms      | 384  | 82.2   |
+| (w/ augment)  |                   | TensorRT FP16 | - ms        | -    | -      |
+| YOLOv8-4L     |                   | PyTorch       | 3.2 ms      | 312  | 82.3   |
+| (w/ augment)  |                   | TensorRT FP16 | - ms        | -    | -      |
 
 - 500 images are tested on Speed/Image, FPS
 - fujinolab-all are tested on AP@All
@@ -213,7 +216,8 @@ success = model.export(format="onnx")  # export the model to ONNX format
 
 ## 4. Jetson メモ
 
-YOLOv5のドキュメントを参照. [[Web](https://docs.ultralytics.com/yolov5/tutorials/running_on_jetson_nano/)]
+YOLOv5のドキュメントを参照. [[Web](https://docs.ultralytics.com/yolov5/tutorials/running_on_jetson_nano/)] 
+またコミュニティも参照のこと. [[参考](https://elinux.org/Jetson_Zoo)]
 
 ### 4.1 CUDA Pythonのビルド
 
@@ -266,4 +270,14 @@ cd .. && rm -rf torchvision
 
 ```bash
 pipenv install -e ".[dev]"
+```
+
+5. 必要に応じて次もインストール
+
+ONNX系 [[参考](https://elinux.org/Jetson_Zoo#ONNX_Runtime)]
+
+```bash
+wget https://nvidia.box.com/shared/static/amhb62mzes4flhbfavoa73m5z933pv75.whl -O onnxruntime_gpu-1.12.1-cp38-cp38-linux_aarch64.whl
+pipenv install onnxruntime_gpu-1.12.1-cp38-cp38-linux_aarch64.whl
+rm onnxruntime_gpu-1.12.1-cp38-cp38-linux_aarch64.whl
 ```

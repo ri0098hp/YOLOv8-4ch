@@ -9,7 +9,7 @@ from pathlib import Path
 from pprint import pprint
 
 from ultralytics.yolo.cfg import get_cfg
-from ultralytics.yolo.data.build import build_dataloader
+from ultralytics.yolo.data import build_yolo_dataset
 from ultralytics.yolo.data.utils import check_det_dataset
 from ultralytics.yolo.utils import yaml_save
 
@@ -20,7 +20,7 @@ ROOT_DIR = "/home/suwako/workspace"
 def main():
     os.chdir(ROOT_DIR)
     pprint(glob.glob("data/*.yaml"))
-    data_name = input("name of data: ")
+    data_name = input("name of data w/o 'data/': ")
 
     cfg = f"cfg/custom/{data_name}.yaml"
     if not os.path.exists(cfg):
@@ -34,12 +34,13 @@ def main():
         args.data = data_dict["yaml_file"]  # for validating 'yolo train data=url.zip' usage
 
     # Train dataloader ---------------------------------------------------------------------------------------
-    print("pos_imgs_train:", args.get("pos_imgs_train"))
-    print("neg_ratio_train:", args.get("neg_ratio_train"))
-
     while True:
         try:
-            build_dataloader(cfg=args, img_path=data_dict, names=data_dict["names"], batch=64, mode="train")
+            args.classes = None
+            args.fraction = 1.0
+            build_yolo_dataset(args, data_dict, 1, data_dict, mode="train")
+            del args.classes
+            del args.fraction
         except PermissionError:
             pass
 
@@ -47,6 +48,8 @@ def main():
         yaml_save(Path("cfg") / "custom" / f"{data_name}.yaml", vars(args))  # save run args
 
         # input number
+        print("pos_imgs_train:", args.get("pos_imgs_train"))
+        print("neg_ratio_train:", args.get("neg_ratio_train"))
         print("0: 決定, -1: 全データ, 自然数: ラベル有画像数")
         p = int(input("pos_imgs_train: "))
         if p == 0:
@@ -64,18 +67,21 @@ def main():
             del args.neg_ratio_train
 
     # Validater dataloader ---------------------------------------------------------------------------------------
-    print("pos_imgs_val:", args.get("pos_imgs_val"))
-    print("neg_ratio_val:", args.get("neg_ratio_val"))
-
     while True:
         try:
-            build_dataloader(cfg=args, img_path=data_dict, names=data_dict["names"], batch=64 * 2, rank=-1, mode="val")
+            args.classes = None
+            args.fraction = 1.0
+            build_yolo_dataset(args, data_dict, 1, data_dict, mode="val")
+            del args.classes
+            del args.fraction
         except PermissionError:
             pass
 
         yaml_save(Path("cfg") / "custom" / f"{data_name}.yaml", vars(args))  # save run args
 
         print("0: 決定, -1: 全データ, 0.1~1.0: ラベル無しデータの割合")
+        print("pos_imgs_val:", args.get("pos_imgs_val"))
+        print("neg_ratio_val:", args.get("neg_ratio_val"))
         p = int(input("pos_imgs_val: "))
         if p == 0:
             break

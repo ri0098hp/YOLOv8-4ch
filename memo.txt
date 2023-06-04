@@ -26,7 +26,7 @@ for cond in ${conds[@]}
 do
   for model in ${models[@]}
   do
-    yolo cfg=cfg/custom/fujinolab-${cond}.yaml neg_ratio_train=0.5 ch=${model} name=fujinolab-${cond}-${model}ch;
+    yolo cfg=cfg/custom/fujinolab-${cond}.yaml ch=${model} name=fujinolab-${cond}-${model}ch;
   done;
 done
 

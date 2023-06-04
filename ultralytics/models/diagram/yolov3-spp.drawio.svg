@@ -1,0 +1,461 @@
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="721px" height="331px" viewBox="-0.5 -0.5 721 331" content="&lt;mxfile&gt;&lt;diagram id=&quot;D45ScRCSN2JgSK6r8sjm&quot; name=&quot;Page-1&quot;&gt;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&lt;/diagram&gt;&lt;/mxfile&gt;">
+    <defs/>
+    <g>
+        <rect x="420" y="0" width="270" height="270" fill="none" stroke="#2d7600" pointer-events="all"/>
+        <g fill="#00CC00" font-family="Helvetica" font-weight="bold" text-anchor="end" font-size="12px">
+            <text x="687.5" y="264.5">
+                Neck
+            </text>
+        </g>
+        <rect x="80" y="0" width="340" height="60" fill="none" stroke="#a50040" pointer-events="all"/>
+        <g fill="#CC0066" font-family="Helvetica" font-weight="bold" text-anchor="end" font-size="12px">
+            <text x="417.5" y="54.5">
+                Backbone
+            </text>
+        </g>
+        <path d="M 260 30 L 300.03 30.03 L 300.03 240.03 L 535.13 240" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 538.88 240 L 533.88 242.5 L 535.13 240 L 533.88 237.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 620 110 L 620.03 170.03 L 410.03 170.03 L 410.03 200.03 L 443.88 200" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 447.63 200 L 442.63 202.5 L 443.88 200 L 442.63 197.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 360 30 L 360.03 130.03 L 535.13 130" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 538.88 130 L 533.88 132.5 L 535.13 130 L 533.88 127.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 410 30.03 L 420.03 30.03 L 425.13 29.92" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 428.88 29.83 L 423.94 32.44 L 425.13 29.92 L 423.83 27.44 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 610 30 L 610.03 60.03 L 410.03 60.03 L 410.03 90.03 L 443.88 90" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 447.63 90 L 442.63 92.5 L 443.88 90 L 442.63 87.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="499.99" y="180" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <rect fill="rgb(255, 255, 255)" stroke="none" x="498" y="180" width="44" height="12" stroke-width="0"/>
+            <text x="519.5" y="188">
+                76*76*128
+            </text>
+        </g>
+        <rect x="590" y="60" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="609.5" y="68">
+                19*19*512
+            </text>
+        </g>
+        <rect x="650" y="200" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="669.5" y="208">
+                76*76*255
+            </text>
+        </g>
+        <rect x="600" y="170" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="619.5" y="178">
+                38*38*128
+            </text>
+        </g>
+        <rect x="650" y="90" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="669.5" y="98">
+                38*38*255
+            </text>
+        </g>
+        <rect x="499.99" y="69.57" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <rect fill="rgb(255, 255, 255)" stroke="none" x="498" y="70" width="44" height="12" stroke-width="0"/>
+            <text x="519.5" y="77.57">
+                38*38*256
+            </text>
+        </g>
+        <rect x="650" y="9.61" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="669.5" y="17.61">
+                19*19*255
+            </text>
+        </g>
+        <rect x="510" y="9.61" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <rect fill="rgb(255, 255, 255)" stroke="none" x="509" y="10" width="44" height="12" stroke-width="0"/>
+            <text x="529.5" y="17.61">
+                19*19*512
+            </text>
+        </g>
+        <rect x="329.99" y="9.81" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="349.5" y="17.81">
+                38*38*512
+            </text>
+        </g>
+        <rect x="389.99" y="9.61" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <rect fill="rgb(255, 255, 255)" stroke="none" x="386" y="10" width="49" height="12" stroke-width="0"/>
+            <text x="409.5" y="17.61">
+                19*19*1024
+            </text>
+        </g>
+        <rect x="19.23" y="10" width="30.77" height="30" fill="#4d4d4d" stroke="#000000" pointer-events="none"/>
+        <rect x="16.15" y="13.33" width="30.77" height="30" fill="#0050ef" stroke="#001dbc" pointer-events="none"/>
+        <rect x="13.08" y="16.67" width="30.77" height="30" fill="#008a00" stroke="#005700" pointer-events="none"/>
+        <rect x="10" y="20" width="30.77" height="30" fill="#e51400" stroke="#b20000" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="29.5" y="57.9">
+                608*608*4
+            </text>
+        </g>
+        <rect x="10" y="70" width="280" height="260" fill="#b3b3b3" stroke="#4d4d4d" pointer-events="none"/>
+        <rect x="488.75" y="190" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="8px">
+            <text x="508.25" y="202.5">
+                UpSample
+            </text>
+        </g>
+        <rect x="488.75" y="80" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="8px">
+            <text x="508.25" y="92.5">
+                UpSample
+            </text>
+        </g>
+        <rect x="130" y="20" width="40" height="20" rx="3" ry="3" fill="#0050ef" stroke="#001dbc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="149.5" y="34.5">
+                Res1
+            </text>
+        </g>
+        <path d="M 50.34 30.22 L 70.03 30.2 L 85.13 30.05" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 88.88 30.01 L 83.91 32.56 L 85.13 30.05 L 83.86 27.56 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="90" y="20" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="109.5" y="34.5">
+                CBS
+            </text>
+        </g>
+        <rect x="170" y="20" width="40" height="20" rx="3" ry="3" fill="#0050ef" stroke="#001dbc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="189.5" y="34.5">
+                Res2
+            </text>
+        </g>
+        <path d="M 250 30 L 305.13 30" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 308.88 30 L 303.88 32.5 L 305.13 30 L 303.88 27.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="210" y="20" width="40" height="20" rx="3" ry="3" fill="#0050ef" stroke="#001dbc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="229.5" y="34.5">
+                Res8
+            </text>
+        </g>
+        <path d="M 350 30 L 365.13 30" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 368.88 30 L 363.88 32.5 L 365.13 30 L 363.88 27.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="310" y="20" width="40" height="20" rx="3" ry="3" fill="#0050ef" stroke="#001dbc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="329.5" y="34.5">
+                Res8
+            </text>
+        </g>
+        <rect x="370" y="20" width="40" height="20" rx="3" ry="3" fill="#0050ef" stroke="#001dbc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="389.5" y="34.5">
+                Res4
+            </text>
+        </g>
+        <path d="M 530 29.81 L 545.13 29.81" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 548.88 29.81 L 543.88 32.31 L 545.13 29.81 L 543.88 27.31 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="490" y="19.81" width="40" height="20" rx="3" ry="3" fill="#d80073" stroke="#a50040" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="509.5" y="34.31">
+                SPP
+            </text>
+        </g>
+        <path d="M 590 29.8 L 625.13 29.8" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 628.88 29.8 L 623.88 32.3 L 625.13 29.8 L 623.88 27.3 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 470 29.81 L 485.13 29.81" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 488.88 29.81 L 483.88 32.31 L 485.13 29.81 L 483.88 27.31 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 670 29.8 L 685 29.8 L 695.13 29.94" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 698.88 29.99 L 693.85 32.42 L 695.13 29.94 L 693.92 27.42 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="630" y="19.8" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="649.5" y="34.3">
+                CBS
+            </text>
+        </g>
+        <rect x="590" y="120" width="240" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" transform="rotate(90,710,130)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px" transform="rotate(90,710,130)">
+            <text x="709.5" y="134.5">
+                Detect
+            </text>
+        </g>
+        <rect x="448.75" y="80" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="468.25" y="94.5">
+                CBS
+            </text>
+        </g>
+        <path d="M 528.75 90.03 L 538.83 90.03 L 530.03 90.03 L 535.13 90.01" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 538.88 90 L 533.89 92.52 L 535.13 90.01 L 533.87 87.52 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 540 70 L 560 110 L 540 150 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px" transform="rotate(90,546.67,110)">
+            <text x="546.17" y="113.5">
+                Concat
+            </text>
+        </g>
+        <rect x="430" y="19.81" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="449.5" y="34.31">
+                CBS
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="474.5" y="22.61">
+                * 2
+            </text>
+        </g>
+        <rect x="550" y="19.81" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="569.5" y="34.31">
+                CBS
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="594.5" y="22.61">
+                * 2
+            </text>
+        </g>
+        <rect x="570" y="100" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="589.5" y="114.5">
+                CBS
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="614.5" y="102.8">
+                * 5
+            </text>
+        </g>
+        <path d="M 670 110 L 695.13 110" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 698.88 110 L 693.88 112.5 L 695.13 110 L 693.88 107.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="630" y="100" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="649.5" y="114.5">
+                CBS
+            </text>
+        </g>
+        <path d="M 559.99 110.03 L 565.16 110.03" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 568.91 110.03 L 563.91 112.53 L 565.16 110.03 L 563.91 107.53 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 610 110 L 625.13 110" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 628.88 110 L 623.88 112.5 L 625.13 110 L 623.88 107.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="448.75" y="190" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="468.25" y="204.5">
+                CBS
+            </text>
+        </g>
+        <path d="M 528.75 200.03 L 538.83 200.03 L 530.03 200.03 L 535.13 200.01" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 538.88 200 L 533.89 202.52 L 535.13 200.01 L 533.87 197.52 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 540 180 L 560 220 L 540 260 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px" transform="rotate(90,546.92,220)">
+            <text x="546.42" y="223.5">
+                Concat
+            </text>
+        </g>
+        <rect x="570" y="210" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="589.5" y="224.5">
+                CBS
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="614.5" y="212.8">
+                * 5
+            </text>
+        </g>
+        <path d="M 670 220.03 L 694.13 220.03" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 697.88 220.03 L 692.88 222.53 L 694.13 220.03 L 692.88 217.53 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="630" y="210" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="649.5" y="224.5">
+                CBS
+            </text>
+        </g>
+        <path d="M 559.99 220.03 L 565.16 220.03" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 568.91 220.03 L 563.91 222.53 L 565.16 220.03 L 563.91 217.53 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 610 220 L 625.13 220" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 628.88 220 L 623.88 222.5 L 625.13 220 L 623.88 217.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="20" y="79.57" width="40.01" height="18.75" rx="2.81" ry="2.81" fill="#0050ef" stroke="#001dbc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="39.5" y="93.45">
+                ResN
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="204.51" y="83">
+                * N
+            </text>
+        </g>
+        <rect x="20" y="110.2" width="40" height="20" rx="3" ry="3" fill="#1ba1e2" stroke="#006eaf" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="39.5" y="123.2">
+                ResUnit
+            </text>
+        </g>
+        <path d="M 80.48 90.08 L 113.64 90.18" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 118.89 90.2 L 111.88 93.67 L 113.64 90.18 L 111.9 86.67 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="69.51" y="94.08">
+                =
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="69.5" y="124.69">
+                =
+            </text>
+        </g>
+        <path d="M 80.22 120.22 L 115.13 120.2" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 118.88 120.2 L 113.88 122.7 L 115.13 120.2 L 113.88 117.7 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 260 120.19 L 273.63 120.19" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 278.88 120.19 L 271.88 123.69 L 273.63 120.19 L 271.88 116.69 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 240 110.19 L 260 120.19 L 240 130.19 L 220 120.19 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px">
+            <text x="239.5" y="123.69">
+                add
+            </text>
+        </g>
+        <path d="M 200.01 120.2 L 215.13 120.19" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 218.88 120.19 L 213.88 122.69 L 215.13 120.19 L 213.88 117.69 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 100 120.19 L 100.03 160.2 L 240.03 160.2 L 240 135.06" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 240 131.31 L 242.51 136.31 L 240 135.06 L 237.51 136.31 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="20" y="250" width="39.99" height="20" rx="3" ry="3" fill="#d80073" stroke="#a50040" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="39.5" y="264.5">
+                SPP
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="69.5" y="264.5">
+                =
+            </text>
+        </g>
+        <path d="M 109.99 260 L 109.99 220 Q 109.99 210 117.56 210 L 125.13 210" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 128.88 210 L 123.88 212.5 L 125.13 210 L 123.88 207.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 200.01 90.2 L 235.14 90.2" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 238.89 90.2 L 233.89 92.7 L 235.14 90.2 L 233.89 87.7 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 170 209.98 L 185.13 209.96" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 188.88 209.96 L 183.88 212.47 L 185.13 209.96 L 183.88 207.47 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="130" y="200" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="149.5" y="213">
+                Maxpool
+            </text>
+        </g>
+        <path d="M 79.99 260.22 L 107.99 260.01" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <ellipse cx="109.99" cy="260" rx="2" ry="2" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <path d="M 170 240.66 L 185.13 240.68" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 188.88 240.68 L 183.88 243.17 L 185.13 240.68 L 183.88 238.17 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="130" y="230.64" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="149.5" y="243.64">
+                Maxpool
+            </text>
+        </g>
+        <path d="M 169.99 280.02 L 185.13 280.04" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 188.88 280.04 L 183.88 282.54 L 185.13 280.04 L 183.88 277.54 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="129.99" y="270.01" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="149.49" y="283.01">
+                Maxpool
+            </text>
+        </g>
+        <path d="M 109.99 260 L 109.99 270 Q 109.99 280 117.56 280 L 125.12 280.01" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 128.87 280.01 L 123.87 282.51 L 125.12 280.01 L 123.87 277.51 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 190 200 L 210 260 L 190 320 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px" transform="rotate(90,199.79,260)">
+            <text x="199.29" y="263.5">
+                Concat
+            </text>
+        </g>
+        <path d="M 109.99 260 L 109.99 250.5 Q 109.99 241 117.56 240.86 L 125.13 240.73" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 128.88 240.66 L 123.93 243.25 L 125.13 240.73 L 123.84 238.25 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 109.99 260 L 109.99 300 Q 109.99 310 119.99 310 L 185.13 310.04" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 188.88 310.04 L 183.88 312.54 L 185.13 310.04 L 183.88 307.54 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 209.94 260 L 215.13 260" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 218.88 260 L 213.88 262.5 L 215.13 260 L 213.88 257.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="20" y="170.21" width="40" height="19.99" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="39.5" y="184.71">
+                CBS
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="69.5" y="184.7">
+                =
+            </text>
+        </g>
+        <rect x="120" y="170.21" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="139.5" y="184.71">
+                Conv
+            </text>
+        </g>
+        <rect x="160.01" y="170.22" width="39.99" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="179.5" y="184.72">
+                BN
+            </text>
+        </g>
+        <path d="M 240 180.2 L 254.03 180.2 L 275.13 180.21" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 278.88 180.21 L 273.88 182.71 L 275.13 180.21 L 273.88 177.71 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="200.01" y="170.2" width="39.99" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="219.5" y="184.7">
+                SiLU
+            </text>
+        </g>
+        <path d="M 80.09 180.34 L 115.13 180.23" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 118.88 180.21 L 113.89 182.73 L 115.13 180.23 L 113.87 177.73 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="160" y="80.2" width="40.02" height="20" rx="3" ry="3" fill="#1ba1e2" stroke="#006eaf" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="179.51" y="93.2">
+                ResUnit
+            </text>
+        </g>
+        <rect x="120.01" y="80.2" width="39.99" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="139.5" y="94.7">
+                CBS
+            </text>
+        </g>
+        <rect x="160.01" y="110.2" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="179.51" y="124.7">
+                CBS
+            </text>
+        </g>
+        <rect x="120" y="110.2" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="139.5" y="124.7">
+                CBS
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <rect fill="rgb(255, 255, 255)" stroke="none" x="184" y="40" width="54" height="12" stroke-width="0"/>
+            <text x="209.51" y="47.8">
+                152*152*128
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="129.5" y="48.1">
+                608*608*32
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="249.51" y="17.61">
+                76*76*256
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="169.51" y="17.8">
+                304*304*64
+            </text>
+        </g>
+        <path d="M 260.63 260 L 273.63 260" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 278.88 260 L 271.88 263.5 L 273.63 260 L 271.88 256.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="220.63" y="250" width="40" height="19.99" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="240.13" y="264.5">
+                CBS
+            </text>
+        </g>
+    </g>
+</svg>

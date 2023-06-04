@@ -1,4 +1,16 @@
-## Models
+# Models
+
+## Architecture Diagram
+
+### YOLOv8s 4ch
+
+![yolov3-spp.drawio](diagram/yolov8s.drawio.svg)
+
+### YOLOv3-SPP 4ch
+
+![yolov3-spp.drawio](diagram/yolov3-spp.drawio.svg)
+
+## Description
 
 Welcome to the Ultralytics Models directory! Here you will find a wide variety of pre-configured model configuration
 files (`*.yaml`s) that can be used to create custom YOLO models. The models in this directory have been expertly crafted
@@ -15,7 +27,7 @@ selected a model, you can use the provided `*.yaml` file to train and deploy you
 details at the Ultralytics [Docs](https://docs.ultralytics.com/models), and if you need help or have any questions, feel free
 to reach out to the Ultralytics team for support. So, don't wait, start creating your custom YOLO model now!
 
-### Usage
+## Usage
 
 Model `*.yaml` files may be used directly in the Command Line Interface (CLI) with a `yolo` command:
 
