@@ -2,7 +2,7 @@
 
 ## DEMO
 
-<https://user-images.githubusercontent.com/104181368/222668654-0efb9323-4e6a-408c-90a1-a6807b9d8e40.mp4>
+<https://github.com/ri0098hp/YOLOv8-4ch/assets/104181368/177f036e-4932-4fda-9338-532504e81663>
 
 | Best Model    | Device            | Format        | Speed/Image | FPS  | AP@All |
 | ------------- | ----------------- | ------------- | ----------- | ---- | ------ |

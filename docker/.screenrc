@@ -21,7 +21,7 @@ altscreen on
 # logging
 log on
 deflog on
-logfile "/Users/YourName/screen/log/screen-%Y%m%d-%n.log"
+logfile "~/log/screen-%Y%m%d-%n.log"
 
 
 # Show date and screen list
