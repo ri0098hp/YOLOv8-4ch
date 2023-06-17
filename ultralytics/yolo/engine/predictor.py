@@ -120,7 +120,9 @@ class BasePredictor:
         """
         if not isinstance(im, torch.Tensor):
             im = np.stack(self.pre_transform(im))
-            im = im[..., ::-1].transpose((0, 3, 1, 2))  # BGR to RGB, BHWC to BCHW, (n, 3, h, w)
+            if len(im.shape) < 4:
+                im = np.expand_dims(im, -1)
+            im = im[..., ::-1].transpose((0, 3, 1, 2)).copy()  # BGR to RGB, BHWC to BCHW, (n, 3, h, w)
             im = np.ascontiguousarray(im)  # contiguous
             im = torch.from_numpy(im)
         # NOTE: assuming im with (b, 3, h, w) if it's a tensor
