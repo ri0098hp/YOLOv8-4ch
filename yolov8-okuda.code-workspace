@@ -5,6 +5,11 @@
     }
   ],
   "settings": {
+    "files.watcherExclude": {
+      "**/.git/objects/**": true,
+      "**/.git/subtree-cache/**": true,
+      "**/node_modules/*/**": true
+    },
     "python.terminal.activateEnvironment": true,
     "python.formatting.provider": "black", // フォーマッターをblackに設定
     "python.linting.pylintEnabled": false, // pyLintをオフに

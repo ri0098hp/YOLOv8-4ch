@@ -48,6 +48,7 @@ from .conv import (
     SpatialAttention,
 )
 from .head import Classify, Detect, Pose, RTDETRDecoder, Segment
+from .multi import M2S, S2M_FIR, S2M_RGB, Pass
 from .transformer import (
     AIFI,
     MLP,
@@ -107,4 +108,8 @@ __all__ = [
     "DeformableTransformerDecoderLayer",
     "MSDeformAttn",
     "MLP",
+    "S2M_RGB",
+    "S2M_FIR",
+    "M2S",
+    "Pass",
 ]

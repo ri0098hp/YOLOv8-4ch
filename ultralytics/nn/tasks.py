@@ -13,6 +13,9 @@ from ultralytics.nn.modules import (
     C2,
     C3,
     C3TR,
+    M2S,
+    S2M_FIR,
+    S2M_RGB,
     SPP,
     SPPF,
     Bottleneck,
@@ -33,6 +36,7 @@ from ultralytics.nn.modules import (
     GhostConv,
     HGBlock,
     HGStem,
+    Pass,
     Pose,
     RepC3,
     RepConv,
@@ -577,8 +581,14 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
 
         elif m is nn.BatchNorm2d:
             args = [ch[f]]
-        elif m is Concat:
+        elif m in (Concat, M2S):
             c2 = sum(ch[x] for x in f)
+        elif m is S2M_RGB:
+            c1 = 4
+            c2 = 3
+        elif m is S2M_FIR:
+            c1 = 4
+            c2 = 1
         elif m in (Detect, Segment, Pose, RTDETRDecoder):
             args.append([ch[x] for x in f])
             if m is Segment:
