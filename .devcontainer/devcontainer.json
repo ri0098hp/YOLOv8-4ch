@@ -15,7 +15,8 @@
         "ms-toolsai.jupyter",
         "yzhang.markdown-all-in-one",
         "DavidAnson.vscode-markdownlint",
-        "TakumiI.markdowntable"
+        "TakumiI.markdowntable",
+        "redhat.vscode-yaml"
       ]
     }
   }

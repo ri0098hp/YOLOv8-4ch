@@ -321,24 +321,3 @@ class BottleneckCSP(nn.Module):
         y1 = self.cv3(self.m(self.cv1(x)))
         y2 = self.cv2(x)
         return self.cv4(self.act(self.bn(torch.cat((y1, y2), 1))))
-
-
-class MultiInput(nn.Module):
-    """Multi-Channel Input Layer"""
-
-    def __init__(self, c1, c2, k=1, s=1):  # ch_in, ch_out, kernels, stride
-        super().__init__()
-        self.cv = Conv(c1, c2, k, s)
-        self.cv1 = Conv(3, c2, k, s)
-        self.cv2 = Conv(1, c2, k, s)
-        self.fuse = Conv(c2 * 2, c2, 1, 1)
-
-    def forward(self, x):
-        if x.shape[1] == 4:
-            x = torch.unbind(x, 1)
-            x1 = torch.stack(x[:3], dim=1)
-            x2 = torch.unsqueeze(x[3], dim=1)
-            x = torch.cat((self.cv1(x1), self.cv2(x2)), dim=1)
-            return self.fuse(x)
-        else:
-            return self.cv(x)

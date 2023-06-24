@@ -48,7 +48,7 @@ from .conv import (
     SpatialAttention,
 )
 from .head import Classify, Detect, Pose, RTDETRDecoder, Segment
-from .multi import M2S, S2M_FIR, S2M_RGB, Pass
+from .multi import M2S, S2M_FIR, S2M_RGB, M2S_Add, M2S_Conv, Pass
 from .transformer import (
     AIFI,
     MLP,
@@ -111,5 +111,7 @@ __all__ = [
     "S2M_RGB",
     "S2M_FIR",
     "M2S",
+    "M2S_Conv",
+    "M2S_Add",
     "Pass",
 ]

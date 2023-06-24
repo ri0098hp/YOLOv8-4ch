@@ -36,6 +36,8 @@ from ultralytics.nn.modules import (
     GhostConv,
     HGBlock,
     HGStem,
+    M2S_Add,
+    M2S_Conv,
     Pass,
     Pose,
     RepC3,
@@ -584,11 +586,16 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
         elif m in (Concat, M2S):
             c2 = sum(ch[x] for x in f)
         elif m is S2M_RGB:
-            c1 = 4
             c2 = 3
         elif m is S2M_FIR:
-            c1 = 4
             c2 = 1
+        elif m is M2S_Add:
+            c2 = ch[f[0]]
+        elif m is M2S_Conv:
+            c1, c2 = sum(ch[x] for x in f), args[0]
+            if c2 != nc:  # if c2 not equal to number of classes (i.e. for Classify() output)
+                c2 = make_divisible(min(c2, max_channels) * width, 8)
+            args = [c1, c2, *args[1:]]
         elif m in (Detect, Segment, Pose, RTDETRDecoder):
             args.append([ch[x] for x in f])
             if m is Segment:
