@@ -10,6 +10,14 @@
 
 ![yolov3-spp.drawio](diagram/yolov3-spp.drawio.svg)
 
+### YOLOv8s-st2 4ch
+
+![yolov3-spp.drawio](diagram/yolov8s-st.drawio.svg)
+
+### YOLOv8s-st2-conv 4ch
+
+![yolov3-spp.drawio](diagram/yolov8s-st-conv.drawio.svg)
+
 ## Description
 
 Welcome to the Ultralytics Models directory! Here you will find a wide variety of pre-configured model configuration

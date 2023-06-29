@@ -42,14 +42,9 @@ YOLOv8 をRGB-FIR向けに拡張したもの. 次の機能をオリジナルか�
 - [x] テスト結果の画像を全て書き出し
 - [x] pip installで利用可能にする
 
-## TODO
+## Models
 
-基本的にはissueに投げる.  
-開発をする際には自分のブランチを作成する. その後mainへマージする際には各ブランチ上でpull rebaseした後にPRを投げる.
-
-```bash
-git pull --rebase origin main
-```
+工事中… [ここ](ultralytics/models)
 
 ## 1. Installation
 

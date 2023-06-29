@@ -1,0 +1,527 @@
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="832px" height="312px" viewBox="-0.5 -0.5 832 312" content="&lt;mxfile&gt;&lt;diagram id=&quot;D45ScRCSN2JgSK6r8sjm&quot; name=&quot;st1&quot;&gt;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&lt;/diagram&gt;&lt;diagram name=&quot;st2&quot; id=&quot;LKN8-qoLPaZydv6zQzit&quot;&gt;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&lt;/diagram&gt;&lt;diagram name=&quot;st3&quot; id=&quot;gIiYvHt5FsS_hCe1XcsP&quot;&gt;7V1bc6M4Fv4t+5Cq3VSFksT9MZfpmYedrtSmZmdnXqaITRKqifFi0kn216+wEQYdYUk2Amy3u5NuQAhzbjrn09HRhX37+vFzHi1ffs3mcXpB0Pzjwr67IISELv1dnvjcnHBCtDnxnCfzzSm8PfGQ/C+uTrJmb8k8XrUaFlmWFsmyfXKWLRbxrGidi/I8e283e8rS9lOX0XMMTjzMohSe/T2ZFy/VWeyF2wu/xMnzS/XogPibC68Ra1y9yeolmmfvjVP2Txf2bZ5lxeZ/rx+3cVrSjtEl/j38d4qW6b+QnzrxH79Ezp/e1aazLzq31K+Qx4ui367JpuvvUfpW0YugS/rXxdWVVfHJKJlnb4t5XPaGLuybp2xRVNwO6eGqyLNv8W2WZjk9s8gWcdkmSVP+FL2NnZrHT9FbSt/oJo0e4/Qmmn17Xj+Eu0fx9SsyfY/zIv5oML8ix89x9hoX+Sdt8sFYXXG2Eu2gOnzfyomDLFT1+9IQEibcUSWcz3XfWwbQ/1Q80OCHDfgRoEv6F5Pg/PhB3PEZ4gCGOOiS/iWud34Mwf74DHHPmSG+z2kIGp8h3jmbLG+CJss/Zw3xbM5kTYAhAWAI4EM8p05rdZjlxUv2nC2i9Kft2ZtOTmHUyYJVEeWsmUOP48W8dURf7j9Vh+uDP8oDy2WHdx/Ni3ef1ZEe6+hXeI53tquksiTBTg7ncRoVyfe2Xy9iVnXrfZbQL1hLhuMHlu+2tdXjWL75stWNTV+a68tzOwZG1tEqe8tnMejoOs+jz0azZdlg1f2du56j+r1Y7NLV3sUHtndb7el/Nm+41ZWaf/urT9gxwJyFPXNJaIVhm+j2+CaNdQwGmbMIHAVMwfSU64/PFwz4AthRkmqpQ+QDyVhjO9Ej+wpoJ3mdtpFxoLh7lKzNj4DELt/EMUVyiKEAkjdJfUH1F7kofuLoTc8/rT9AKdZ34LubWw1e6DtOFnbtwPHYb6fFA9uyWx8HsMRGlu+F9J/qtw9Zstaa5sczxRIIo8hZEkSI96QkLHF9pOMPabPEtpCIpJ+MYV7rE0ybJRBIkbEkdrGjx5IbUmq6EZYwMw9t0aSoDNERjw7K5Y99fMOytsJcYYWRA7IntAJT/IDgyG/Lh+h1SXnQzQ7cZkdg0pPBMCgSUM0RUI0Y82EggAGIpRsvb2NdC3l+O94NnToa7oh410f3cZ7QF4zz+mQzmOZDbT2GbcLFXe0qCZVG02z2qr9o+jBeQuxjYgrAQ9yjSz8Md3dKf2VThwFzpHLKyGIazKntOHOGkMX59x1QTl+gBIEB8C15ksl028HxqMf5pBUG2NTjvNUJA3TVoZ5Q+KyjKOjqD6oPRCGiPWP0lFHDtMJhxMXTHqd/StoHug14NW530wGj9qbEMHS/vXnQU+InFNkogkr8Zf0RRil3vl6UoqvEGCjxyCqsEI7LVXhfheMdwf68NvnURmBEObVnEfg5MU2UX7v9rlkB6bcLB7YBEJi4o17+rJCYgTwrKMuyxV5mff8UjHBsXYYIAyAUA5gPpIk2buxy2RHYdgGxiIBY/ORdf8SC4T8gVpEn0eI5jS9AyNM2XHX24frgW1zMXvREr+acXPZGoxeM/G+zxSyCukjfoBA4clGaPJcaOaOkKAP1m/Jlk1mUXlcXXpP5vHIIa/UNu13AXnAsDcLXOJZrue1PS7BJYDm2D4XbcSyn9YG8w7aF2Rfqn38GMh32HfYP9fFdA8GxmUwHbXeAcw+5pALZcN1x92CBtyY+coiMEQ0hC6TOZZ9z1XLAcKCsGn7MrYONgcSBOY+nYHL0I5CJWRLihVZ4gC3Z3q8NJLihtCvDgYQNgSqboMvND5DJXibfdlsUI8kc3aADF8YJcXRhMoy56TdG9wZLsIcuyx/PMcOSKaUp4WBL8E/muiviueZWuEAw6CQwN25CYnzg3IbAxikQmp/5cULLG5nQCpBIjzN2g847271PJ4uHb5tXn5qrQ/mRClBNX36kL2Nxny6iFKRmmX4j+5J2KAQ6u/w9vjkJfE4sdjmeHQ8bzFUU4Fzk6a9dXuJxTB/baHLGGUJSpzAKOhyhhUuXhyRz1yKNs1gFaHOxj83neyoxx9wa5q7FGmexgsbhECrhGuYhuaGZ0HJM7qJjKzodTu9Ox2E8gUDBTp5oeX9XZRTutLnm++FBfBNmpI7FzInMazh6HiTfHEvag9nldnszax8dAVpyEp6i40zLgXFOEy1xJ+YnOhArOYW0WXdq0gzRjHMCvmvC1nMRY6PeDoz4z6jQlutNzAU3mqdiodonL509bCEUSJ09gTvXJwood/aqGFXq7HkVqabiuUPg4RQGFJBl4408orC0jinkWQyqGC5RVAx3WivvXAPrZqbAMDkfwr75sFc0GvC5LZLSPaC9s7u95x3Yvlorrpipw9+tWPCorziYaeGJm3kyuplXWKozlfR+MnZ6vwsxA0CswdL7a85NN73fFQT/x5/er0H4I0/vdyGqcEZBrIenFcS6EFKY8sK18Yc2w0G/Q9pOceDKp3jGjvpd5ai/94Tzw3gpiPpPAK33QHlnwSAwpM54ClH/WO6gzxkY7I7sDnoKEfdg7mDNuem6gwxJPC13UIPwR+4Oer2UdZgewiQdNT1XddScFiToKcSrx8gwKR/8aaQ48xAfVydDCrpptyc6C3vBtxs4Kdo7zdQAny/hPnZugDfgSodpmW1Vc8EkcWRz4TtihexSf0l7Mwlq3nGhEONr34AlMmzXkejf+AiEp4pA+NNCIDyIQDzc33/RG67mdMz1bZ3h6tpFyDGaMMhV5PNDK8DjqgwLQI8BhPBGxiD8KWEQvnooPBq9ThKD0CD8kWMQvlEMwgqPMJOPBbvyEZVMakT1TzMDn8f0sWALiWGHU81yBScT//meomKQ3uGiwxgGA/ZTBEbGrmzqG9h2YgolxOV6oQyjDlRTDkBmiON5Ry0QbYCl4zlGARNfAQAYLcNOnnReL21quXiBMaVUqPaoSa2aAfuTazx6BAqxMJd51R4IbtZ/dAYC5678o0HfsIO+k6IjjJN/WyQy0LIZ/BFIW/wY4Zjo0BYh76frL0Zoy67ygyyNYbQrUxgbcwMYfjOhFsTeGrF2vEr+V6lxqQTVSEA7c28u3FKYo7ciW1WsBJzZnZDYkoDyuPqi2CQfnbKkiLPlm+9BvqphT+aYqRmLQ5KGxlym+CMpyttoCI9xdVzdidjx9tbyoHnnnoUWGJelHhhTA6kHFg5Ujs13t+LEJCy0bK5Op2ptVrXetLfM7nsCOtBMj9DE5JSFwczsI9xCiwcmFL3s3sgNcYhoPocj8Ev2+vi2EkCvxmwtHDRHHiU1Z+wPrBikZ5CZYW0b1Z0mtW+NCVWBnf5V6zC+qiAOizm1gOtpmFkarVbJbP8h02qj2bIhUxPrmEerl9pT1mRxf5xr6Kgr0FF27kDbyZcO4k1nx1gGd1XzA4ttVs1qx9mW77rbfdYYGNkz9sG/gWT1KOG3kHIGgEqC/qGSzsFAGyuBe15R11LggduCKTFC25KmM++bsjDjrpOgJC2iZKHrNwddCA1kRkX9bZ1z2WqsMowyROxQgM0cdTBrnn11NVMaIDT0IRw5kg0hOnSbLb5L9GYwcvH7OwLqOS4ZeeFQCIGdm6+ToZ8D9kVYl2jcUjDwbLZcsEFBe2s8hiGigeSGqTj3jGty595M7r50R2ncYZN69sNq/2D3Y436WSEEPh6Sf/42GXUNhMP74Nq43zYPnMJ1l3Wtg7PD4E3ktJUV+abgTXUVrlgihzd7z/HtCLsQoYThEEnLDpp6x3WqjHXqWZHRQc9QkFwyvayrPea9XDDGT2zuKxRsAnESlJ/2lGN4RKCCbwkCIU9ALd9Ufm0IAYTLXX78NGu9hNo+B2EhliQENVbdpY7xuMrfsiBq8Lw/DdoyhHPk6RSMYHjPDMFZATX6atEF1LBVAqVL3sCux85IoH4eVCJjQI4+Obm1VuMrxoQqOvAy30uqeKgastQ2Qhqz1DI2kUlFjBTSGJiD01iTdFUm2x0u6/ouDzezNPICOowUwvzDV9DtTfgte6e7qA4jGFQ+LFNBeuUxLarToTxbVRe2h0cIKY+9fg4jA6seapOPj8vkE2WTP40CER1bbhvFijEasIBBvwLDQFIGe26e4QeeKYBUQ/RUK0phPPReW30DjhgpLOk4YFZLRxCs0HUbwlBu1OYYywbWkIaB1lnxST0e5xBoT3F15zl5u59kuLRUDUmOJ3OaQjK4ektZxkedyiluEtYbzjLGWKEihiAcGiUW4hUSblo1rB/PynoPFgvpBEI1YyccCGHB9o3HX15Eh/Tb+iJtayKYBRo7FMIGymNqOiZmF4SreyBYNaO+NhHGp+xDMJ97sLvS+aTWY6qtzc1GVdhAUY6Rw+mhJIO43G7rIu71nrbljSEkEFY7hkXL+vMi2AfKPnbVHIwhUHaEM+F7LIYjnKSPPTGOIQBVE+manv+6lvsO/0qVBTp+V5fN1cmy2SMHXDgWNrgiyhMxyBUFVIezPHVhCQ3Lg8wW61rPbyPfC+mzyt98bi6cnLKRtW1Of/sCm8SNTyzlrn8mEAhzeE655TO6hBoxdVOlzTx+iZrtWjBrWKQVoRUY44hgJcn0kvy0Sc2vQBm9qB1m5saUA90dUvdZw8584jPHN54hqmnOgaQf04AuUclU2S6drizPS/GaXrD64zuKJNV1mbvrL/dp4ia6qNmhdtFXYivoyunY6WIw1JeoYDnq8tEBzMimJ39IFZQqXhJURWqdRr794HZ4aA8tXyp4jYZ8iaamd05E6svWkUqPDtf3NU+DS4+ooIu38SaW0aIlRt5/37LywmzD0jLCzZ8f/07KbCT6+PJNyn8wIv9YMxmVXsrVU/SapJ+b5r/E6fe4DF4b1zdJyOVVTJYfzQubB5dXFln+GqWNa9+jcq6nuKIhcFS85fFK0m4WLbuavFeiUl70K1cVpXFBg+0rSoJZsniGd2b58iVaVF2Szbkyrr9KqCotqt4Qe531lSKnNzzRPlhvlSEtxTd7b3f1nuXz9sPrvuj3ffyW0O7KPjcqdlUpAHzmPJ5l+Xou5qp4SWbfFvGqelCySIqEvQ3ftkH5ne0agtBq95RmUcG/5jxZLdPokzVPE3qBoL8lr0vqAEclzW62Ikb/91z+Ww5Aj+suyrtuydNdlNO3KJiMUqHfiOmmOTB8Fdby/pIU8QOlZ3n6PY+WbQu4e6zbXKUcifO9oRk9i6eDEgjzrpomEQ8c/ehVEurfHT7KwQV4qdTj9dSq0sn7wqHluA3QR612Xn9DjEqa3o8ASUtePH6DrX1zYviOhs6JIQpg7Vg1qG1uZs2FxlU032CsUnCdZDuJLXW2rDs468UgxYTlc44+60WD9Nusl5276thEsMBXJQ/GWA6MrQKj/nAkZIN/XwODKj7b28hg25Ddmqh5QxiExSvpyS9JypocFXoOUlktteKMsCfgAPA9mQbQ7X4B0jNVdGW+KUBQirLUnwT0C2GerQT0Y+mHDgFsCEF+jWffNpDPw/39Bbn5cv+V/r6//hrvSjHjeS9IDFhnbtzermE+IA7kzvfWV3gf7zEriuyVeYeNagfMO8w3zDW3FWoHq5vZH1ggaYSf4ujRPdNcrXlgJXA9yspTQm0zq1vktfwIsuxwPDDGhmDMKezgRmAWCBvERssDsSG0YRN0ufmRmbH9cqB2R5fiiNQUS/glwVhQx6hR/XSgLCgHQijUl74sfzzHDFOmlJjWLGBZJ6epqoq5lE3nRHPTeOM/Aavk/Airu0drwLD9RmtpkC3rt7+Q+/aPh+v8r5flQ5B++5IlK/Rw9ecVtIGnoG2wbHJoeYNpm5DQCgt+e/SRuwv66mta04MWvhoZRiP5OZhyMtNr5uEQJY3sS3MI1Bzy9Ncub+44/Geb95/H1x2YVhugS/q3nk8+ZT/NVnKezbhoQm5A3/ggr2E/A7ebF2uDx2GE63OVM4KG91cUcIiKYdLlzf0DFh3yQA/zrEzC2trNPFq+/JrN47LF/wE=&lt;/diagram&gt;&lt;/mxfile&gt;">
+    <defs/>
+    <g>
+        <rect x="790" y="50" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="809.5" y="58">
+                20*20*512
+            </text>
+        </g>
+        <rect x="790" y="220" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="809.5" y="228">
+                80*80*128
+            </text>
+        </g>
+        <rect x="790" y="140" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="809.5" y="148">
+                40*40*256
+            </text>
+        </g>
+        <rect x="740" y="170" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="759.5" y="178">
+                40*40*256
+            </text>
+        </g>
+        <rect x="590" y="220" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="609.5" y="228">
+                80*80*128
+            </text>
+        </g>
+        <rect x="600" y="120" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="619.5" y="128">
+                40*40*256
+            </text>
+        </g>
+        <path d="M 620 140 L 620 190 L 480 190 L 480 220 L 483.88 220" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 487.63 220 L 482.63 222.5 L 483.88 220 L 482.63 217.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="499.99" y="200" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="519.5" y="208">
+                80*80*256
+            </text>
+        </g>
+        <rect x="499.99" y="99.57" width="40.01" height="10" fill="none" stroke="none" pointer-events="all"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" text-anchor="middle" font-size="9px">
+            <text x="519.5" y="107.57">
+                40*40*512
+            </text>
+        </g>
+        <rect x="16.15" y="13.33" width="30.77" height="30" fill="#0050ef" stroke="#001dbc" pointer-events="none"/>
+        <rect x="13.08" y="16.67" width="30.77" height="30" fill="#008a00" stroke="#005700" pointer-events="none"/>
+        <rect x="10" y="20" width="30.77" height="30" fill="#e51400" stroke="#b20000" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="29.5" y="57.9">
+                640*640*3
+            </text>
+        </g>
+        <rect x="488.75" y="210" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="8px">
+            <text x="508.25" y="222.5">
+                UpSample
+            </text>
+        </g>
+        <path d="M 530 120 L 535.13 120" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 538.88 120 L 533.88 122.5 L 535.13 120 L 533.88 117.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="490" y="110" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="8px">
+            <text x="509.5" y="122.5">
+                UpSample
+            </text>
+        </g>
+        <path d="M 210 30.4 L 223.63 30.4" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 228.88 30.4 L 221.88 33.9 L 223.63 30.4 L 221.88 26.9 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="170" y="20.4" width="40" height="20" rx="3" ry="3" fill="#6a00ff" stroke="#3700cc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="189.5" y="34.9">
+                C2f
+            </text>
+        </g>
+        <path d="M 50 30 L 65.13 30" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 68.88 30 L 63.88 32.5 L 65.13 30 L 63.88 27.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="70" y="20" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="89.5" y="34.5">
+                CBS
+            </text>
+        </g>
+        <path d="M 600 60 L 600 90 L 480 90 L 480 120 L 485.13 120" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 488.88 120 L 483.88 122.5 L 485.13 120 L 483.88 117.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="790" y="60" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="809.5" y="74.5">
+                Detect
+            </text>
+        </g>
+        <path d="M 540 105 L 560 140 L 540 175 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px" transform="rotate(90,546.67,140)">
+            <text x="546.17" y="143.5">
+                Concat
+            </text>
+        </g>
+        <path d="M 560 140 L 564.38 140" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 568.88 140 L 562.88 143 L 564.38 140 L 562.88 137 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 528.75 220 L 538.81 220 L 530 220 L 535.13 220" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 538.88 220 L 533.88 222.5 L 535.13 220 L 533.88 217.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 560 239.9 L 565.13 239.9" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 568.88 239.9 L 563.88 242.4 L 565.13 239.9 L 563.88 237.4 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="119.51" y="17.9">
+                320*320*32
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="169.51" y="48.4">
+                160*160*64
+            </text>
+        </g>
+        <rect x="130" y="20.4" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="149.5" y="34.9">
+                CBS
+            </text>
+        </g>
+        <rect x="270" y="50" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="289.5" y="64.5">
+                CBS
+            </text>
+        </g>
+        <path d="M 350 60 L 365.13 60" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 368.88 60 L 363.88 62.5 L 365.13 60 L 363.88 57.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 360 60 L 360 257.52 L 535.13 257.5" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 538.88 257.5 L 533.88 260 L 535.13 257.5 L 533.88 255 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="310" y="50" width="40" height="20" rx="3" ry="3" fill="#6a00ff" stroke="#3700cc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="329.5" y="64.5">
+                C2f_2
+            </text>
+        </g>
+        <rect x="370" y="50" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="389.5" y="64.5">
+                CBS
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="359.5" y="48.4">
+                80*80*128
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="459.5" y="48">
+                40*40*256
+            </text>
+        </g>
+        <path d="M 450 60 L 465.13 60" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 468.88 60 L 463.88 62.5 L 465.13 60 L 463.88 57.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 450 60 L 460 60 L 460 160 L 534.85 160" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 538.6 160 L 533.6 162.5 L 534.85 160 L 533.6 157.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="410" y="50" width="40" height="20" rx="3" ry="3" fill="#6a00ff" stroke="#3700cc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="429.5" y="64.5">
+                C2f_2
+            </text>
+        </g>
+        <rect x="470" y="50" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="489.5" y="64.5">
+                CBS
+            </text>
+        </g>
+        <rect x="510" y="50" width="40" height="20" rx="3" ry="3" fill="#6a00ff" stroke="#3700cc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="529.5" y="64.5">
+                C2f
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="209.5" y="18.4">
+                160*160*64
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="549.5" y="48">
+                20*20*512
+            </text>
+        </g>
+        <path d="M 610 140 L 685.13 140" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 688.88 140 L 683.88 142.5 L 685.13 140 L 683.88 137.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="570" y="130" width="40" height="20" rx="3" ry="3" fill="#6a00ff" stroke="#3700cc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="589.5" y="144.5">
+                C2f
+            </text>
+        </g>
+        <path d="M 610 240 L 785.13 240" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 788.88 240 L 783.88 242.5 L 785.13 240 L 783.88 237.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 630 240 L 770 240 L 770 210 L 630 210 L 630 185 L 635.13 185" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 638.88 185 L 633.88 187.5 L 635.13 185 L 633.88 182.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="570" y="230" width="40" height="20" rx="3" ry="3" fill="#6a00ff" stroke="#3700cc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="589.5" y="244.5">
+                C2f
+            </text>
+        </g>
+        <path d="M 540 205 L 560 240 L 540 275 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px" transform="rotate(90,546.67,240)">
+            <text x="546.17" y="243.5">
+                Concat
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="599.5" y="48">
+                20*20*512
+            </text>
+        </g>
+        <rect x="790" y="230" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="809.5" y="244.5">
+                Detect
+            </text>
+        </g>
+        <path d="M 680 185 L 685.13 185" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 688.88 185 L 683.88 187.5 L 685.13 185 L 683.88 182.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="640" y="175" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="659.5" y="189.5">
+                CBS
+            </text>
+        </g>
+        <path d="M 690 125 L 710 160 L 690 195 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px" transform="rotate(90,696.67,160)">
+            <text x="696.17" y="163.5">
+                Concat
+            </text>
+        </g>
+        <path d="M 760 160 L 785.13 160" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 788.88 160 L 783.88 162.5 L 785.13 160 L 783.88 157.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 770 160 L 770 120 L 630 120 L 630 90 L 635.13 90" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 638.88 90 L 633.88 92.5 L 635.13 90 L 633.88 87.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="720" y="150" width="40" height="20" rx="3" ry="3" fill="#6a00ff" stroke="#3700cc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="739.5" y="164.5">
+                C2f
+            </text>
+        </g>
+        <path d="M 710 160 L 715.13 160" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 718.88 160 L 713.88 162.5 L 715.13 160 L 713.88 157.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="790" y="150" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="809.5" y="164.5">
+                Detect
+            </text>
+        </g>
+        <path d="M 590 59.78 L 685.13 59.78" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 688.88 59.78 L 683.88 62.28 L 685.13 59.78 L 683.88 57.28 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="550" y="49.81" width="40" height="20" rx="3" ry="3" fill="#d80073" stroke="#a50040" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="569.5" y="64.31">
+                SPPF
+            </text>
+        </g>
+        <path d="M 690 35 L 710 70 L 690 105 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px" transform="rotate(90,696.67,70)">
+            <text x="696.17" y="73.5">
+                Concat
+            </text>
+        </g>
+        <path d="M 680 90 L 690 90 L 680.05 90 L 685.13 90" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 688.88 90 L 683.88 92.5 L 685.13 90 L 683.88 87.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="640" y="80" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="659.5" y="94.5">
+                CBS
+            </text>
+        </g>
+        <path d="M 760 70 L 785.13 70" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 788.88 70 L 783.88 72.5 L 785.13 70 L 783.88 67.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="720" y="60" width="40" height="20" rx="3" ry="3" fill="#6a00ff" stroke="#3700cc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="739.5" y="74.5">
+                C2f
+            </text>
+        </g>
+        <path d="M 710 70 L 715.13 70" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 718.88 70 L 713.88 72.5 L 715.13 70 L 713.88 67.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="20" y="130" width="280" height="180" fill="#b3b3b3" stroke="#4d4d4d" pointer-events="none"/>
+        <rect x="30" y="220.01" width="40" height="20" rx="3" ry="3" fill="#1ba1e2" stroke="#006eaf" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="49.5" y="234.51">
+                Unit
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="79.5" y="234.5">
+                =
+            </text>
+        </g>
+        <path d="M 90.22 230.02 L 125.13 230.01" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 128.88 230.01 L 123.88 232.51 L 125.13 230.01 L 123.88 227.51 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 270 230 L 283.63 230" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 288.88 230 L 281.88 233.5 L 283.63 230 L 281.88 226.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 250 220 L 270 230 L 250 240 L 230 230 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px">
+            <text x="249.5" y="233.5">
+                add
+            </text>
+        </g>
+        <path d="M 210.01 230.01 L 225.13 230" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 228.88 230 L 223.88 232.5 L 225.13 230 L 223.88 227.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 110 230 L 110 270 L 250 270 L 250 244.87" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" stroke-dasharray="3 3" pointer-events="none"/>
+        <path d="M 250 241.12 L 252.5 246.12 L 250 244.87 L 247.5 246.12 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="30" y="280.03" width="40" height="19.99" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="49.5" y="294.52">
+                CBS
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="79.5" y="294.51">
+                =
+            </text>
+        </g>
+        <rect x="130" y="280.02" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="149.5" y="294.52">
+                Conv
+            </text>
+        </g>
+        <rect x="170.01" y="280.03" width="39.99" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="189.5" y="294.53">
+                BN
+            </text>
+        </g>
+        <path d="M 250 290.01 L 264 290 L 285.13 290.02" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 288.88 290.02 L 283.88 292.52 L 285.13 290.02 L 283.88 287.52 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="210.01" y="280.01" width="39.99" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="229.5" y="294.51">
+                SiLU
+            </text>
+        </g>
+        <path d="M 90.08 290.15 L 125.13 290.04" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 128.88 290.02 L 123.89 292.54 L 125.13 290.04 L 123.87 287.54 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="170.01" y="220.01" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="189.51" y="234.51">
+                CBS
+            </text>
+        </g>
+        <rect x="130" y="220.01" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="149.5" y="234.51">
+                CBS
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="239.5" y="145.5">
+                *N
+            </text>
+        </g>
+        <rect x="30" y="167.5" width="40" height="20" rx="3" ry="3" fill="#6a00ff" stroke="#3700cc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="49.5" y="182">
+                C2f_N
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="79.5" y="182">
+                =
+            </text>
+        </g>
+        <rect x="110" y="167.5" width="40" height="20" rx="3" ry="3" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="129.5" y="182">
+                Conv
+            </text>
+        </g>
+        <path d="M 90 177.5 L 105.13 177.5" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 108.88 177.5 L 103.88 180 L 105.13 177.5 L 103.88 175 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 160 142.5 L 180 177.5 L 160 212.5 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" transform="rotate(-180,170,177.5)" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px" transform="rotate(90,173.22,177.06)">
+            <text x="172.72" y="180.56">
+                Split
+            </text>
+        </g>
+        <path d="M 150 177.52 L 155.13 177.52" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 158.88 177.52 L 153.88 180.02 L 155.13 177.52 L 153.88 175.02 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 180 157.48 L 195.14 157.5" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 198.89 157.5 L 193.89 159.99 L 195.14 157.5 L 193.89 154.99 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 180.32 197.28 L 219.86 197.29 L 255.13 197.47" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 258.88 197.49 L 253.87 199.97 L 255.13 197.47 L 253.9 194.97 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 190 157.5 L 190 192.63" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 190 196.38 L 187.5 191.38 L 190 192.63 L 192.5 191.38 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 260 141.5 L 280 176.5 L 260 211.5 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px" transform="rotate(90,267.22,177.06)">
+            <text x="266.72" y="180.56">
+                Concat
+            </text>
+        </g>
+        <path d="M 220 167.5 L 220 176.52 L 255.13 176.5" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 258.88 176.5 L 253.88 179 L 255.13 176.5 L 253.88 174 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 279.99 176.52 L 285.13 176.52" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 288.88 176.52 L 283.88 179.02 L 285.13 176.52 L 283.88 174.02 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="200.01" y="147.5" width="40" height="20" rx="3" ry="3" fill="#1ba1e2" stroke="#006eaf" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="219.51" y="162">
+                Unit
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="249.5" y="168">
+                *N
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px">
+            <text x="59.5" y="198.5">
+                default: N=1
+            </text>
+        </g>
+        <rect x="10" y="75" width="30.77" height="30" fill="#4d4d4d" stroke="#000000" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="29.5" y="113">
+                640*640*1
+            </text>
+        </g>
+        <rect x="70" y="80" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="89.5" y="94.5">
+                CBS
+            </text>
+        </g>
+        <path d="M 50 90 L 65.13 90" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 68.88 90 L 63.88 92.5 L 65.13 90 L 63.88 87.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 60 119.87 L 260 120" fill="none" stroke="#a50040" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 60 120 L 60 0" fill="none" stroke="#a50040" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 60 0 L 260 0" fill="none" stroke="#a50040" stroke-miterlimit="10" pointer-events="none"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 138px; height: 1px; padding-top: 100px; margin-left: 261px;">
+                        <div data-drawio-colors="color: rgb(0, 0, 0); " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: none; white-space: normal; overflow-wrap: normal;">
+                                <span style="color: rgb(204, 0, 102); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 700; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;">
+                                    Backbone: C2fDarknet
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="330" y="104" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Backbone: C2fDarknet
+                </text>
+            </switch>
+        </g>
+        <path d="M 260 119.68 L 260 89.46" fill="none" stroke="#a50040" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 610 90 L 610 30" fill="none" stroke="#a50040" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 230 20 L 250 60 L 230 100 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="10px" transform="rotate(90,236.67,60)">
+            <text x="236.17" y="63.5">
+                Concat
+            </text>
+        </g>
+        <path d="M 260 90 L 610 90" fill="none" stroke="#a50040" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 110 30.4 L 125.13 30.4" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 128.88 30.4 L 123.88 32.9 L 125.13 30.4 L 123.88 27.9 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 260 30.4 L 260 0.4" fill="none" stroke="#a50040" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 260 30 L 610 30" fill="none" stroke="#a50040" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="470" y="30" width="310" height="250" fill="none" stroke="#2d7600" pointer-events="none"/>
+        <g fill="#00CC00" font-family="Helvetica" font-weight="bold" pointer-events="none" text-anchor="end" font-size="12px">
+            <text x="777.5" y="274.5">
+                Neck: SPP+FPN+PANet
+            </text>
+        </g>
+        <path d="M 210 90.4 L 223.63 90.4" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 228.88 90.4 L 221.88 93.9 L 223.63 90.4 L 221.88 86.9 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <rect x="170" y="80.4" width="40" height="20" rx="3" ry="3" fill="#6a00ff" stroke="#3700cc" pointer-events="none"/>
+        <g fill="#ffffff" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="189.5" y="94.9">
+                C2f
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="119.51" y="77.9">
+                320*320*32
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="169.51" y="108.4">
+                160*160*64
+            </text>
+        </g>
+        <rect x="130" y="80.4" width="40" height="20" rx="3" ry="3" fill="#f0a30a" stroke="#bd7000" pointer-events="none"/>
+        <g fill="#FFFFFF" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="12px">
+            <text x="149.5" y="94.9">
+                CBS
+            </text>
+        </g>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="209.5" y="78.4">
+                160*160*64
+            </text>
+        </g>
+        <path d="M 110 90.4 L 125.13 90.4" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 128.88 90.4 L 123.88 92.9 L 125.13 90.4 L 123.88 87.9 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 250 60 L 265.13 60" fill="none" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <path d="M 268.88 60 L 263.88 62.5 L 265.13 60 L 263.88 57.5 Z" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="none"/>
+        <g fill="rgb(0, 0, 0)" font-family="Helvetica" pointer-events="none" text-anchor="middle" font-size="9px">
+            <text x="269.5" y="48">
+                160*160*128
+            </text>
+        </g>
+    </g>
+    <switch>
+        <g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/>
+        <a transform="translate(0,-5)" xlink:href="https://www.diagrams.net/doc/faq/svg-export-text-problems" target="_blank">
+            <text text-anchor="middle" font-size="10px" x="50%" y="100%">
+                Text is not SVG - cannot display
+            </text>
+        </a>
+    </switch>
+</svg>
