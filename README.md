@@ -22,8 +22,8 @@
 | YOLOv8-4L     |                   | PyTorch       | 3.2 ms      | 312  | 82.3   |
 | (w/ augment)  |                   | TensorRT FP16 | - ms        | -    | -      |
 
-- 500 images are tested on Speed/Image, FPS
-- fujinolab-all are tested on AP@All
+- 500 images (with 7 persons each) are tested on Speed/Image, FPS
+- AP is tested All-Season dataset by AP@0.5
 
 ## Original
 
@@ -49,7 +49,7 @@ YOLOv8 をRGB-FIR向けに拡張したもの. 次の機能をオリジナルか�
 ## 1. Installation
 
 以下[1.1](#11-環境構築)以降の手法はYOLOの内部を弄る必要があるときである.  
-ただ利用するだけならまず[Actions](https://github.com/Rits-Fujinolab/YOLOv8-4ch/actions/workflows/release.yaml)で`Run workflow`を実行すれば, [Release](https://github.com/Rits-Fujinolab/YOLOv8-4ch/releases/latest)に最新のwhlファイルが実装される.  
+ただ利用するだけならまず[Actions](https://github.com/ri0098ho/YOLOv8-4ch/actions/workflows/release.yaml)で`Run workflow`を実行すれば, [Release](https://github.com/ri0098ho/YOLOv8-4ch/releases/latest)に最新のwhlファイルが実装される.  
 これをダウンロードしたのち
 
 ```bash
@@ -67,13 +67,13 @@ pip install [whlファイル]
 レポジトリをcloneする. git環境がある人はOrganizationsにアクセス権限のあるuser名とmailを設定して
 
 ```bash
-git clone git@github.com:Rits-Fujinolab/YOLOv3-4ch.git
+git clone git@github.com:ri0098ho/YOLOv8-4ch.git
 ```
 
 または [GitHub CLI](https://cli.github.com) をインストールしてログイン認証後
 
 ```bash
-gh repo clone Rits-Fujinolab/YOLOv3-4ch
+gh repo clone ri0098ho/YOLOv8-4ch
 ```
 
 ### 1.3 コンテナを立ち上げる
@@ -92,11 +92,13 @@ pip install -e ".[dev]"
 
 データセットをdatasetフォルダーに入れる.  
 [dataloader](utils/datasets.py) を魔改造してるため次のようなディレクトリ構造推奨...  
+All-Season以外はtrainとvalフォルダ以下で再帰的に探索を行う.  
+尚ラベルとRGB画像とFIR画像は対称となるパス関係に存在する必要がある.  
 シンボリックリンクでも認識可能なのでデータフォルダを作った後, フォルダごとにリンクを作るとスペースを節約できる.
 
 ```txt
   <datasets>
-  ├── fujinolab-all
+  ├── All-Season
   │   ├── 20180903_1113
   │   │   ├── FIR
   │   │   ├── FIR_labels
@@ -110,7 +112,7 @@ pip install -e ".[dev]"
   │       ├── RGB_crop
   │       ├── RGB_labels
   │       └── RGB_raw
-  ├── fujinolab-day
+  ├── All-Season-day
   │   └── 20180903_1113  <-シンボリックリンク推奨
   │   
   └── kaist-all
@@ -134,7 +136,7 @@ pip install -e ".[dev]"
 
 ### 2.1 データセットの準備
 
-[ここ](data/fujinolab-all.yaml)を参考にディレクトリとクラスを指定.  
+[ここ](data/All-Season.yaml)を参考にディレクトリとクラスを指定.  
 なおRGB画像、FIR画像、ラベルファイルは全て同じ名前を持っている必要がある (RGBを基準に出ディレクトリを置換している)
 
 ### 2.2 訓練
@@ -187,7 +189,7 @@ yolo cfg=cfg/test.yaml
 
 ### 3.1 データセットの準備
 
-[ここ](data/fujinolab-all.yaml)を参考にディレクトリとクラスを指定.  
+[ここ](data/All-Season.yaml)を参考にディレクトリとクラスを指定.  
 なおRGB画像、FIR画像、ラベルファイルは全て同じ名前を持っている必要がある (RGBを基準に出ディレクトリを置換している)
 
 ### 3.2 Pythonコードで利用
@@ -200,10 +202,10 @@ from ultralytics import YOLO
 # Load a model
 model = YOLO("yolov8s.yaml")  # build a new model from scratch
 # OR
-model = YOLO("weights/fujinolab-all-4ch-aug.pt")  # load a pretrained model (recommended for training)
+model = YOLO("weights/All-Season-4ch-aug.pt")  # load a pretrained model (recommended for training)
 
 # Use the model
-model.train(data="data/fujinolab-all.yaml", epochs=3)  # train the model
+model.train(data="data/All-Season.yaml", epochs=3)  # train the model
 metrics = model.val()  # evaluate model performance on the validation set
 results = model("datasets/demo")  # predict on an image
 success = model.export(format="onnx")  # export the model to ONNX format

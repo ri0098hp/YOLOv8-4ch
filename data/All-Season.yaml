@@ -1,8 +1,8 @@
-data_path: datasets/fujinolab-all # データセットのrootフォルダ
+data_path: datasets/All-Season # データセットのrootフォルダ
 rgb_folder: RGB_homo # RGB画像があるフォルダ名
 fir_folder: FIR # FIR画像があるフォルダ名
 labels_folder: FIR_labels # ラベルがあるフォルダ名
 
 nc: 1 # number of classes
-ch: 1 # number of channels
+ch: 4 # number of channels
 names: ["person"] # class names

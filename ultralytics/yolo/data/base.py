@@ -196,31 +196,23 @@ class BaseDataset(Dataset):
         # save log files of loading
         log_path = self.data_path / "cache" / f"{self.is_train}_log.txt"
         msg = (
-            "##########################\n"
-            f"{self.is_train} data has ...\n"
-            f"RGB: {nRGB} files\n"
-            f"FIR: {nFIR} files\n"
-            f"instance: {sum(len(data.get('bboxes')) for data in self.labels)} targets\n"
-            "##########################"
+            f"{prefix}##########################\n"
+            f"{prefix}{self.is_train} data has ...\n"
+            f"{prefix}RGB: {nRGB} files\n"
+            f"{prefix}FIR: {nFIR} files\n"
+            f"{prefix}instance: {sum(len(data.get('bboxes')) for data in self.labels)} targets\n"
+            f"{prefix}##########################"
         )
         print(msg)
         with open(log_path, "w") as f:
-            f.write(msg)
+            f.write(msg.replace(prefix, ""))
             print(f"{prefix}DataLoader info save on: {log_path}")
 
     def get_img_files(self):
         """Read image files."""
         try:
-            # loading RGB images
-            if "kaist" in str(self.data_path):  # kaistの場合はtrainとvalフォルダで切り分け (先行研究)
-                base = self.fir_folder if self.ch == 1 else self.rgb_folder
-                if "train" in self.is_train:
-                    target = self.data_path / "train" / "**" / base / "*.*"
-                else:
-                    target = self.data_path / "val" / "**" / base / "*.*"
-                im_files = sorted(glob.iglob(str(target), recursive=True))
-                im_files = [x for x in im_files if x.split(".")[-1].lower() in IMG_FORMATS]
-            else:  # 自作データセットの場合はディレクトリごとに割合で振り分け
+            # loading images
+            if "All-Season" in str(self.data_path):  # 自作データセットの場合はディレクトリごとに割合で振り分け
                 target = self.data_path / "**" / self.rgb_folder
                 dirs = sorted(glob.iglob(f"{target}/", recursive=True))
                 dirs = [x.replace(self.rgb_folder + os.sep, "") for x in dirs]
@@ -228,6 +220,14 @@ class BaseDataset(Dataset):
                     im_files = self.data_distributor(dirs, self.fir_folder)
                 else:  # RGB only, RGB-FIR
                     im_files = self.data_distributor(dirs, self.rgb_folder)
+            else:  # それ以外の場合はtrainとvalフォルダで切り分け
+                base = self.fir_folder if self.ch == 1 else self.rgb_folder
+                if "train" in self.is_train:
+                    target = self.data_path / "train" / "**" / base / "*.*"
+                else:
+                    target = self.data_path / "val" / "**" / base / "*.*"
+                im_files = sorted(glob.iglob(str(target), recursive=True))
+                im_files = [x for x in im_files if x.split(".")[-1].lower() in IMG_FORMATS]
         except Exception as e:
             raise FileNotFoundError(f"{self.prefix}Error loading data from {self.data_path}\n{HELP_URL}") from e
         return im_files
@@ -440,7 +440,7 @@ class BaseDataset(Dataset):
         """
         fs = []  # ファイルパス
         if "train" in self.prefix:
-            print("□ is train group, ■ is val group")
+            print("\n□ is train group, ■ is val group")
         for dir in dirs:  # 日付ディレクトリごとに探索
             # RGBフォルダ下の画像を探索
             f = sorted(glob.iglob(os.path.join(dir, trg_folder, "*.*"), recursive=True))
@@ -465,4 +465,5 @@ class BaseDataset(Dataset):
             else:
                 for id in idx_val:
                     fs += spl[id]
+        print()
         return fs

@@ -3,6 +3,6 @@ rgb_folder: visible
 fir_folder: lwir
 labels_folder: labels
 
-nc: 1
+nc: 4
 ch: 4
 names: ["person", "people", "cyclist", "person?"]
