@@ -266,6 +266,7 @@ class BaseDataset(Dataset):
                     im_rgb = cv2.imread(f)  # BGR
                     f = self.im_files_ir[i]
                     im_fir = cv2.imread(f, 0)  # gray
+                    # im_fir = hist_eq(im_fir) # histogram equalization
                     im = cv2.merge((im_rgb, im_fir))  # combine rgb + ir
                 else:
                     f = self.im_files[i]
@@ -467,3 +468,10 @@ class BaseDataset(Dataset):
                     fs += spl[id]
         print()
         return fs
+
+
+def hist_eq(img):
+    res1 = cv2.equalizeHist(img)
+    res2 = cv2.createCLAHE(clipLimit=2, tileGridSize=(4, 4)).apply(img)
+    ave_img = np.clip(((np.float32(img) + np.float32(res1) + np.float32(res2)) / 3.0), 0, 255).astype(np.uint8)
+    return ave_img

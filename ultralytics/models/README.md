@@ -6,10 +6,6 @@
 
 ![yolov3-spp.drawio](diagram/yolov8s.drawio.svg)
 
-### YOLOv3-SPP 4ch
-
-![yolov3-spp.drawio](diagram/yolov3-spp.drawio.svg)
-
 ### YOLOv8s-st2 4ch
 
 ![yolov3-spp.drawio](diagram/yolov8s-st.drawio.svg)

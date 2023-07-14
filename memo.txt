@@ -17,7 +17,7 @@ pip install -e '.[dev]'
   yolo cfg=cfg/test.yaml
 
 [datase symlink (容量を圧縮)]
-find ../fujinolab-all -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
+find ../All-Season -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
 
 [tasker]
 conds=(day night hot inter cold time season)
