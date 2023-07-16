@@ -29,18 +29,20 @@ from ultralytics.yolo.utils import (
 # Define valid tasks and modes
 MODES = "train", "val", "predict", "export", "track", "benchmark"
 TASKS = "detect", "segment", "classify", "pose"
-TASK2DATA = {
-    "detect": "coco128.yaml",
-    "segment": "coco128-seg.yaml",
-    "classify": "imagenet100",
-    "pose": "coco8-pose.yaml",
-}
+TASK2DATA = {"detect": "coco8.yaml", "segment": "coco8-seg.yaml", "classify": "imagenet100", "pose": "coco8-pose.yaml"}
 TASK2MODEL = {
     "detect": "yolov8n.pt",
     "segment": "yolov8n-seg.pt",
     "classify": "yolov8n-cls.pt",
     "pose": "yolov8n-pose.pt",
 }
+TASK2METRIC = {
+    "detect": "metrics/mAP50-95(B)",
+    "segment": "metrics/mAP50-95(M)",
+    "classify": "metrics/accuracy_top1",
+    "pose": "metrics/mAP50-95(P)",
+}
+
 
 CLI_HELP_MSG = f"""
     Arguments received: {str(['yolo'] + sys.argv[1:])}. Ultralytics 'yolo' commands use the following syntax:
@@ -151,17 +153,25 @@ CFG_BOOL_KEYS = (
     "dynamic",
     "simplify",
     "nms",
-    "v5loader",
     "profile",
 )
+CFG_CUSTOM_KEYS = (
+    "ch",
+    "flipir",
+    "hsv_ir",
+    "pos_imgs_train",
+    "neg_ratio_train",
+    "pos_imgs_val",
+    "neg_ratio_val",
+)  # add by okuda
 
 
 def cfg2dict(cfg):
     """
     Convert a configuration object to a dictionary, whether it is a file path, a string, or a SimpleNamespace object.
 
-    Inputs:
-        cfg (str) or (Path) or (SimpleNamespace): Configuration object to be converted to a dictionary.
+    Args:
+        cfg (str | Path | SimpleNamespace): Configuration object to be converted to a dictionary.
 
     Returns:
         cfg (dict): Configuration object in dictionary format.
@@ -178,8 +188,8 @@ def get_cfg(cfg: Union[str, Path, Dict, SimpleNamespace] = DEFAULT_CFG_DICT, ove
     Load and merge configuration data from a file or dictionary.
 
     Args:
-        cfg (str) or (Path) or (Dict) or (SimpleNamespace): Configuration data.
-        overrides (str) or (Dict), optional: Overrides in the form of a file name or a dictionary. Default is None.
+        cfg (str | Path | Dict | SimpleNamespace): Configuration data.
+        overrides (str | Dict | optional): Overrides in the form of a file name or a dictionary. Default is None.
 
     Returns:
         (SimpleNamespace): Training arguments namespace.
@@ -254,13 +264,13 @@ def check_cfg_mismatch(base: Dict, custom: Dict, e=None):
     This function checks for any mismatched keys between a custom configuration list and a base configuration list.
     If any mismatched keys are found, the function prints out similar keys from the base list and exits the program.
 
-    Inputs:
-        - custom (Dict): a dictionary of custom configuration options
-        - base (Dict): a dictionary of base configuration options
+    Args:
+        custom (dict): a dictionary of custom configuration options
+        base (dict): a dictionary of base configuration options
     """
     custom = _handle_deprecation(custom)
     base, custom = (set(x.keys()) for x in (base, custom))
-    mismatched = [x for x in custom if x not in base]
+    mismatched = [x for x in custom if x not in base and x not in CFG_CUSTOM_KEYS]
     if mismatched:
         string = ""
         for x in mismatched:
@@ -455,10 +465,19 @@ def entrypoint(debug=""):
     if model is None:
         model = "yolov8n.pt"
         LOGGER.warning(f"WARNING ⚠️ 'model' is missing. Using default 'model={model}'.")
-    from ultralytics.yolo.engine.model import YOLO
-
     overrides["model"] = model
-    model = YOLO(model, task=task)
+    if "rtdetr" in model.lower():  # guess architecture
+        from ultralytics import RTDETR
+
+        model = RTDETR(model)  # no task argument
+    elif "sam" in model.lower():
+        from ultralytics import SAM
+
+        model = SAM(model)
+    else:
+        from ultralytics import YOLO
+
+        model = YOLO(model, task=task)
     if isinstance(overrides.get("pretrained"), str):
         model.load(overrides["pretrained"])
 

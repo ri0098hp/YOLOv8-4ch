@@ -8,7 +8,7 @@ from copy import deepcopy
 import numpy as np
 import torch
 
-from ultralytics.yolo.utils import LOGGER, colorstr
+from ultralytics.yolo.utils import DEFAULT_CFG, LOGGER, colorstr
 from ultralytics.yolo.utils.torch_utils import profile
 
 
@@ -29,7 +29,7 @@ def check_train_batch_size(model, imgsz=640, amp=True, ch=3):
         return autobatch(deepcopy(model).train(), imgsz, ch=ch)  # compute optimal batch size
 
 
-def autobatch(model, imgsz=640, fraction=0.67, batch_size=16, ch=3):
+def autobatch(model, imgsz=640, fraction=0.67, batch_size=DEFAULT_CFG.batch, ch=3):
     """
     Automatically estimate the best YOLO batch size to use a fraction of the available CUDA memory.
 

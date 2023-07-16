@@ -2,6 +2,7 @@
 
 import contextlib
 import math
+import warnings
 from pathlib import Path
 
 import cv2
@@ -10,7 +11,7 @@ import numpy as np
 import torch
 from PIL import Image, ImageDraw, ImageFont
 from PIL import __version__ as pil_version
-from scipy.ndimage.filters import gaussian_filter1d
+from scipy.ndimage import gaussian_filter1d
 
 from ultralytics.yolo.utils import LOGGER, TryExcept, plt_settings, threaded
 
@@ -20,7 +21,8 @@ from .ops import clip_boxes, scale_image, xywh2xyxy, xyxy2xywh
 
 
 class Colors:
-    # Ultralytics color palette https://ultralytics.com/
+    """Ultralytics color palette https://ultralytics.com/."""
+
     def __init__(self):
         """Initialize colors as hex = matplotlib.colors.TABLEAU_COLORS.values()."""
         hexs = (
@@ -87,7 +89,8 @@ colors = Colors()  # create instance for 'from utils.plots import colors'
 
 
 class Annotator:
-    # YOLOv8 Annotator for train/val mosaics and jpgs and detect/hub inference annotations
+    """YOLOv8 Annotator for train/val mosaics and jpgs and detect/hub inference annotations."""
+
     def __init__(self, im, line_width=None, font_size=None, font="Arial.ttf", pil=False, example="abc"):
         """Initialize the Annotator class with image and line width along with color palette for keypoints and limbs."""
         assert im.data.contiguous, "Image not contiguous. Apply np.ascontiguousarray(im) to Annotator() input images."
@@ -95,7 +98,6 @@ class Annotator:
         self.ch = 1 if len(im.shape) < 3 else im.shape[2]
         self.pil = pil or non_ascii
         if self.pil:  # use PIL
-            self.pil_9_2_0_check = check_version(pil_version, "9.2.0")  # deprecation check
             self.im = im if isinstance(im, Image.Image) else Image.fromarray(im)
             self.draw = ImageDraw.Draw(self.im)
             try:
@@ -104,6 +106,9 @@ class Annotator:
                 self.font = ImageFont.truetype(str(font), size)
             except Exception:
                 self.font = ImageFont.load_default()
+            # Deprecation fix for w, h = getsize(string) -> _, _, w, h = getbox(string)
+            if check_version(pil_version, "9.2.0"):
+                self.font.getsize = lambda x: self.font.getbbox(x)[2:4]  # text width, height
         else:  # use cv2
             self.im = im
         self.lw = line_width or max(round(sum(im.shape) / 2 * 0.003), 2)  # line width
@@ -142,10 +147,7 @@ class Annotator:
         if self.pil or not is_ascii(label):
             self.draw.rectangle(box, width=self.lw, outline=color)  # box
             if label:
-                if self.pil_9_2_0_check:
-                    _, _, w, h = self.font.getbbox(label)  # text width, height (New)
-                else:
-                    w, h = self.font.getsize(label)  # text width, height (Old, deprecated in 9.2.0)
+                w, h = self.font.getsize(label)  # text width, height
                 outside = box[1] - h >= 0  # label fits outside box
                 self.draw.rectangle(
                     (
@@ -273,7 +275,14 @@ class Annotator:
                 self.draw.rectangle((xy[0], xy[1], xy[0] + w + 1, xy[1] + h + 1), fill=txt_color)
                 # Using `txt_color` for background and draw fg with white color
                 txt_color = (255, 255, 255)
-            self.draw.text(xy, text, fill=txt_color, font=self.font)
+            if "\n" in text:
+                lines = text.split("\n")
+                _, h = self.font.getsize(text)
+                for line in lines:
+                    self.draw.text(xy, line, fill=txt_color, font=self.font)
+                    xy[1] += h
+            else:
+                self.draw.text(xy, text, fill=txt_color, font=self.font)
         else:
             if box_style:
                 tf = max(self.lw - 1, 1)  # font thickness
@@ -302,6 +311,9 @@ def plot_labels(boxes, cls, names=(), save_dir=Path(""), on_plot=None):
     """Save and plot image with no axis or spines."""
     import pandas as pd
     import seaborn as sn
+
+    # Filter matplotlib>=3.7.2 warning
+    warnings.filterwarnings("ignore", category=UserWarning, message="The figure layout has changed to tight")
 
     # Plot dataset labels
     LOGGER.info(f"Plotting labels to {save_dir / 'labels.jpg'}... ")
@@ -378,7 +390,7 @@ def plot_images(
     names=None,
     on_plot=None,
 ):
-    # Plot image grid with labels
+    """Plot image grid with labels."""
     if isinstance(images, torch.Tensor):
         images = images.cpu().float().numpy()
     if isinstance(cls, torch.Tensor):
@@ -453,7 +465,7 @@ def plot_images(
                         color = (0,) * ch
                     else:
                         color = (0,) * (ch - 3) + colors(c)
-                    c = names[c] if names else c
+                    c = names.get(c, c) if names else c
                     if labels or conf[j] > 0.25:  # 0.25 conf thresh
                         label = f"{c}" if labels else f"{c} {conf[j]:.1f}"
                         annotator.box_label(box, label, color=color, txt_color=txt_color)

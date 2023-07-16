@@ -90,8 +90,5 @@ copy_paste: 0.0 # segment copy-paste (probability)
 # Custom config.yaml ---------------------------------------------------------------------------------------------------
 cfg: # for overriding defaults.yaml
 
-# Debug, do not modify -------------------------------------------------------------------------------------------------
-v5loader: False # use legacy YOLOv5 dataloader
-
 # Tracker settings ------------------------------------------------------------------------------------------------------
 tracker: botsort.yaml # tracker type, ['botsort.yaml', 'bytetrack.yaml']

@@ -5,13 +5,13 @@ pip install -e '.[dev]'
   yolo detect train
 
 [val]
-  yolo detect val model=fujinolab-all-4ch.pt data=data/fujinolab-all.yaml exist_ok
+  yolo detect val model=All-Season-4ch.pt data=data/All-Season.yaml exist_ok
 
 [detect]
-  yolo detect predict model=fujinolab-all-4ch.pt source=datasets/demo save=True
+  yolo detect predict model=All-Season-4ch.pt source=datasets/demo save=True
 
 [export]
- yolo export model=fujinolab-all-4ch.pt format=engine ch=0 device=0
+ yolo export model=All-Season-4ch.pt format=engine device=0
 
 [debug]
   yolo cfg=cfg/test.yaml

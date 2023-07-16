@@ -1,6 +1,7 @@
 ---
 comments: true
 description: Benchmark mode compares speed and accuracy of various YOLOv8 export formats like ONNX or OpenVINO. Optimize formats for speed or accuracy.
+keywords: YOLOv8, Benchmark Mode, Export Formats, ONNX, OpenVINO, TensorRT, Ultralytics Docs
 ---
 
 <img width="1024" src="https://github.com/ultralytics/assets/raw/main/yolov8/banner-integrations.png">
@@ -69,5 +70,6 @@ Benchmarks will attempt to run automatically on all possible export formats belo
 | [TF Edge TPU](https://coral.ai/docs/edgetpu/models-intro/)         | `edgetpu`         | `yolov8n_edgetpu.tflite`  | ✅        |
 | [TF.js](https://www.tensorflow.org/js)                             | `tfjs`            | `yolov8n_web_model/`      | ✅        |
 | [PaddlePaddle](https://github.com/PaddlePaddle)                    | `paddle`          | `yolov8n_paddle_model/`   | ✅        |
+| [ncnn](https://github.com/Tencent/ncnn)                            | `ncnn`            | `yolov8n_ncnn_model/`     | ✅        |
 
 See full `export` details in the [Export](https://docs.ultralytics.com/modes/export/) page.

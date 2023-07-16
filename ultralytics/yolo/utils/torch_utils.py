@@ -18,7 +18,7 @@ import torch.nn.functional as F
 import torchvision
 
 from ultralytics.yolo.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, RANK, __version__
-from ultralytics.yolo.utils.checks import check_version
+from ultralytics.yolo.utils.checks import check_requirements, check_version
 
 try:
     import thop
@@ -53,6 +53,14 @@ def smart_inference_mode():
     return decorate
 
 
+def get_cpu_info():
+    """Return a string with system CPU information, i.e. 'Apple M2'."""
+    check_requirements("py-cpuinfo")
+    import cpuinfo  # noqa
+
+    return cpuinfo.get_cpu_info()["brand_raw"].replace("(R)", "").replace("CPU ", "").replace("@ ", "")
+
+
 def select_device(device="", batch=0, newline=False, verbose=True):
     """Selects PyTorch Device. Options are device = None or 'cpu' or 0 or '0' or '0,1,2,3'."""
     s = f"Ultralytics YOLOv{__version__} 🚀 Python-{platform.python_version()} torch-{torch.__version__} "
@@ -64,6 +72,8 @@ def select_device(device="", batch=0, newline=False, verbose=True):
     if cpu or mps:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # force torch.cuda.is_available() = False
     elif device:  # non-cpu device requested
+        if device == "cuda":
+            device = "0"
         visible = os.environ.get("CUDA_VISIBLE_DEVICES", None)
         os.environ["CUDA_VISIBLE_DEVICES"] = device  # set environment variable - must be before assert is_available()
         if not (torch.cuda.is_available() and torch.cuda.device_count() >= len(device.replace(",", ""))):
@@ -99,10 +109,10 @@ def select_device(device="", batch=0, newline=False, verbose=True):
         arg = "cuda:0"
     elif mps and getattr(torch, "has_mps", False) and torch.backends.mps.is_available() and TORCH_2_0:
         # Prefer MPS if available
-        s += "MPS\n"
+        s += f"MPS ({get_cpu_info()})\n"
         arg = "mps"
     else:  # revert to CPU
-        s += "CPU\n"
+        s += f"CPU ({get_cpu_info()})\n"
         arg = "cpu"
 
     if verbose and RANK == -1:
@@ -255,7 +265,7 @@ def get_flops(model, imgsz=640):
 
 
 def get_flops_with_torch_profiler(model, imgsz=640):
-    # Compute model FLOPs (thop alternative)
+    """Compute model FLOPs (thop alternative)."""
     model = de_parallel(model)
     p = next(model.parameters())
     stride = (max(int(model.stride.max()), 32) if hasattr(model, "stride") else 32) * 2  # max stride
@@ -342,14 +352,17 @@ def init_seeds(seed=0, deterministic=False):
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)  # for Multi-GPU, exception safe
     # torch.backends.cudnn.benchmark = True  # AutoBatch problem https://github.com/ultralytics/yolov5/issues/9287
-    if deterministic:  # https://github.com/ultralytics/yolov5/pull/8213
+    if deterministic:
         if TORCH_2_0:
-            torch.use_deterministic_algorithms(True)
+            torch.use_deterministic_algorithms(True, warn_only=True)  # warn if deterministic is not possible
             torch.backends.cudnn.deterministic = True
             os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
             os.environ["PYTHONHASHSEED"] = str(seed)
         else:
             LOGGER.warning("WARNING ⚠️ Upgrade to torch>=2.0.0 for deterministic training.")
+    else:
+        torch.use_deterministic_algorithms(False)
+        torch.backends.cudnn.deterministic = False
 
 
 class ModelEMA:
@@ -411,7 +424,7 @@ def strip_optimizer(f: Union[str, Path] = "best.pt", s: str = "") -> None:
         import pickle
 
     x = torch.load(f, map_location=torch.device("cpu"))
-    args = {**DEFAULT_CFG_DICT, **x["train_args"]}  # combine model args with default args, preferring model args
+    args = {**DEFAULT_CFG_DICT, **x["train_args"]} if "train_args" in x else None  # combine args
     if x.get("ema"):
         x["model"] = x["ema"]  # replace model with ema
     for k in "optimizer", "best_fitness", "ema", "updates":  # keys

@@ -1,3 +1,5 @@
+# Ultralytics YOLO 🚀, AGPL-3.0 license
+
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # All rights reserved.
 
@@ -16,15 +18,15 @@ from .encoders import ImageEncoderViT, PromptEncoder
 
 class Sam(nn.Module):
     mask_threshold: float = 0.0
-    image_format: str = 'RGB'
+    image_format: str = "RGB"
 
     def __init__(
         self,
         image_encoder: ImageEncoderViT,
         prompt_encoder: PromptEncoder,
         mask_decoder: MaskDecoder,
-        pixel_mean: List[float] = [123.675, 116.28, 103.53],
-        pixel_std: List[float] = [58.395, 57.12, 57.375],
+        pixel_mean: List[float] = None,
+        pixel_std: List[float] = None,
     ) -> None:
         """
         SAM predicts object masks from an image and input prompts.
@@ -38,12 +40,16 @@ class Sam(nn.Module):
           pixel_mean (list(float)): Mean values for normalizing pixels in the input image.
           pixel_std (list(float)): Std values for normalizing pixels in the input image.
         """
+        if pixel_mean is None:
+            pixel_mean = [123.675, 116.28, 103.53]
+        if pixel_std is None:
+            pixel_std = [58.395, 57.12, 57.375]
         super().__init__()
         self.image_encoder = image_encoder
         self.prompt_encoder = prompt_encoder
         self.mask_decoder = mask_decoder
-        self.register_buffer('pixel_mean', torch.Tensor(pixel_mean).view(-1, 1, 1), False)
-        self.register_buffer('pixel_std', torch.Tensor(pixel_std).view(-1, 1, 1), False)
+        self.register_buffer("pixel_mean", torch.Tensor(pixel_mean).view(-1, 1, 1), False)
+        self.register_buffer("pixel_std", torch.Tensor(pixel_std).view(-1, 1, 1), False)
 
     @property
     def device(self) -> Any:
@@ -93,19 +99,19 @@ class Sam(nn.Module):
                 shape BxCxHxW, where H=W=256. Can be passed as mask input
                 to subsequent iterations of prediction.
         """
-        input_images = torch.stack([self.preprocess(x['image']) for x in batched_input], dim=0)
+        input_images = torch.stack([self.preprocess(x["image"]) for x in batched_input], dim=0)
         image_embeddings = self.image_encoder(input_images)
 
         outputs = []
         for image_record, curr_embedding in zip(batched_input, image_embeddings):
-            if 'point_coords' in image_record:
-                points = (image_record['point_coords'], image_record['point_labels'])
+            if "point_coords" in image_record:
+                points = (image_record["point_coords"], image_record["point_labels"])
             else:
                 points = None
             sparse_embeddings, dense_embeddings = self.prompt_encoder(
                 points=points,
-                boxes=image_record.get('boxes', None),
-                masks=image_record.get('mask_inputs', None),
+                boxes=image_record.get("boxes", None),
+                masks=image_record.get("mask_inputs", None),
             )
             low_res_masks, iou_predictions = self.mask_decoder(
                 image_embeddings=curr_embedding.unsqueeze(0),
@@ -116,14 +122,17 @@ class Sam(nn.Module):
             )
             masks = self.postprocess_masks(
                 low_res_masks,
-                input_size=image_record['image'].shape[-2:],
-                original_size=image_record['original_size'],
+                input_size=image_record["image"].shape[-2:],
+                original_size=image_record["original_size"],
             )
             masks = masks > self.mask_threshold
-            outputs.append({
-                'masks': masks,
-                'iou_predictions': iou_predictions,
-                'low_res_logits': low_res_masks, })
+            outputs.append(
+                {
+                    "masks": masks,
+                    "iou_predictions": iou_predictions,
+                    "low_res_logits": low_res_masks,
+                }
+            )
         return outputs
 
     def postprocess_masks(
@@ -150,11 +159,11 @@ class Sam(nn.Module):
         masks = F.interpolate(
             masks,
             (self.image_encoder.img_size, self.image_encoder.img_size),
-            mode='bilinear',
+            mode="bilinear",
             align_corners=False,
         )
-        masks = masks[..., :input_size[0], :input_size[1]]
-        masks = F.interpolate(masks, original_size, mode='bilinear', align_corners=False)
+        masks = masks[..., : input_size[0], : input_size[1]]
+        masks = F.interpolate(masks, original_size, mode="bilinear", align_corners=False)
         return masks
 
     def preprocess(self, x: torch.Tensor) -> torch.Tensor:

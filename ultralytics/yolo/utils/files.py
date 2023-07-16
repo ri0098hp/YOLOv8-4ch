@@ -25,7 +25,7 @@ class WorkingDirectory(contextlib.ContextDecorator):
         os.chdir(self.cwd)
 
 
-def increment_path(path, exist_ok=False, sep="", mkdir=False):
+def increment_path(path, exist_ok=False, sep='', mkdir=False):
     """
     Increments a file or directory path, i.e. runs/exp --> runs/exp{sep}2, runs/exp{sep}3, ... etc.
 
@@ -45,11 +45,11 @@ def increment_path(path, exist_ok=False, sep="", mkdir=False):
     """
     path = Path(path)  # os-agnostic
     if path.exists() and not exist_ok:
-        path, suffix = (path.with_suffix(""), path.suffix) if path.is_file() else (path, "")
+        path, suffix = (path.with_suffix(''), path.suffix) if path.is_file() else (path, '')
 
         # Method 1
         for n in range(2, 9999):
-            p = f"{path}{sep}{n}{suffix}"  # increment path
+            p = f'{path}{sep}{n}{suffix}'  # increment path
             if not os.path.exists(p):  #
                 break
         path = Path(p)
@@ -62,14 +62,14 @@ def increment_path(path, exist_ok=False, sep="", mkdir=False):
 
 def file_age(path=__file__):
     """Return days since last file update."""
-    dt = datetime.now() - datetime.fromtimestamp(Path(path).stat().st_mtime)  # delta
+    dt = (datetime.now() - datetime.fromtimestamp(Path(path).stat().st_mtime))  # delta
     return dt.days  # + dt.seconds / 86400  # fractional days
 
 
 def file_date(path=__file__):
     """Return human-readable file modification date, i.e. '2021-3-26'."""
     t = datetime.fromtimestamp(Path(path).stat().st_mtime)
-    return f"{t.year}-{t.month}-{t.day}"
+    return f'{t.year}-{t.month}-{t.day}'
 
 
 def file_size(path):
@@ -80,21 +80,21 @@ def file_size(path):
         if path.is_file():
             return path.stat().st_size / mb
         elif path.is_dir():
-            return sum(f.stat().st_size for f in path.glob("**/*") if f.is_file()) / mb
+            return sum(f.stat().st_size for f in path.glob('**/*') if f.is_file()) / mb
     return 0.0
 
 
-def get_latest_run(search_dir="."):
+def get_latest_run(search_dir='.'):
     """Return path to most recent 'last.pt' in /runs (i.e. to --resume from)."""
-    last_list = glob.glob(f"{search_dir}/**/last*.pt", recursive=True)
-    return max(last_list, key=os.path.getctime) if last_list else ""
+    last_list = glob.glob(f'{search_dir}/**/last*.pt', recursive=True)
+    return max(last_list, key=os.path.getctime) if last_list else ''
 
 
-def make_dirs(dir="new_dir/"):
-    # Create folders
+def make_dirs(dir='new_dir/'):
+    """Create directories."""
     dir = Path(dir)
     if dir.exists():
         shutil.rmtree(dir)  # delete dir
-    for p in dir, dir / "labels", dir / "images":
+    for p in dir, dir / 'labels', dir / 'images':
         p.mkdir(parents=True, exist_ok=True)  # make dir
     return dir

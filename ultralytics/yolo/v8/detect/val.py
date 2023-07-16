@@ -7,9 +7,8 @@ import numpy as np
 import torch
 
 from ultralytics.yolo.data import build_dataloader, build_yolo_dataset
-from ultralytics.yolo.data.dataloaders.v5loader import create_dataloader
 from ultralytics.yolo.engine.validator import BaseValidator
-from ultralytics.yolo.utils import DEFAULT_CFG, LOGGER, colorstr, ops
+from ultralytics.yolo.utils import DEFAULT_CFG, LOGGER, ops
 from ultralytics.yolo.utils.checks import check_requirements
 from ultralytics.yolo.utils.metrics import ConfusionMatrix, DetMetrics, box_iou
 from ultralytics.yolo.utils.plotting import output_to_target, plot_images
@@ -194,34 +193,12 @@ class DetectionValidator(BaseValidator):
         return build_yolo_dataset(self.args, img_path, batch, self.data, mode=mode, stride=gs)
 
     def get_dataloader(self, dataset_path, batch_size):
-        """TODO: manage splits differently."""
-        # Calculate stride - check if model is initialized
-        if self.args.v5loader:
-            LOGGER.warning(
-                "WARNING ⚠️ 'v5loader' feature is deprecated and will be removed soon. You can train using "
-                "the default YOLOv8 dataloader instead, no argument is needed."
-            )
-            gs = max(int(de_parallel(self.model).stride if self.model else 0), 32)
-            return create_dataloader(
-                path=dataset_path,
-                imgsz=self.args.imgsz,
-                batch_size=batch_size,
-                stride=gs,
-                hyp=vars(self.args),
-                cache=False,
-                pad=0.5,
-                rect=self.args.rect,
-                workers=self.args.workers,
-                prefix=colorstr(f"{self.args.mode}: "),
-                shuffle=False,
-                seed=self.args.seed,
-            )[0]
-
+        """Construct and return dataloader."""
         dataset = self.build_dataset(dataset_path, batch=batch_size, mode="val")
-        dataloader = build_dataloader(dataset, batch_size, self.args.workers, shuffle=False, rank=-1)
-        return dataloader
+        return build_dataloader(dataset, batch_size, self.args.workers, shuffle=False, rank=-1)  # return dataloader
 
     def plot_val_samples(self, batch, ni, fname="val_batch_labels.jpg"):
+        """Plot validation image samples."""
         plot_images(
             batch["img"],
             batch["batch_idx"],
@@ -234,9 +211,10 @@ class DetectionValidator(BaseValidator):
         )
 
     def plot_predictions(self, batch, preds, ni, fname="val_batch_pred.jpg"):
+        """Plots predicted bounding boxes on input images and saves the result."""
         plot_images(
             batch["img"],
-            *output_to_target(preds, max_det=15),
+            *output_to_target(preds, max_det=self.args.max_det),
             paths=batch["im_file"],
             fname=fname,
             names=self.names,

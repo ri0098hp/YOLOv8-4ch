@@ -425,7 +425,7 @@ class RandomPerspective:
         """
         if self.pre_transform and "mosaic_border" not in labels:
             labels = self.pre_transform(labels)
-            labels.pop("ratio_pad")  # do not need ratio pad
+        labels.pop("ratio_pad", None)  # do not need ratio pad
 
         img = labels["img"]
         cls = labels["cls"]
@@ -567,13 +567,14 @@ class RandomFlip:
 class LetterBox:
     """Resize image and padding for detection, instance segmentation, pose."""
 
-    def __init__(self, new_shape=(640, 640), auto=False, scaleFill=False, scaleup=True, stride=32):
+    def __init__(self, new_shape=(640, 640), auto=False, scaleFill=False, scaleup=True, center=True, stride=32):
         """Initialize LetterBox object with specific parameters."""
         self.new_shape = new_shape
         self.auto = auto
         self.scaleFill = scaleFill
         self.scaleup = scaleup
         self.stride = stride
+        self.center = center  # Put the image in the middle or top-left
 
     def __call__(self, labels=None, image=None):
         """Return updated labels and image with added border."""
@@ -601,15 +602,16 @@ class LetterBox:
             new_unpad = (new_shape[1], new_shape[0])
             ratio = new_shape[1] / shape[1], new_shape[0] / shape[0]  # width, height ratios
 
-        dw /= 2  # divide padding into 2 sides
-        dh /= 2
+        if self.center:
+            dw /= 2  # divide padding into 2 sides
+            dh /= 2
         if labels.get("ratio_pad"):
             labels["ratio_pad"] = (labels["ratio_pad"], (dw, dh))  # for evaluation
 
         if shape[::-1] != new_unpad:  # resize
             img = cv2.resize(img, new_unpad, interpolation=cv2.INTER_LINEAR)
-        top, bottom = int(round(dh - 0.1)), int(round(dh + 0.1))
-        left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
+        top, bottom = int(round(dh - 0.1)) if self.center else 0, int(round(dh + 0.1))
+        left, right = int(round(dw - 0.1)) if self.center else 0, int(round(dw + 0.1))
         img = cv2.copyMakeBorder(
             img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(114, 114, 114)
         )  # add border
@@ -671,7 +673,8 @@ class CopyPaste:
 
 
 class Albumentations:
-    # YOLOv8 Albumentations class (optional, only used if package is installed)
+    """YOLOv8 Albumentations class (optional, only used if package is installed)"""
+
     def __init__(self, p=1.0):
         """Initialize the transform object for YOLO bbox formatted params."""
         self.p = p
@@ -792,6 +795,7 @@ class Format:
         return labels
 
     def _format_img(self, img):
+        """Format the image for YOLOv5 from Numpy array to PyTorch tensor."""
         if len(img.shape) < 3:
             img = np.expand_dims(img, -1)
         img = img.transpose((2, 0, 1))[::-1].copy()  # HWC to CHW, BGRg to gRGB
@@ -813,7 +817,7 @@ class Format:
         return masks, instances, cls
 
 
-def v8_transforms(dataset, imgsz, hyp):
+def v8_transforms(dataset, imgsz, hyp, stretch=False):
     """Convert images to a size suitable for YOLOv8 training."""
     pre_transform = Compose(
         [
@@ -825,14 +829,14 @@ def v8_transforms(dataset, imgsz, hyp):
                 scale=hyp.scale,
                 shear=hyp.shear,
                 perspective=hyp.perspective,
-                pre_transform=LetterBox(new_shape=(imgsz, imgsz)),
+                pre_transform=None if stretch else LetterBox(new_shape=(imgsz, imgsz)),
             ),
         ]
     )
-    flip_idx = dataset.data.get("flip_idx", None)  # for keypoints augmentation
+    flip_idx = dataset.data.get("flip_idx", [])  # for keypoints augmentation
     if dataset.use_keypoints:
         kpt_shape = dataset.data.get("kpt_shape", None)
-        if flip_idx is None and hyp.fliplr > 0.0:
+        if len(flip_idx) == 0 and hyp.fliplr > 0.0:
             hyp.fliplr = 0.0
             LOGGER.warning("WARNING ⚠️ No 'flip_idx' array defined in data.yaml, setting augmentation 'fliplr=0.0'")
         elif flip_idx and (len(flip_idx) != kpt_shape[0]):
@@ -846,7 +850,7 @@ def v8_transforms(dataset, imgsz, hyp):
             RandomHSV(hgain=hyp.hsv_h, sgain=hyp.hsv_s, vgain=hyp.hsv_v, irgain=hyp.hsv_ir),
             InvertColor(p=hyp.flipir),
             RandomFlip(direction="vertical", p=hyp.flipud),
-            RandomFlip(direction="horizontal", p=hyp.fliplr),
+            RandomFlip(direction="horizontal", p=hyp.fliplr, flip_idx=flip_idx),
         ]
     )  # transforms
 
@@ -880,7 +884,7 @@ def classify_albumentations(
     std=(1.0, 1.0, 1.0),  # IMAGENET_STD
     auto_aug=False,
 ):
-    # YOLOv8 classification Albumentations (optional, only used if package is installed)
+    """YOLOv8 classification Albumentations (optional, only used if package is installed)."""
     prefix = colorstr("albumentations: ")
     try:
         import albumentations as A
@@ -912,7 +916,8 @@ def classify_albumentations(
 
 
 class ClassifyLetterBox:
-    # YOLOv8 LetterBox class for image preprocessing, i.e. T.Compose([LetterBox(size), ToTensor()])
+    """YOLOv8 LetterBox class for image preprocessing, i.e. T.Compose([LetterBox(size), ToTensor()])"""
+
     def __init__(self, size=(640, 640), auto=False, stride=32):
         """Resizes image and crops it to center with max dimensions 'h' and 'w'."""
         super().__init__()
@@ -932,7 +937,8 @@ class ClassifyLetterBox:
 
 
 class CenterCrop:
-    # YOLOv8 CenterCrop class for image preprocessing, i.e. T.Compose([CenterCrop(size), ToTensor()])
+    """YOLOv8 CenterCrop class for image preprocessing, i.e. T.Compose([CenterCrop(size), ToTensor()])"""
+
     def __init__(self, size=640):
         """Converts an image from numpy array to PyTorch tensor."""
         super().__init__()
@@ -946,7 +952,8 @@ class CenterCrop:
 
 
 class ToTensor:
-    # YOLOv8 ToTensor class for image preprocessing, i.e. T.Compose([LetterBox(size), ToTensor()])
+    """YOLOv8 ToTensor class for image preprocessing, i.e. T.Compose([LetterBox(size), ToTensor()])."""
+
     def __init__(self, half=False):
         """Initialize YOLOv8 ToTensor object with optional half-precision support."""
         super().__init__()

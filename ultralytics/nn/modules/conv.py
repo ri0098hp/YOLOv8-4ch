@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-__all__ = [
+__all__ = (
     "Conv",
     "LightConv",
     "DWConv",
@@ -22,7 +22,7 @@ __all__ = [
     "CBAM",
     "Concat",
     "RepConv",
-]
+)
 
 
 def autopad(k, p=None, d=1):  # kernel, padding, dilation

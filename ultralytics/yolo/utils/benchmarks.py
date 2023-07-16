@@ -21,6 +21,7 @@ TensorFlow Lite         | `tflite`                  | yolov8n.tflite
 TensorFlow Edge TPU     | `edgetpu`                 | yolov8n_edgetpu.tflite
 TensorFlow.js           | `tfjs`                    | yolov8n_web_model/
 PaddlePaddle            | `paddle`                  | yolov8n_paddle_model/
+ncnn                    | `ncnn`                    | yolov8n_ncnn_model/
 """
 
 import glob
@@ -33,6 +34,7 @@ import torch.cuda
 from tqdm import tqdm
 
 from ultralytics import YOLO
+from ultralytics.yolo.cfg import TASK2DATA, TASK2METRIC
 from ultralytics.yolo.engine.exporter import export_formats
 from ultralytics.yolo.utils import LINUX, LOGGER, MACOS, ROOT, SETTINGS
 from ultralytics.yolo.utils.checks import check_requirements, check_yolo
@@ -48,13 +50,13 @@ def benchmark(
     Benchmark a YOLO model across different formats for speed and accuracy.
 
     Args:
-        model (Union[str, Path], optional): Path to the model file or directory. Default is
+        model (str | Path | optional): Path to the model file or directory. Default is
             Path(SETTINGS['weights_dir']) / 'yolov8n.pt'.
         imgsz (int, optional): Image size for the benchmark. Default is 160.
         half (bool, optional): Use half-precision for the model if True. Default is False.
         int8 (bool, optional): Use int8-precision for the model if True. Default is False.
         device (str, optional): Device to run the benchmark on, either 'cpu' or 'cuda'. Default is 'cpu'.
-        hard_fail (Union[bool, float], optional): If True or a float, assert benchmarks pass with given metric.
+        hard_fail (bool | float | optional): If True or a float, assert benchmarks pass with given metric.
             Default is False.
 
     Returns:
@@ -88,12 +90,13 @@ def benchmark(
                 filename = model.ckpt_path or model.cfg
                 export = model  # PyTorch format
             else:
-                filename = model.export(imgsz=imgsz, format=format, half=half, int8=int8, device=device)  # all others
+                filename = model.export(imgsz=imgsz, format=format, half=half, int8=int8, device=device, verbose=False)
                 export = YOLO(filename, task=model.task)
                 assert suffix in str(filename), "export failed"
             emoji = "❎"  # indicates export succeeded
 
             # Predict
+            assert model.task != "pose" or i != 7, "GraphDef Pose inference is not supported"
             assert i not in (9, 10), "inference not supported"  # Edge TPU and TF.js are unsupported
             assert i != 5 or platform.system() == "Darwin", "inference only supported on macOS>=10.13"  # CoreML
             if not (ROOT / "assets/bus.jpg").exists():
@@ -101,15 +104,8 @@ def benchmark(
             export.predict(ROOT / "assets/bus.jpg", imgsz=imgsz, device=device, half=half)
 
             # Validate
-            if model.task == "detect":
-                data, key = "coco8.yaml", "metrics/mAP50-95(B)"
-            elif model.task == "segment":
-                data, key = "coco8-seg.yaml", "metrics/mAP50-95(M)"
-            elif model.task == "classify":
-                data, key = "imagenet100", "metrics/accuracy_top5"
-            elif model.task == "pose":
-                data, key = "coco8-pose.yaml", "metrics/mAP50-95(P)"
-
+            data = TASK2DATA[model.task]  # task to dataset, i.e. coco8.yaml for task=detect
+            key = TASK2METRIC[model.task]  # task to metric, i.e. metrics/mAP50-95(B) for task=detect
             results = export.val(
                 data=data, batch=1, imgsz=imgsz, plots=False, device=device, half=half, int8=int8, verbose=False
             )
@@ -191,8 +187,21 @@ class ProfileModels:
                 model.fuse()  # to report correct params and GFLOPs in model.info()
                 model_info = model.info()
                 if self.trt and self.device.type != "cpu" and not engine_file.is_file():
-                    engine_file = model.export(format="engine", half=True, imgsz=self.imgsz, device=self.device)
-                onnx_file = model.export(format="onnx", half=True, imgsz=self.imgsz, simplify=True, device=self.device)
+                    engine_file = model.export(
+                        format="engine",
+                        half=True,
+                        imgsz=self.imgsz,
+                        device=self.device,
+                        verbose=False,
+                    )
+                onnx_file = model.export(
+                    format="onnx",
+                    half=True,
+                    imgsz=self.imgsz,
+                    simplify=True,
+                    device=self.device,
+                    verbose=False,
+                )
             elif file.suffix == ".onnx":
                 model_info = self.get_onnx_model_info(file)
                 onnx_file = file
@@ -249,7 +258,7 @@ class ProfileModels:
         for _ in range(3):
             start_time = time.time()
             for _ in range(self.num_warmup_runs):
-                model(input_data, verbose=False)
+                model(input_data, imgsz=self.imgsz, verbose=False)
             elapsed = time.time() - start_time
 
         # Compute number of runs as higher of min_time or num_timed_runs
@@ -258,7 +267,7 @@ class ProfileModels:
         # Timed runs
         run_times = []
         for _ in tqdm(range(num_runs), desc=engine_file):
-            results = model(input_data, verbose=False)
+            results = model(input_data, imgsz=self.imgsz, verbose=False)
             run_times.append(results[0].speed["inference"])  # Convert to milliseconds
 
         run_times = self.iterative_sigma_clipping(np.array(run_times), sigma=2, max_iters=3)  # sigma clipping

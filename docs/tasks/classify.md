@@ -1,12 +1,13 @@
 ---
 comments: true
 description: Check YOLO class label with only one class for the whole image, using image classification. Get strategies for training and validation models.
+keywords: YOLOv8n-cls, image classification, pretrained models
 ---
 
 Image classification is the simplest of the three tasks and involves classifying an entire image into one of a set of
 predefined classes.
 
-<img width="1024" src="https://user-images.githubusercontent.com/26833433/212094133-6bb8c21c-3d47-41df-a512-81c5931054ae.png">
+<img width="1024" src="https://user-images.githubusercontent.com/26833433/243418606-adf35c62-2e11-405d-84c6-b84e7d013804.png">
 
 The output of an image classifier is a single class label and a confidence score. Image
 classification is useful when you need to know only what class an image belongs to and don't need to know where objects
@@ -175,5 +176,6 @@ i.e. `yolo predict model=yolov8n-cls.onnx`. Usage examples are shown for your mo
 | [TF Edge TPU](https://coral.ai/docs/edgetpu/models-intro/)         | `edgetpu`         | `yolov8n-cls_edgetpu.tflite`  | ✅        | `imgsz`                                             |
 | [TF.js](https://www.tensorflow.org/js)                             | `tfjs`            | `yolov8n-cls_web_model/`      | ✅        | `imgsz`                                             |
 | [PaddlePaddle](https://github.com/PaddlePaddle)                    | `paddle`          | `yolov8n-cls_paddle_model/`   | ✅        | `imgsz`                                             |
+| [ncnn](https://github.com/Tencent/ncnn)                            | `ncnn`            | `yolov8n-cls_ncnn_model/`     | ✅        | `imgsz`, `half`                                     |
 
 See full `export` details in the [Export](https://docs.ultralytics.com/modes/export/) page.

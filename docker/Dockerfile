@@ -1,4 +1,4 @@
-# Ultralytics YOLO 🚀, GPL-3.0 license
+# Ultralytics YOLO 🚀, AGPL-3.0 license
 # Builds ultralytics/ultralytics:latest image on DockerHub https://hub.docker.com/r/ultralytics/ultralytics
 # Image is CUDA-optimized for YOLOv8 single/multi-GPU training and inference
 
@@ -30,9 +30,6 @@ RUN pip install nvidia-tensorrt --index-url https://pypi.ngc.nvidia.com \
 RUN pip install --no-cache -U Pillow opencv-python
 # Set environment variables
 ENV OMP_NUM_THREADS=1
-
-# Cleanup
-ENV DEBIAN_FRONTEND teletype
 
 # Add binary path
 ENV PATH=$PATH:/home/$USER/.local/bin

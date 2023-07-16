@@ -62,7 +62,7 @@ from .transformer import (
     TransformerLayer,
 )
 
-__all__ = [
+__all__ = (
     "Conv",
     "Conv2",
     "LightConv",
@@ -114,4 +114,4 @@ __all__ = [
     "M2S_Conv",
     "M2S_Add",
     "Pass",
-]
+)
