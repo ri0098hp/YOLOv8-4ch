@@ -4,7 +4,7 @@
 
 # Start FROM NVIDIA PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
 # FROM docker.io/pytorch/pytorch:latest
-FROM nvcr.io/nvidia/pytorch:23.04-py3
+FROM nvcr.io/nvidia/pytorch:23.06-py3
 RUN rm -rf /opt/pytorch
 
 # rootless user

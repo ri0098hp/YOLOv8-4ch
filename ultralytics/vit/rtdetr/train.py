@@ -14,7 +14,7 @@ from .val import RTDETRDataset, RTDETRValidator
 class RTDETRTrainer(DetectionTrainer):
     def get_model(self, cfg=None, weights=None, verbose=True):
         """Return a YOLO detection model."""
-        model = RTDETRDetectionModel(cfg, nc=self.data["nc"], verbose=verbose and RANK == -1)
+        model = RTDETRDetectionModel(cfg, ch=self.data["ch"], nc=self.data["nc"], verbose=verbose and RANK == -1)
         if weights:
             model.load(weights)
         return model
@@ -65,7 +65,14 @@ def train(cfg=DEFAULT_CFG, use_python=False):
     # NOTE: F.grid_sample which is in rt-detr does not support deterministic=True
     # NOTE: amp training causes nan outputs and end with error while doing bipartite graph matching
     args = dict(
-        model=model, data=data, device=device, imgsz=640, exist_ok=True, batch=4, deterministic=False, amp=False
+        model=model,
+        data=data,
+        device=device,
+        imgsz=640,
+        exist_ok=True,
+        batch=4,
+        deterministic=False,
+        amp=False,
     )
     trainer = RTDETRTrainer(overrides=args)
     trainer.train()

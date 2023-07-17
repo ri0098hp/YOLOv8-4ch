@@ -483,7 +483,11 @@ class RTDETRDetectionModel(DetectionModel):
         dec_scores = torch.cat([enc_scores.unsqueeze(0), dec_scores])
 
         loss = self.criterion(
-            (dec_bboxes, dec_scores), targets, dn_bboxes=dn_bboxes, dn_scores=dn_scores, dn_meta=dn_meta
+            (dec_bboxes, dec_scores),
+            targets,
+            dn_bboxes=dn_bboxes,
+            dn_scores=dn_scores,
+            dn_meta=dn_meta,
         )
         # NOTE: There are like 12 losses in RTDETR, backward with all losses but only show the main three losses.
         return sum(loss.values()), torch.as_tensor(

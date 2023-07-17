@@ -1,4 +1,6 @@
 # Ultralytics YOLO 🚀, AGPL-3.0 license
+from pathlib import Path
+
 from ultralytics.yolo.utils import TESTS_RUNNING
 from ultralytics.yolo.utils.torch_utils import model_info_for_loggers
 
@@ -16,6 +18,8 @@ _processed_plots = {}
 def _log_plots(plots, step):
     for name, params in plots.items():
         timestamp = params["timestamp"]
+        if isinstance(name, str):
+            return
         if _processed_plots.get(name, None) != timestamp:
             wb.run.log({name.stem: wb.Image(str(name))}, step=step)
             _processed_plots[name] = timestamp

@@ -27,7 +27,19 @@ class RTDETRDataset(YOLODataset):
             if fn.exists():  # load npy
                 im = np.load(fn)
             else:  # read image
-                im = cv2.imread(f)  # BGR
+                if self.ch == 1:
+                    f = self.im_files[i]
+                    im = cv2.imread(f, 0)  # gray
+                elif self.ch == 4:
+                    f = self.im_files[i]
+                    im_rgb = cv2.imread(f)  # BGR
+                    f = self.im_files_ir[i]
+                    im_fir = cv2.imread(f, 0)  # gray
+                    # im_fir = hist_eq(im_fir) # histogram equalization
+                    im = cv2.merge((im_rgb, im_fir))  # combine rgb + ir
+                else:
+                    f = self.im_files[i]
+                    im = cv2.imread(f)  # BGR
                 if im is None:
                     raise FileNotFoundError(f"Image Not Found {f}")
             h0, w0 = im.shape[:2]  # orig hw

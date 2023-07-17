@@ -10,7 +10,7 @@
       "**/.git/subtree-cache/**": true,
       "**/node_modules/*/**": true
     },
-    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvironment": false,
     "python.formatting.provider": "black", // フォーマッターをblackに設定
     "python.linting.pylintEnabled": false, // pyLintをオフに
     "python.linting.flake8Enabled": true, // flake8をオンに

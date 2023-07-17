@@ -49,7 +49,7 @@ YOLOv8 をRGB-FIR向けに拡張したもの. 次の機能をオリジナルか�
 ## 1. Installation
 
 以下[1.1](#11-環境構築)以降の手法はYOLOの内部を弄る必要があるときである.  
-ただ利用するだけならまず[Actions](https://github.com/ri0098ho/YOLOv8-4ch/actions/workflows/release.yaml)で`Run workflow`を実行すれば, [Release](https://github.com/ri0098ho/YOLOv8-4ch/releases/latest)に最新のwhlファイルが実装される.  
+ただ利用するだけならまず[Actions](https://github.com/ri0098hp/YOLOv8-4ch/actions/workflows/release.yaml)で`Run workflow`を実行すれば, [Release](https://github.com/ri0098hp/YOLOv8-4ch/releases/latest)に最新のwhlファイルが実装される.  
 これをダウンロードしたのち
 
 ```bash
@@ -67,13 +67,13 @@ pip install [whlファイル]
 レポジトリをcloneする. git環境がある人はOrganizationsにアクセス権限のあるuser名とmailを設定して
 
 ```bash
-git clone git@github.com:ri0098ho/YOLOv8-4ch.git
+git clone git@github.com:ri0098hp/YOLOv8-4ch.git
 ```
 
 または [GitHub CLI](https://cli.github.com) をインストールしてログイン認証後
 
 ```bash
-gh repo clone ri0098ho/YOLOv8-4ch
+gh repo clone ri0098hp/YOLOv8-4ch
 ```
 
 ### 1.3 コンテナを立ち上げる
@@ -91,7 +91,7 @@ pip install -e ".[dev]"
 ### 1.5 データセットを準備
 
 データセットをdatasetフォルダーに入れる.  
-[dataloader](utils/datasets.py) を魔改造してるため次のようなディレクトリ構造推奨...  
+dataloaderを魔改造してるため次のようなディレクトリ構造推奨...  
 All-Season以外はtrainとvalフォルダ以下で再帰的に探索を行う.  
 尚ラベルとRGB画像とFIR画像は対称となるパス関係に存在する必要がある.  
 シンボリックリンクでも認識可能なのでデータフォルダを作った後, フォルダごとにリンクを作るとスペースを節約できる.
