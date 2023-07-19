@@ -18,34 +18,3 @@ pip install -e '.[dev]'
 
 [datase symlink (容量を圧縮)]
 find ../All-Season -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
-
-[tasker]
-conds=(day night hot inter cold time season)
-models=(4 1 3)
-for cond in ${conds[@]}
-do
-  for model in ${models[@]}
-  do
-    yolo cfg=cfg/custom/fujinolab-${cond}.yaml ch=${model} name=fujinolab-${cond}-${model}ch;
-  done;
-done
-
-conds=(day night hot inter cold)
-models=(day night hot inter cold time season)
-for cond in ${conds[@]}
-do
-  for model in ${models[@]}
-  do
-    yolo detect val data=data/fujinolab-${cond}.yaml model=runs/detect/fujinolab-${model}-4ch/weights/best.pt project=runs/val name=${cond}-by-${model};
-  done;
-done
-
-conds=(day-winter night summer)
-models=(4 1 3)
-for cond in ${conds[@]}
-do
-  for model in ${models[@]}
-  do
-      yolo predict source=datasets/demo_allseason/${cond} model=weights/fujinolab-all-${model}ch-aug.pt project=runs/demo name=${cond}-${model}ch save=True
-  done;
-done

@@ -268,8 +268,10 @@ class DetectionModel(BaseModel):
         self.yaml = cfg if isinstance(cfg, dict) else yaml_model_load(cfg)  # cfg dict
 
         # Define model
-        self.yaml["ch"] = ch
-        # ch = self.yaml["ch"] = self.yaml.get("ch", ch)  # input channels
+        if ch != 3:
+            self.yaml["ch"] = ch
+        else:
+            ch = self.yaml["ch"] = self.yaml.get("ch", ch)  # input channels
         if nc and nc != self.yaml["nc"]:
             LOGGER.info(f"Overriding model.yaml nc={self.yaml['nc']} with nc={nc}")
             self.yaml["nc"] = nc  # override yaml value

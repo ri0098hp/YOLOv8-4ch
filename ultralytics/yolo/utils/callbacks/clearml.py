@@ -118,10 +118,7 @@ def on_fit_epoch_end(trainer):
 
 def on_val_end(validator):
     """Logs validation results including labels and predictions."""
-    if Task.current_task():
-        # Log val_labels and val_pred
-        # _log_debug_samples(sorted(validator.save_dir.glob("**/val*.jpg")), "Validation")
-        pass
+    pass
 
 
 def on_train_end(trainer):

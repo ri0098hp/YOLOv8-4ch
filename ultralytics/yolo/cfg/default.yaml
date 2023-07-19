@@ -8,7 +8,7 @@ mode: train # (str) YOLO mode, i.e. train, val, predict, export, track, benchmar
 model: # (str, optional) path to model file, i.e. yolov8n.pt, yolov8n.yaml
 data: # (str, optional) path to data file, i.e. coco128.yaml
 epochs: 100 # (int) number of epochs to train for
-patience: 50 # (int) epochs to wait for no observable improvement for early stopping of training
+patience: 100 # (int) epochs to wait for no observable improvement for early stopping of training
 batch: 16 # (int) number of images per batch (-1 for AutoBatch)
 imgsz: 640 # (int | list) input images size as int for train and val modes, or list[w,h] for predict and export modes
 save: True # (bool) save train checkpoints and predict results
@@ -96,7 +96,7 @@ nbs: 64 # (int) nominal batch size
 hsv_h: 0.015 # (float) image HSV-Hue augmentation (fraction)
 hsv_s: 0.7 # (float) image HSV-Saturation augmentation (fraction)
 hsv_v: 0.4 # (float) image HSV-Value augmentation (fraction)
-hsv_ir: 0.4 # (float)  FIR image V-Value augmentation (fraction) add by okuda
+hsv_ir: 0.5 # (float)  FIR image V-Value augmentation (fraction) add by okuda
 degrees: 0.0 # (float) image rotation (+/- deg)
 translate: 0.1 # (float) image translation (+/- fraction)
 scale: 0.5 # (float) image scale (+/- gain)

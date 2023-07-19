@@ -496,14 +496,14 @@ class RandomHSV:
 
             ch = 1 if len(img.shape) < 3 else img.shape[2]
             if ch == 1:
-                img = cv2.LUT(img, lut_gray)
+                labels["img"] = cv2.LUT(img, lut_gray)
             elif ch == 4:
                 b, g, r, ir = cv2.split(img)
                 img = cv2.merge((b, g, r))
                 hue, sat, val = cv2.split(cv2.cvtColor(img, cv2.COLOR_BGR2HSV))
                 im_hsv = cv2.merge((cv2.LUT(hue, lut_hue), cv2.LUT(sat, lut_sat), cv2.LUT(val, lut_val)))
-                cv2.cvtColor(im_hsv, cv2.COLOR_HSV2BGR, dst=img)
-                img = cv2.merge((img, cv2.LUT(ir, lut_gray)))
+                img = cv2.cvtColor(im_hsv, cv2.COLOR_HSV2BGR)
+                labels["img"] = cv2.merge((img, cv2.LUT(ir, lut_gray)))
             else:
                 hue, sat, val = cv2.split(cv2.cvtColor(img, cv2.COLOR_BGR2HSV))
                 im_hsv = cv2.merge((cv2.LUT(hue, lut_hue), cv2.LUT(sat, lut_sat), cv2.LUT(val, lut_val)))
