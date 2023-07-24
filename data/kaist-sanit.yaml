@@ -5,4 +5,4 @@ labels_folder: labels
 
 nc: 1
 ch: 4
-names: ["labels"]
+names: ["person"]

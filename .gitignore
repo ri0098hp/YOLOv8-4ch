@@ -35,6 +35,7 @@ __pycache__
 *.data
 *.json
 *.cfg
+*.out
 !setup.cfg
 !cfg/yolov3*.cfg
 

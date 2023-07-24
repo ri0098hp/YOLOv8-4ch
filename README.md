@@ -85,7 +85,7 @@ devcontainerかdocker-compose upでコンテナを立ち上げる.
 次のコマンドを実行してファイルの変更をパッケージに逐次反映出来るようにする.  
 
 ```bash
-pip install -e ".[dev]"
+scripts/build_yolo.sh
 ```
 
 ### 1.5 データセットを準備
@@ -115,7 +115,7 @@ All-Season以外はtrainとvalフォルダ以下で再帰的に探索を行う.
   ├── All-Season-day
   │   └── 20180903_1113  <-シンボリックリンク推奨
   │   
-  └── kaist-all
+  └── kaist-sanit
       ├── train
       │   ├── set00
       │   │   ├──V000
