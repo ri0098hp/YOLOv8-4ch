@@ -27,25 +27,6 @@ def _log_images(imgs_dict, group="", step=0):
             task.get_logger().report_image(group, k, step, v)
 
 
-def _log_debug_samples(files, title="Debug Samples") -> None:
-    """
-    Log files (images) as debug samples in the ClearML task.
-
-    Args:
-        files (list): A list of file paths in PosixPath format.
-        title (str): A title that groups together images with the same values.
-    """
-    task = Task.current_task()
-    if task:
-        for f in files:
-            if f.exists():
-                it = re.search(r"_batch(\d+)", f.name)
-                iteration = int(it.groups()[0]) if it else 0
-                task.get_logger().report_image(
-                    title=title, series=f.name.replace(it.group(), ""), local_path=str(f), iteration=iteration
-                )
-
-
 def _log_plot(title, plot_path) -> None:
     """
     Log an image as a plot in the plot section of ClearML.
@@ -130,7 +111,7 @@ def on_train_end(trainer):
             "results.png",
             "confusion_matrix.png",
             "confusion_matrix_normalized.png",
-            *(f"{x}_curve.png" for x in ("F1", "PR", "P", "R")),
+            *(f"{x}_curve.png" for x in ("F1", "PR", "P", "R", "LAMR")),
         ]
         files = [(trainer.save_dir / f) for f in files if (trainer.save_dir / f).exists()]  # filter
         for f in files:

@@ -18,7 +18,7 @@ except (ImportError, AssertionError):
 COMET_SUPPORTED_TASKS = ["detect"]
 
 # Names of plots created by YOLOv8 that are logged to Comet
-EVALUATION_PLOT_NAMES = "F1_curve", "P_curve", "R_curve", "PR_curve", "confusion_matrix"
+EVALUATION_PLOT_NAMES = "F1_curve", "P_curve", "R_curve", "PR_curve", "LAMR_curve", "confusion_matrix"
 LABEL_PLOT_NAMES = "labels", "labels_correlogram"
 
 _comet_image_prediction_count = 0

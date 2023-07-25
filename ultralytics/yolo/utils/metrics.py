@@ -366,6 +366,49 @@ def plot_pr_curve(px, py, ap, save_dir=Path("pr_curve.png"), names=(), on_plot=N
 
 
 @plt_settings()
+def plot_lamr_curve(
+    px,
+    py,
+    lamr,
+    save_dir=Path("lamr_curve.png"),
+    names=(),
+    xlabel="FPPI",
+    ylabel="Miss Rate",
+    on_plot=None,
+):
+    """Plots a fppi-missrate curve."""
+    # TODO: each class plotting
+    px = px[:: len(px) // 1000]
+    py = py[:: len(py) // 1000]
+    yticks = [0.05, 0.1, 0.20, 0.30, 0.40, 0.50, 0.64, 0.80, 1]
+
+    save_csv = str(save_dir.parent / "csv" / save_dir.stem) + ".csv"
+    save_svg = str(save_dir.parent / "svg" / save_dir.stem) + ".svg"
+    with open(save_csv, "w") as file:
+        writer = csv.writer(file, lineterminator="\n")
+        writer.writerow(["FPPI", *names.values()])
+        for row in zip(np.around(px, 3), np.around(py, 3)):
+            writer.writerow(row)
+
+    fig, ax = plt.subplots(1, 1, figsize=(9, 6), tight_layout=True)
+    ax.plot(px, py, linewidth=3, color="blue", label=f"all classes {lamr[:, 0].mean():.3f} LAMR@0.5")
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_ylim([0.04, 1])
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(yticks)
+    ax.grid(which="major", color="black", linestyle="--")
+    ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+    fig.savefig(save_dir, dpi=250)
+    fig.savefig(save_svg, dpi=250)
+    plt.close(fig)
+    if on_plot:
+        on_plot(save_dir)
+
+
+@plt_settings()
 def plot_mc_curve(px, py, save_dir=Path("mc_curve.png"), names=(), xlabel="Confidence", ylabel="Metric", on_plot=None):
     """Plots a metric-confidence curve."""
     save_csv = str(save_dir.parent / "csv" / save_dir.stem) + ".csv"
@@ -432,8 +475,30 @@ def compute_ap(recall, precision):
     return ap, mpre, mrec
 
 
+def compute_lamr(miss_rates, fppi):
+    fppi = [1e-16 if x == 0 else x for x in fppi]
+    log_fppi = np.log(fppi)
+    start = np.log(0.01)
+    end = np.log(10)
+    step = (end - start) / 9
+    log_sampled_fppi = np.arange(start, end + step, step)
+    sampled_miss_rates = np.interp(log_sampled_fppi, log_fppi, miss_rates)
+    lamr = np.exp(np.mean(np.log(sampled_miss_rates)))
+    return lamr
+
+
 def ap_per_class(
-    tp, conf, pred_cls, target_cls, plot=False, on_plot=None, save_dir=Path(), names=(), eps=1e-16, prefix=""
+    tp,
+    conf,
+    pred_cls,
+    target_cls,
+    plot=False,
+    on_plot=None,
+    save_dir=Path(),
+    names=(),
+    eps=1e-16,
+    n_images=0,
+    prefix="",
 ):
     """
     Computes the average precision per class for object detection evaluation.
@@ -458,6 +523,7 @@ def ap_per_class(
             r (np.ndarray): Recall values at each confidence threshold.
             f1 (np.ndarray): F1-score values at each confidence threshold.
             ap (np.ndarray): Average precision for each class at different IoU thresholds.
+            lamr (np.ndarray): Log Average Miss Rate for each class at different IoU thresholds.
             unique_classes (np.ndarray): An array of unique classes that have data.
 
     """
@@ -473,6 +539,7 @@ def ap_per_class(
     # Create Precision-Recall curve and compute AP for each class
     px, py = np.linspace(0, 1, 1000), []  # for plotting
     ap, p, r = np.zeros((nc, tp.shape[1])), np.zeros((nc, 1000)), np.zeros((nc, 1000))
+    lamr = np.zeros((nc, tp.shape[1]))
     for ci, c in enumerate(unique_classes):
         i = pred_cls == c
         n_l = nt[ci]  # number of labels
@@ -498,6 +565,16 @@ def ap_per_class(
             if plot and j == 0:
                 py.append(np.interp(px, mrec, mpre))  # precision at mAP@0.5
 
+        # Miss Rate
+        miss = 1 - recall
+
+        # False Positive Per Images
+        fppi = fpc / n_images
+
+        # LAMR from missrate-fppi curve
+        for j in range(tp.shape[1]):
+            lamr[ci, j] = compute_lamr(miss[:, j], fppi[:, j])
+
     # Compute F1 (harmonic mean of precision and recall)
     f1 = 2 * p * r / (p + r + eps)
     names = [v for k, v in names.items() if k in unique_classes]  # list: only classes that have data
@@ -505,6 +582,7 @@ def ap_per_class(
     if plot:
         (save_dir / "svg").mkdir(exist_ok=True), (save_dir / "csv").mkdir(exist_ok=True)
         plot_pr_curve(px, py, ap, save_dir / f"{prefix}PR_curve.png", names, on_plot=on_plot)
+        plot_lamr_curve(fppi[:, 0], miss[:, 0], lamr, save_dir / f"{prefix}LAMR_curve.png", names, on_plot=on_plot)
         plot_mc_curve(px, f1, save_dir / f"{prefix}F1_curve.png", names, ylabel="F1", on_plot=on_plot)
         plot_mc_curve(px, p, save_dir / f"{prefix}P_curve.png", names, ylabel="Precision", on_plot=on_plot)
         plot_mc_curve(px, r, save_dir / f"{prefix}R_curve.png", names, ylabel="Recall", on_plot=on_plot)
@@ -513,7 +591,7 @@ def ap_per_class(
     p, r, f1 = p[:, i], r[:, i], f1[:, i]
     tp = (r * nt).round()  # true positives
     fp = (tp / (p + eps) - tp).round()  # false positives
-    return tp, fp, p, r, f1, ap, unique_classes.astype(int)
+    return tp, fp, p, r, f1, ap, lamr, unique_classes.astype(int)
 
 
 class Metric(SimpleClass):
@@ -549,6 +627,7 @@ class Metric(SimpleClass):
         self.r = []  # (nc, )
         self.f1 = []  # (nc, )
         self.all_ap = []  # (nc, 10)
+        self.all_lamr = []  # (nc, 10)
         self.ap_class_index = []  # (nc, )
         self.nc = 0
 
@@ -571,6 +650,16 @@ class Metric(SimpleClass):
             (np.ndarray, list): Array of shape (nc,) with AP50-95 values per class, or an empty list if not available.
         """
         return self.all_ap.mean(1) if len(self.all_ap) else []
+
+    @property
+    def lamr50(self):
+        """
+        Returns the Log Average Miss Rate (LAMR) at an IoU threshold of 0.5 for all classes.
+
+        Returns:
+            (np.ndarray, list): Array of shape (nc,) with LAMR50 values per class, or an empty list if not available.
+        """
+        return self.all_lamr[:, 0].mean() if len(self.all_lamr) else 1.0
 
     @property
     def mp(self):
@@ -623,8 +712,8 @@ class Metric(SimpleClass):
         return self.all_ap.mean() if len(self.all_ap) else 0.0
 
     def mean_results(self):
-        """Mean of results, return mp, mr, map50, map."""
-        return [self.mp, self.mr, self.map50, self.map]
+        """Mean of results, return mp, mr, map50, map, lamr."""
+        return [self.mp, self.mr, self.map50, self.map, self.lamr50]
 
     def class_result(self, i):
         """class-aware result, return p[i], r[i], ap50[i], ap[i]."""
@@ -640,15 +729,15 @@ class Metric(SimpleClass):
 
     def fitness(self):
         """Model fitness as a weighted combination of metrics."""
-        w = [0.0, 0.0, 1.0, 0.0]  # weights for [P, R, mAP@0.5, mAP@0.5:0.95]
+        w = [0.0, 0.0, 1.0, 0.0, 0.0]  # weights for [P, R, mAP@0.5, mAP@0.5:0.95, LAMR@0.5]
         return (np.array(self.mean_results()) * w).sum()
 
     def update(self, results):
         """
         Args:
-            results (tuple): A tuple of (p, r, ap, f1, ap_class)
+            results (tuple): A tuple of (p, r, ap, f1, lamr, ap_class)
         """
-        self.p, self.r, self.f1, self.all_ap, self.ap_class_index = results
+        self.p, self.r, self.f1, self.all_ap, self.all_lamr, self.ap_class_index = results
 
 
 class DetMetrics(SimpleClass):
@@ -689,7 +778,7 @@ class DetMetrics(SimpleClass):
         self.box = Metric()
         self.speed = {"preprocess": 0.0, "inference": 0.0, "loss": 0.0, "postprocess": 0.0}
 
-    def process(self, tp, conf, pred_cls, target_cls):
+    def process(self, tp, conf, pred_cls, target_cls, n_images):
         """Process predicted results for object detection and update metrics."""
         results = ap_per_class(
             tp,
@@ -699,6 +788,7 @@ class DetMetrics(SimpleClass):
             plot=self.plot,
             save_dir=self.save_dir,
             names=self.names,
+            n_images=n_images,
             on_plot=self.on_plot,
         )[2:]
         self.box.nc = len(self.names)
@@ -707,7 +797,13 @@ class DetMetrics(SimpleClass):
     @property
     def keys(self):
         """Returns a list of keys for accessing specific metrics."""
-        return ["metrics/precision(B)", "metrics/recall(B)", "metrics/mAP50(B)", "metrics/mAP50-95(B)"]
+        return [
+            "metrics/precision(B)",
+            "metrics/recall(B)",
+            "metrics/mAP50(B)",
+            "metrics/mAP50-95(B)",
+            "metrics/LAMR50(B)",
+        ]
 
     def mean_results(self):
         """Calculate mean of detected objects & return precision, recall, mAP50, and mAP50-95."""
