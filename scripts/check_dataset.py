@@ -13,7 +13,7 @@ from ultralytics.yolo.data import build_yolo_dataset
 from ultralytics.yolo.data.utils import check_det_dataset
 from ultralytics.yolo.utils import yaml_save
 
-DEFAULT_CFG = "cfg/yolov8.yaml"
+DEFAULT_CFG = "ultralytics/yolo/cfg/default.yaml"
 ROOT_DIR = "/home/suwako/workspace"
 
 

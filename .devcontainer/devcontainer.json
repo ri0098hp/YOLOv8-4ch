@@ -16,7 +16,8 @@
         "yzhang.markdown-all-in-one",
         "DavidAnson.vscode-markdownlint",
         "TakumiI.markdowntable",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "janisdd.vscode-edit-csv"
       ]
     }
   }

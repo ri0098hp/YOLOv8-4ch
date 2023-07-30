@@ -724,14 +724,23 @@ class Albumentations:
             bboxes = labels["instances"].bboxes
             # TODO: add supports of segments and keypoints
             if self.transform and random.random() < self.p:
+                # do not apply mutable calss for RGB and FIR cuz of different augments on each images
                 if ch == 1:
-                    new = self.transform_gray(image=im, bboxes=bboxes, class_labels=cls)  # transformed
+                    # for deterministic
+                    self.transform(image=np.zeros_like(cv2.merge((im, im, im))), bboxes=bboxes, class_labels=cls)
+                    # transformed
+                    new = self.transform_gray(image=im, bboxes=bboxes, class_labels=cls)
                 elif ch == 3:
-                    new = self.transform(image=im, bboxes=bboxes, class_labels=cls)  # transformed
+                    # transformed
+                    new = self.transform(image=im, bboxes=bboxes, class_labels=cls)
+                    # for deterministic
+                    self.transform_gray(image=np.zeros_like(cv2.split(im)[0]), bboxes=bboxes, class_labels=cls)
                 else:
                     b, g, r, im_fir = cv2.split(im)
                     im_rgb = cv2.merge((b, g, r))
+                    # transformed
                     new = self.transform(image=im_rgb, bboxes=bboxes, class_labels=cls)
+                    # transformed
                     new_fir = self.transform_gray(image=im_fir, bboxes=bboxes, class_labels=cls)
                     new["image"] = cv2.merge((new["image"], new_fir["image"]))
 
