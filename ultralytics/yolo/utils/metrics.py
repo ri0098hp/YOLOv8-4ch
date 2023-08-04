@@ -376,7 +376,7 @@ def plot_lamr_curve(
     ylabel="Miss Rate",
     on_plot=None,
 ):
-    """Plots a fppi-missrate curve."""
+    """Plots a fppi-missrate curve. add by okuda"""
     # TODO: each class plotting
     px = px[:: len(px) // 1000]
     py = py[:: len(py) // 1000]
@@ -391,12 +391,15 @@ def plot_lamr_curve(
             writer.writerow(row)
 
     fig, ax = plt.subplots(1, 1, figsize=(9, 6), tight_layout=True)
-    ax.plot(px, py, linewidth=3, color="blue", label=f"all classes {lamr[:, 0].mean():.3f} LAMR@0.5")
+    ax.plot(px, py, linewidth=3, color="blue", label=f"all classes {lamr.mean():.3f} LAMR@0.5")
+    # labels
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
+    # set ticks
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_ylim([0.04, 1])
+    ax.set_xlim([0.005, 2])
+    ax.set_ylim([0.05, 1])
     ax.set_yticks(yticks)
     ax.set_yticklabels(yticks)
     ax.grid(which="major", color="black", linestyle="--")
@@ -475,15 +478,19 @@ def compute_ap(recall, precision):
     return ap, mpre, mrec
 
 
-def compute_lamr(miss_rates, fppi):
-    fppi = [1e-16 if x == 0 else x for x in fppi]
-    log_fppi = np.log(fppi)
-    start = np.log(0.01)
-    end = np.log(10)
-    step = (end - start) / 9
-    log_sampled_fppi = np.arange(start, end + step, step)
-    sampled_miss_rates = np.interp(log_sampled_fppi, log_fppi, miss_rates)
-    lamr = np.exp(np.mean(np.log(sampled_miss_rates)))
+def compute_lamr(fppi, mr):
+    fppi_tmp = np.insert(fppi, 0, -1.0)
+    mr_tmp = np.insert(mr, 0, 1.0)
+
+    # Use 9 evenly spaced reference points in log-space
+    ref = np.logspace(-2.0, 0.0, num=9)
+    for i, ref_i in enumerate(ref):
+        # np.where() will always find at least 1 index, since min(ref) = 0.01 and min(fppi_tmp) = -1.0
+        j = np.where(fppi_tmp <= ref_i)[-1][-1]
+        ref[i] = mr_tmp[j]
+
+    # log(0) is undefined, so we use the np.maximum(1e-10, ref)
+    lamr = math.exp(np.mean(np.log(np.maximum(1e-16, ref))))
     return lamr
 
 
@@ -566,14 +573,14 @@ def ap_per_class(
                 py.append(np.interp(px, mrec, mpre))  # precision at mAP@0.5
 
         # Miss Rate
-        miss = 1 - recall
+        mr = 1.0 - recall
 
         # False Positive Per Images
         fppi = fpc / n_images
 
         # LAMR from missrate-fppi curve
         for j in range(tp.shape[1]):
-            lamr[ci, j] = compute_lamr(miss[:, j], fppi[:, j])
+            lamr[ci, j] = compute_lamr(fppi[:, j], mr[:, j])
 
     # Compute F1 (harmonic mean of precision and recall)
     f1 = 2 * p * r / (p + r + eps)
@@ -582,7 +589,7 @@ def ap_per_class(
     if plot:
         (save_dir / "svg").mkdir(exist_ok=True), (save_dir / "csv").mkdir(exist_ok=True)
         plot_pr_curve(px, py, ap, save_dir / f"{prefix}PR_curve.png", names, on_plot=on_plot)
-        plot_lamr_curve(fppi[:, 0], miss[:, 0], lamr, save_dir / f"{prefix}LAMR_curve.png", names, on_plot=on_plot)
+        plot_lamr_curve(fppi[:, 0], mr[:, 0], lamr[:, 0], save_dir / f"{prefix}LAMR_curve.png", names, on_plot=on_plot)
         plot_mc_curve(px, f1, save_dir / f"{prefix}F1_curve.png", names, ylabel="F1", on_plot=on_plot)
         plot_mc_curve(px, p, save_dir / f"{prefix}P_curve.png", names, ylabel="Precision", on_plot=on_plot)
         plot_mc_curve(px, r, save_dir / f"{prefix}R_curve.png", names, ylabel="Recall", on_plot=on_plot)
