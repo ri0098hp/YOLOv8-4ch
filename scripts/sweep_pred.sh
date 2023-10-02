@@ -1,12 +1,12 @@
 #!/bin/sh
 
 cd ~/workspace
-conds=(day-winter night summer)
-models=(4 1 3)
+conds=(day night hot cold)
+chs=(4 1 3)
 for cond in ${conds[@]}
 do
-  for model in ${models[@]}
+  for ch in ${chs[@]}
   do
-      yolo predict source=datasets/demo_allseason/${cond} model=weights/All-Season-${model}ch-aug.pt project=runs/demo name=${cond}-${model}ch save=True
+      yolo predict source=datasets/demo_slides/${cond} model=runs/All-Season/channel/All-Season-${cond}-${ch}ch/weights/best.pt project=runs/demo name=${cond}-${ch}ch save=True
   done;
 done

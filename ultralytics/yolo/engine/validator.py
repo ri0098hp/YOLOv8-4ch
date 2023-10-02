@@ -25,16 +25,28 @@ from pathlib import Path
 
 import torch
 from tqdm import tqdm
-
 from ultralytics.nn.autobackend import AutoBackend
 from ultralytics.yolo.cfg import get_cfg
 from ultralytics.yolo.data.utils import check_cls_dataset, check_det_dataset
-from ultralytics.yolo.utils import DEFAULT_CFG, LOGGER, RANK, SETTINGS, TQDM_BAR_FORMAT, callbacks, colorstr, emojis
+from ultralytics.yolo.utils import (
+    DEFAULT_CFG,
+    LOGGER,
+    RANK,
+    SETTINGS,
+    TQDM_BAR_FORMAT,
+    callbacks,
+    colorstr,
+    emojis,
+)
 from ultralytics.yolo.utils.checks import check_imgsz
 from ultralytics.yolo.utils.files import increment_path
 from ultralytics.yolo.utils.ops import Profile
 from ultralytics.yolo.utils.plotting import output_to_target
-from ultralytics.yolo.utils.torch_utils import de_parallel, select_device, smart_inference_mode
+from ultralytics.yolo.utils.torch_utils import (
+    de_parallel,
+    select_device,
+    smart_inference_mode,
+)
 
 
 class BaseValidator:
@@ -190,16 +202,13 @@ class BaseValidator:
 
             # keep max number of instances : add by okuda
             if not self.training and self.args.plots:
-                targets = output_to_target(preds, max_det=15)[2]
                 gt = len(batch.get("bboxes"))
-                target = sum(bbox[4] > 0.25 for bbox in targets)
-                diff = abs(gt - target)
-                if batch_i == 0 or (best_diff > diff and gt > self.args.batch):
-                    best_diff = diff
-                    best_example = (batch, preds, batch_i)
-                if batch_i == 0 or (worst_diff < diff and gt > self.args.batch):
-                    worst_diff = diff
-                    worst_example = (batch, preds, batch_i)
+                if batch_i == 0:
+                    example_0 = (batch, preds, batch_i)
+                    gt_max = gt
+                elif gt > gt_max:
+                    gt_max = gt
+                    example_max = (batch, preds, batch_i)
 
                 if self.args.get("save_all"):
                     fname = self.save_dir / "jpg" / "gt" / f"val_batch{batch_i}_labels.jpg"
@@ -210,16 +219,16 @@ class BaseValidator:
             self.run_callbacks("on_val_batch_end")
 
         if not self.training and self.args.plots:
-            batch, preds, batch_i = best_example
-            fname = self.save_dir / "examples" / f"val_best_{batch_i}_labels.jpg"
+            batch, preds, batch_i = example_0
+            fname = self.save_dir / "examples" / f"val_{batch_i}_labels.jpg"
             self.plot_val_samples(batch, batch_i, fname)
-            fname = self.save_dir / "examples" / f"val_best_{batch_i}_pred.jpg"
+            fname = self.save_dir / "examples" / f"val_{batch_i}_pred.jpg"
             self.plot_predictions(batch, preds, batch_i, fname)
 
-            batch, preds, batch_i = worst_example
-            fname = self.save_dir / "examples" / f"val_worst_{batch_i}_labels.jpg"
+            batch, preds, batch_i = example_max
+            fname = self.save_dir / "examples" / f"val_{batch_i}_labels.jpg"
             self.plot_val_samples(batch, batch_i, fname)
-            fname = self.save_dir / "examples" / f"val_worst_{batch_i}_pred.jpg"
+            fname = self.save_dir / "examples" / f"val_{batch_i}_pred.jpg"
             self.plot_predictions(batch, preds, batch_i, fname)
         stats = self.get_stats()
         self.check_stats(stats)
@@ -236,6 +245,7 @@ class BaseValidator:
                 "Speed: %.1fms preprocess, %.1fms inference, %.1fms loss, %.1fms postprocess per image"
                 % tuple(self.speed.values())
             )
+            LOGGER.info(f"FPS: {int(1 / (1E-3*tuple(self.speed.values())[1]))}")
             if self.args.save_json and self.jdict:
                 with open(str(self.save_dir / "predictions.json"), "w") as f:
                     LOGGER.info(f"Saving {f.name}...")
