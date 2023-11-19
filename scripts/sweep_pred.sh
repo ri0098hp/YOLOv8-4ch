@@ -1,7 +1,8 @@
 #!/bin/sh
 
 cd ~/workspace
-conds=(day night hot cold)
+conds=(day night)
+conds=(hot inter cold)
 chs=(4 1 3)
 for cond in ${conds[@]}
 do
