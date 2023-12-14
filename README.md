@@ -278,3 +278,17 @@ wget https://nvidia.box.com/shared/static/amhb62mzes4flhbfavoa73m5z933pv75.whl -
 pipenv install onnxruntime_gpu-1.12.1-cp38-cp38-linux_aarch64.whl
 rm onnxruntime_gpu-1.12.1-cp38-cp38-linux_aarch64.whl
 ```
+
+## Citation
+
+```bibtex
+@INPROCEEDINGS{10325231,
+  author={Okuda, Masato and Yoshida, Kota and Fujino, Takeshi},
+  booktitle={2023 IEEE SENSORS}, 
+  title={Multispectral Pedestrian Detection with Visible and Far-infrared Images Under Drifting Ambient Light and Temperature}, 
+  year={2023},
+  volume={},
+  number={},
+  pages={1-4},
+  doi={10.1109/SENSORS56945.2023.10325231}}
+```
