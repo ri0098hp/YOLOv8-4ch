@@ -4,7 +4,6 @@ from ultralytics.yolo.utils import LOGGER, SETTINGS, TESTS_RUNNING
 
 try:
     assert not TESTS_RUNNING  # do not log pytest
-    assert SETTINGS["clearml"] is True  # verify integration is enabled
     import clearml
     from clearml import Task
     from clearml.binding.frameworks.pytorch_bind import PatchPyTorchModelIO

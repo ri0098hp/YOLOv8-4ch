@@ -4,26 +4,18 @@
 
 <https://github.com/ri0098hp/YOLOv8-4ch/assets/104181368/177f036e-4932-4fda-9338-532504e81663>
 
-| Best Model    | Device            | Format        | Speed/Image | FPS  | AP@All |
-| ------------- | ----------------- | ------------- | ----------- | ---- | ------ |
-| YOLOv8s       | RTX3090           | PyTorch       | 2.7 ms      | 360  | 84.2   |
-| (w/ augment)  |                   | TensorRT FP16 | 1.1 ms      | 909  | 84.0   |
-|               | Colab (NVIDIA T4) | PyTorch       | 13.4 ms     | 74   | -      |
-|               |                   | TensorRT FP16 | 3.0 ms      | 333  | -      |
-|               | Jetson AGX  Orin  | PyTorch       | 19.9 ms     | 50   | -      |
-|               |                   | TensorRT      | 1.7 ms      | 588  | -      |
-|               | Intel i7-12700    | PyTorch       | 189.5 ms    | 5.2  | -      |
-|               |                   | ONNX          | 47.5 ms     | 21.0 | -      |
-| (w/o augment) | RTX3090           | PyTorch       | 2.8 ms      | 357  | 82.3   |
-| YOLOv8-2L     |                   | PyTorch       | 2.0 ms      | 500  | 81.8   |
-| (w/ augment)  |                   | TensorRT FP16 | 0.8 ms      | 1111 | 81.5   |
-| YOLOv8-3L     |                   | PyTorch       | 2.6 ms      | 384  | 82.2   |
-| (w/ augment)  |                   | TensorRT FP16 | - ms        | -    | -      |
-| YOLOv8-4L     |                   | PyTorch       | 3.2 ms      | 312  | 82.3   |
-| (w/ augment)  |                   | TensorRT FP16 | - ms        | -    | -      |
+| **Model**       | **Device**       | **Format**    | **Speed/Image** | **FPS** | **AP@All** | **LAMR50** |
+| --------------- | ---------------- | ------------- | --------------- | ------- | ---------- | ---------- |
+| YOLOv8s-2stream | RTX3090          | PyTorch       | 4.1 ms          | 243     | 86.5       | 17.9       |
+| (w/ augment)    |                  | TensorRT FP16 | 1.6 ms          | 612     | 86.3       | 18.1       |
+|                 | Jetson AGX  Orin | PyTorch       | 16.2 ms         | 61      | 86.5       | 17.9       |
+|                 |                  | TensorRT FP16 | 10.1 ms         | 99      | 86.4       | 18.0       |
+|                 | Intel i7-12700   | ONNX          | 73.3 ms         | 13      | -          |            |
 
-- 500 images (with 7 persons each) are tested on Speed/Image, FPS
-- AP is tested All-Season dataset by AP@0.5
+- AP means AP@0.5 in a single class.
+- Tested on All-Season-Dataset (Ours)
+- Batch-size=1 on Speed/Image, FPS
+- Jetson uses JetPack 5.0
 
 ## Original
 
@@ -41,10 +33,14 @@ YOLOv8 をRGB-FIR向けに拡張したもの. 次の機能をオリジナルか�
 - [x] テスト結果をsvg, csvで保存
 - [x] テスト結果の画像を全て書き出し
 - [x] pip installで利用可能にする
+- [x] Jetsonで実装
+- [x] YOLOv8をベースにした2入力モデル
 
 ## Models
 
-工事中… [ここ](ultralytics/models)
+ベースラインとなっているモデル. [詳細](ultralytics/models)
+
+![yolov8s-2stream.drawio.svg](ultralytics/models/diagram/yolov8s-2stream.drawio.svg)
 
 ## 1. Installation
 
@@ -239,7 +235,7 @@ Dockerを使っても良いがpipenvやvenvによる仮想化の方が処理速�
 その後環境を構築する.  
 なおtorchとtorchvisionはその時々によって変わるので公式HP参照.  
 [[JetPackとtorchのバージョン関係](https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform-release-notes/pytorch-jetson-rel.html#pytorch-jetson-rel)]
-[[torchのインストールURL一覧](https://developer.download.nvidia.cn/compute/redist/jp/)]
+[[torchのインストールURL一覧](https://developer.download.nvidia.com/compute/redist/jp/)]
 [[torchとtorchvisionのバージョン関係](https://github.com/pytorch/vision#installation)]  
 
 1. 仮想環境の構築
@@ -274,7 +270,22 @@ pipenv install -e ".[dev]"
 ONNX系 [[参考](https://elinux.org/Jetson_Zoo#ONNX_Runtime)]
 
 ```bash
-wget https://nvidia.box.com/shared/static/amhb62mzes4flhbfavoa73m5z933pv75.whl -O onnxruntime_gpu-1.12.1-cp38-cp38-linux_aarch64.whl
-pipenv install onnxruntime_gpu-1.12.1-cp38-cp38-linux_aarch64.whl
-rm onnxruntime_gpu-1.12.1-cp38-cp38-linux_aarch64.whl
+wget https://nvidia.box.com/shared/static/amhb62mzes4flhbfavoa73m5z933pv75.whl -O onnxruntime_gpu-1.16.0-cp38-cp38-linux_aarch64.whl
+pipenv install onnxruntime_gpu-1.16.0-cp38-cp38-linux_aarch64.whl
+rm onnxruntime_gpu-1.16.0-cp38-cp38-linux_aarch64.whl
+```
+
+## 5. Citation
+
+```bibtex
+@INPROCEEDINGS{10325231,
+  author={Okuda, Masato and Yoshida, Kota and Fujino, Takeshi},
+  booktitle={2023 IEEE SENSORS}, 
+  title={Multispectral Pedestrian Detection with Visible and Far-infrared Images Under Drifting Ambient Light and Temperature}, 
+  year={2023},
+  volume={},
+  number={},
+  pages={1-4},
+  doi={10.1109/SENSORS56945.2023.10325231}
+}
 ```

@@ -153,7 +153,7 @@ class BaseValidator:
                 self.args.workers = 0  # faster CPU val as time dominated by inference, not dataloading
             if not pt:
                 self.args.rect = False
-            if model.model.yaml.get("ch"):
+            elif model.model.yaml.get("ch"):
                 self.data["ch"] = model.model.yaml.get("ch")
             if self.args.get("ch"):
                 self.data["ch"] = self.args.get("ch")
