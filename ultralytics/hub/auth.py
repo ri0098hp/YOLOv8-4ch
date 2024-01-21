@@ -1,14 +1,29 @@
 # Ultralytics YOLO 🚀, AGPL-3.0 license
 
 import requests
+from hub_sdk import HUB_API_ROOT, HUB_WEB_ROOT
 
-from ultralytics.hub.utils import HUB_API_ROOT, PREFIX, request_with_credentials
-from ultralytics.yolo.utils import LOGGER, SETTINGS, emojis, is_colab, set_settings
+from ultralytics.hub.utils import PREFIX, request_with_credentials
+from ultralytics.utils import LOGGER, SETTINGS, emojis, is_colab
 
-API_KEY_URL = "https://hub.ultralytics.com/settings?tab=api+keys"
+API_KEY_URL = f"{HUB_WEB_ROOT}/settings?tab=api+keys"
 
 
 class Auth:
+    """
+    Manages authentication processes including API key handling, cookie-based authentication, and header generation.
+
+    The class supports different methods of authentication:
+    1. Directly using an API key.
+    2. Authenticating using browser cookies (specifically in Google Colab).
+    3. Prompting the user to enter an API key.
+
+    Attributes:
+        id_token (str or bool): Token used for identity verification, initialized as False.
+        api_key (str or bool): API key for authentication, initialized as False.
+        model_key (bool): Placeholder for model key, initialized as False.
+    """
+
     id_token = api_key = model_key = False
 
     def __init__(self, api_key="", verbose=False):
@@ -45,7 +60,7 @@ class Auth:
 
         # Update SETTINGS with the new API key after successful authentication
         if success:
-            set_settings({"api_key": self.api_key})
+            SETTINGS.update({"api_key": self.api_key})
             # Log that the new login was successful
             if verbose:
                 LOGGER.info(f"{PREFIX}New authentication successful ✅")
@@ -54,7 +69,9 @@ class Auth:
 
     def request_api_key(self, max_attempts=3):
         """
-        Prompt the user to input their API key. Returns the model ID.
+        Prompt the user to input their API key.
+
+        Returns the model ID.
         """
         import getpass
 
@@ -74,8 +91,7 @@ class Auth:
             bool: True if authentication is successful, False otherwise.
         """
         try:
-            header = self.get_auth_header()
-            if header:
+            if header := self.get_auth_header():
                 r = requests.post(f"{HUB_API_ROOT}/v1/auth", headers=header)
                 if not r.json().get("success", False):
                     raise ConnectionError("Unable to authenticate.")
@@ -88,8 +104,8 @@ class Auth:
 
     def auth_with_cookies(self) -> bool:
         """
-        Attempt to fetch authentication via cookies and set id_token.
-        User must be logged in to HUB and running in a supported browser.
+        Attempt to fetch authentication via cookies and set id_token. User must be logged in to HUB and running in a
+        supported browser.
 
         Returns:
             bool: True if authentication is successful, False otherwise.
@@ -118,23 +134,4 @@ class Auth:
             return {"authorization": f"Bearer {self.id_token}"}
         elif self.api_key:
             return {"x-api-key": self.api_key}
-        else:
-            return None
-
-    def get_state(self) -> bool:
-        """
-        Get the authentication state.
-
-        Returns:
-            bool: True if either id_token or API key is set, False otherwise.
-        """
-        return self.id_token or self.api_key
-
-    def set_api_key(self, key: str):
-        """
-        Set the API key for authentication.
-
-        Args:
-            key (str): The API key string.
-        """
-        self.api_key = key
+        # else returns None

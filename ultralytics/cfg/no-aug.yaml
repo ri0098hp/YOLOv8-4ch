@@ -1,0 +1,19 @@
+# Ultralytics YOLO 🚀, GPL-3.0 license
+# Default training settings and hyperparameters for medium-augmentation COCO training
+
+task: detect # inference task, i.e. detect, segment, classify
+mode: train # YOLO mode, i.e. train, val, predict, export
+
+# Train settings -------------------------------------------------------------------------------------------------------
+model: yolov8s.pt # path to model file, i.e. yolov8n.pt, yolov8n.yaml
+data: All-Season.yaml # path to data file, i.e. i.e. coco128.yaml
+batch: 64 # (int) number of images per batch (-1 for AutoBatch)
+
+# Hyperparameters ------------------------------------------------------------------------------------------------------
+hsv_h: 0.0 # (float) image HSV-Hue augmentation (fraction)
+hsv_s: 0.0 # (float) image HSV-Saturation augmentation (fraction)
+hsv_v: 0.0 # (float) image HSV-Value augmentation (fraction)
+hsv_ir: 0.0 # (float)  FIR image V-Value augmentation (fraction) add by okuda
+translate: 0.0 # (float) image translation (+/- fraction)
+scale: 0.0 # (float) image scale (+/- gain)
+flipir: 0.0 # (float) flip black and white on FIR image (probability) add by okuda

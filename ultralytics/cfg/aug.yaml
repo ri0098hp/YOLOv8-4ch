@@ -1,0 +1,12 @@
+# Ultralytics YOLO 🚀, GPL-3.0 license
+# Default training settings and hyperparameters for medium-augmentation COCO training
+
+task: detect # inference task, i.e. detect, segment, classify
+mode: train # YOLO mode, i.e. train, val, predict, export
+
+# Train settings -------------------------------------------------------------------------------------------------------
+model: yolov8s.pt # path to model file, i.e. yolov8n.pt, yolov8n.yaml
+data: All-Season.yaml # path to data file, i.e. i.e. coco128.yaml
+epochs: 100 # number of epochs to train for
+patience: 100 # epochs to wait for no observable improvement for early stopping of training
+batch: 64 # number of images per batch (-1 for AutoBatch)

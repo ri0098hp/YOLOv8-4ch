@@ -2,15 +2,14 @@
 # Builds ultralytics/ultralytics:latest image on DockerHub https://hub.docker.com/r/ultralytics/ultralytics
 # Image is CUDA-optimized for YOLOv8 single/multi-GPU training and inference
 
-# Start FROM NVIDIA PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
-# FROM docker.io/pytorch/pytorch:latest
-FROM nvcr.io/nvidia/pytorch:23.06-py3
+# Start FROM PyTorch image https://hub.docker.com/r/pytorch/pytorch or nvcr.io/nvidia/pytorch:23.03-py3
+FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
 RUN rm -rf /opt/pytorch
+RUN pip install --no-cache nvidia-tensorrt --index-url https://pypi.ngc.nvidia.com
 
 # rootless user
 ARG USER=suwako
 RUN useradd -m -d /home/$USER -s /bin/bash $USER
-WORKDIR /home/$USER/workspace
 
 # Downloads to user config dir
 ADD https://ultralytics.com/assets/Arial.ttf https://ultralytics.com/assets/Arial.Unicode.ttf /home/$USER/.config/Ultralytics/
@@ -19,17 +18,27 @@ ADD https://ultralytics.com/assets/Arial.ttf https://ultralytics.com/assets/Aria
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update \
   && apt-get -y upgrade
-RUN apt-get install --no-install-recommends -y gcc git zip curl htop libusb-1.0-0 libgl1-mesa-glx libglib2.0-0 libpython3-dev gnupg g++ screen rename python3-tk
+RUN apt-get install --no-install-recommends -y gcc git zip curl htop libgl1 libglib2.0-0 libpython3-dev gnupg g++ libusb-1.0-0 screen rename
+
+# Security updates
+# https://security.snyk.io/vuln/SNYK-UBUNTU1804-OPENSSL-3314796
+RUN apt upgrade --no-install-recommends -y openssl tar
+
+# Copy contents
+USER $USER
+WORKDIR /home/$USER/workspace
+RUN git clone https://github.com/ultralytics/ultralytics
 
 # Install pip packages
-USER $USER
-COPY requirements.txt .
 RUN python3 -m pip install --upgrade pip wheel
-RUN pip install nvidia-tensorrt --index-url https://pypi.ngc.nvidia.com \
-  && pip install -r requirements.txt
-RUN pip install --no-cache -U Pillow opencv-python
+RUN cd ultralytics \
+  && pip install --no-cache -e ".[export]" albumentations comet pycocotools lancedb pytest-cov
+RUN rm -rf ultralytics
+
 # Set environment variables
 ENV OMP_NUM_THREADS=1
+# Avoid DDP error "MKL_THREADING_LAYER=INTEL is incompatible with libgomp.so.1 library" https://github.com/pytorch/pytorch/issues/37377
+ENV MKL_THREADING_LAYER=GNU
 
 # Add binary path
 ENV PATH=$PATH:/home/$USER/.local/bin

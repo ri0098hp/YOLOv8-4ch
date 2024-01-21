@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd ~/workspace
-pip install -e ".[dev]"
+pip install -e ".[export]"

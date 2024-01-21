@@ -1,16 +1,20 @@
 # Ultralytics YOLO 🚀, AGPL-3.0 license
 """
-Ultralytics modules. Visualize with:
+Ultralytics modules.
 
-from ultralytics.nn.modules import *
-import torch
-import os
+Example:
+    Visualize a module with Netron.
+    ```python
+    from ultralytics.nn.modules import *
+    import torch
+    import os
 
-x = torch.ones(1, 128, 40, 40)
-m = Conv(128, 128)
-f = f'{m._get_name()}.onnx'
-torch.onnx.export(m, x, f)
-os.system(f'onnxsim {f} {f} && open {f}')
+    x = torch.ones(1, 128, 40, 40)
+    m = Conv(128, 128)
+    f = f'{m._get_name()}.onnx'
+    torch.onnx.export(m, x, f)
+    os.system(f'onnxsim {f} {f} && open {f}')
+    ```
 """
 
 from .block import (
@@ -31,6 +35,7 @@ from .block import (
     HGStem,
     Proto,
     RepC3,
+    ResNetLayer,
 )
 from .conv import (
     CBAM,
@@ -47,7 +52,7 @@ from .conv import (
     RepConv,
     SpatialAttention,
 )
-from .head import Classify, Detect, Pose, RTDETRDecoder, Segment
+from .head import OBB, Classify, Detect, Pose, RTDETRDecoder, Segment
 from .multi import M2S, S2M_FIR, S2M_RGB, M2S_Add, M2S_Conv, Pass
 from .transformer import (
     AIFI,
@@ -108,6 +113,8 @@ __all__ = (
     "DeformableTransformerDecoderLayer",
     "MSDeformAttn",
     "MLP",
+    "ResNetLayer",
+    "OBB",
     "S2M_RGB",
     "S2M_FIR",
     "M2S",
