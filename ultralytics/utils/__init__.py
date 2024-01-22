@@ -389,8 +389,6 @@ DEFAULT_CFG_DICT = yaml_load(DEFAULT_CFG_PATH)
 for k, v in DEFAULT_CFG_DICT.items():
     if isinstance(v, str) and v.lower() == "none":
         DEFAULT_CFG_DICT[k] = None
-ADDED_CFG_DICT = {"pos_imgs_train": None, "pos_imgs_val": None, "neg_ratio_train": None, "neg_ratio_val": None}
-DEFAULT_CFG_DICT.update(ADDED_CFG_DICT)
 DEFAULT_CFG_KEYS = DEFAULT_CFG_DICT.keys()
 DEFAULT_CFG = IterableSimpleNamespace(**DEFAULT_CFG_DICT)
 

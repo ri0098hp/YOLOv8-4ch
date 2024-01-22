@@ -1,33 +1,35 @@
 """
-data/custom以下に設定したcfg.yamlを保存
-ベースとなるcfgはDEFAULT_CFGで変更可能
+ultralytics/cfg/custom以下に設定したcfg.yamlを保存
 """
 
-import glob
 import os
 from pathlib import Path
-from pprint import pprint
 
-from ultralytics.yolo.cfg import get_cfg
-from ultralytics.yolo.data import build_yolo_dataset
-from ultralytics.yolo.data.utils import check_det_dataset
-from ultralytics.yolo.utils import yaml_save
+from ultralytics.cfg import cfg2dict, get_cfg
+from ultralytics.data import build_yolo_dataset
+from ultralytics.data.utils import check_det_dataset
 
-DEFAULT_CFG = "ultralytics/yolo/cfg/default.yaml"
+DEFAULT_CFG = "ultralytics/cfg/default.yaml"
 ROOT_DIR = "/home/suwako/workspace"
 
 
 def main():
     os.chdir(ROOT_DIR)
-    pprint(glob.glob("data/*.yaml"))
-    data_name = input("name of data w/o 'data/': ")
+    # fps_data = sorted(Path("ultralytics/cfg/datasets/").glob("*.yaml"))
+    # for i, fp_data in enumerate(fps_data):
+    #     print(i, "\t", fp_data.name)
+    # fp_data = fps_data[int(input("index of data: "))]
+    # print(fp_data, "\n")
 
-    cfg = f"cfg/custom/{data_name}.yaml"
-    if not os.path.exists(cfg):
-        cfg = DEFAULT_CFG
-    args = get_cfg(cfg, None)
+    fps_cfg = sorted(Path("ultralytics/cfg/custom/").glob("*.yaml"))
+    for i, fp_cfg in enumerate(fps_cfg):
+        print(i, "\t", fp_cfg.name)
+    fp_cfg = fps_cfg[int(input("index of cfg: "))]
+    print(fp_cfg, "\n")
 
-    args.data = f"data/{data_name}.yaml"
+    args = {**cfg2dict(DEFAULT_CFG), **cfg2dict(fp_cfg)}
+    args = get_cfg(args, None)
+    # args.data = fp_data
 
     data_dict = check_det_dataset(args.data)
     if "yaml_file" in data_dict:
@@ -44,14 +46,11 @@ def main():
         except PermissionError:
             pass
 
-        os.makedirs(Path("cfg") / "custom", exist_ok=True)
-        yaml_save(Path("cfg") / "custom" / f"{data_name}.yaml", vars(args))  # save run args
-
         # input number
         print("pos_imgs_train:", args.get("pos_imgs_train"))
         print("neg_ratio_train:", args.get("neg_ratio_train"))
         print("0: 決定, -1: 全データ, 自然数: ラベル有画像数")
-        p = int(input("pos_imgs_train: "))
+        p = int(input("num for pos_imgs_train: "))
         if p == 0:
             break
         n = float(input("neg_ratio_train: "))
@@ -77,12 +76,10 @@ def main():
         except PermissionError:
             pass
 
-        yaml_save(Path("cfg") / "custom" / f"{data_name}.yaml", vars(args))  # save run args
-
         print("0: 決定, -1: 全データ, 0.1~1.0: ラベル無しデータの割合")
         print("pos_imgs_val:", args.get("pos_imgs_val"))
         print("neg_ratio_val:", args.get("neg_ratio_val"))
-        p = int(input("pos_imgs_val: "))
+        p = int(input("num for pos_imgs_val: "))
         if p == 0:
             break
         n = float(input("neg_ratio_val: "))
@@ -95,6 +92,27 @@ def main():
             args.neg_ratio_val = n
         elif args.get("neg_ratio_val"):
             del args.neg_ratio_val
+    print(f"\nplease add to {fp_cfg}")
+    try:
+        if args.pos_imgs_train is not None:
+            print("pos_imgs_train:", args.pos_imgs_train)
+    except Exception:
+        pass
+    try:
+        if args.neg_ratio_train is not None:
+            print("neg_ratio_train:", args.neg_ratio_train)
+    except Exception:
+        pass
+    try:
+        if args.pos_imgs_val is not None:
+            print("pos_imgs_val:", args.pos_imgs_val)
+    except Exception:
+        pass
+    try:
+        if args.neg_ratio_val is not None:
+            print("neg_ratio_val:", args.neg_ratio_val)
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

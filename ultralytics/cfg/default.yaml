@@ -5,8 +5,8 @@ task: detect # (str) YOLO task, i.e. detect, segment, classify, pose
 mode: train # (str) YOLO mode, i.e. train, val, predict, export, track, benchmark
 
 # Train settings -------------------------------------------------------------------------------------------------------
-model: # (str, optional) path to model file, i.e. yolov8n.pt, yolov8n.yaml
-data: # (str, optional) path to data file, i.e. coco128.yaml
+model: yolov8s.pt # (str, optional) path to model file, i.e. yolov8n.pt, yolov8n.yaml
+data: All-Season.yaml # (str, optional) path to data file, i.e. coco128.yaml
 epochs: 100 # (int) number of epochs to train for
 time: # (float, optional) number of hours to train for, overrides epochs if supplied
 patience: 100 # (int) epochs to wait for no observable improvement for early stopping of training
@@ -119,6 +119,13 @@ copy_paste: 0.0 # (float) segment copy-paste (probability)
 auto_augment: randaugment # (str) auto augmentation policy for classification (randaugment, autoaugment, augmix)
 erasing: 0.4 # (float) probability of random erasing during classification training (0-1)
 crop_fraction: 1.0 # (float) image crop fraction for classification evaluation/inference (0-1)
+
+# Added Parameters ---------------------------------------------------------------------------------------------------
+ch: None # (int) channels of input images (1,2,4)
+pos_imgs_train: None # (int) number of images for train (optionally)
+pos_imgs_val: None # (float) ratio of non-labeled images to labeled ones (optionally)
+neg_ratio_train: None # (int) number of images for val (optionally)
+neg_ratio_val: None # (float) ratio of non-labeled images to labeled ones (optionally)
 
 # Custom config.yaml ---------------------------------------------------------------------------------------------------
 cfg: # (str, optional) for overriding defaults.yaml

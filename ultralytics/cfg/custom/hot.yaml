@@ -1,0 +1,2 @@
+# Train settings -------------------------------------------------------------------------------------------------------
+data: All-Season-hot.yaml # path to data file, i.e. i.e. coco128.yaml

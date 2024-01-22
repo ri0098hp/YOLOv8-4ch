@@ -137,6 +137,7 @@ CFG_INT_KEYS = (
     "save_period",
     "pos_imgs_train",
     "pos_imgs_val",
+    "ch",
 )
 CFG_BOOL_KEYS = (
     "save",

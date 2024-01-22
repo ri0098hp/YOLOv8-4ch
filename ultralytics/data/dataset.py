@@ -122,7 +122,7 @@ class YOLODataset(BaseDataset):
             label_fp = x.replace(os.path.splitext(x)[-1], ".txt")
             self.label_files.append(label_fp)
 
-        cache_path = Path(self.data["data_path"]) / "cache" / f"{self.is_train}_labels.cache"
+        cache_path = Path(self.data["data_path"]) / "cache" / f"{self.is_train}_labels_{self.data['ch']}ch.cache"
         try:
             cache, exists = load_dataset_cache_file(cache_path), True  # attempt to load a *.cache file
             assert cache["version"] == DATASET_CACHE_VERSION  # matches current version
