@@ -788,21 +788,30 @@ def plot_images(
                 annotator.fromarray(im)
 
     # add okuda : multi channels img save
+    fname = str(fname)
+    fname_rgb = fname[:-4] + "_rgb.jpg"
+    fname_fir = fname[:-4] + "_fir.jpg"
     if ch == 2:
-        fname = str(fname)
-        mosaic_ir, mosaic = annotator.im.split()
-        mosaic.save(fname[:-4] + "_rgb.jpg")
-        mosaic_ir.save(fname[:-4] + "_fir.jpg")
+        mosaic_fir, mosaic_rgb = annotator.im.split()
+        mosaic = Image.blend(mosaic_rgb, mosaic_fir, 0.5)
+        mosaic.save(fname)
+        mosaic_rgb.save(fname_rgb)
+        mosaic_fir.save(fname_fir)
+        if on_plot:
+            [on_plot(f) for f in [fname, fname_rgb, fname_fir]]
     elif ch == 4:
-        fname = str(fname)
-        mosaic_ir, r, g, b = annotator.im.split()
-        mosaic = Image.merge("RGB", (r, g, b))
-        mosaic.save(fname[:-4] + "_rgb.jpg")
-        mosaic_ir.save(fname[:-4] + "_fir.jpg")
+        mosaic_fir, r, g, b = annotator.im.split()
+        mosaic_rgb = Image.merge("RGB", (r, g, b))
+        mosaic = Image.blend(mosaic_rgb, mosaic_fir.convert("RGB"), 0.5)
+        mosaic.save(fname)
+        mosaic_rgb.save(fname_rgb)
+        mosaic_fir.save(fname_fir)
+        if on_plot:
+            [on_plot(f) for f in [fname, fname_rgb, fname_fir]]
     else:
         annotator.im.save(fname)  # save
-    if on_plot:
-        on_plot(fname)
+        if on_plot:
+            on_plot(fname)
 
 
 @plt_settings()

@@ -120,6 +120,7 @@ class TQDM(tqdm_original):
         # Set new default values (these can still be overridden when calling TQDM)
         kwargs["disable"] = not VERBOSE or kwargs.get("disable", False)  # logical 'and' with default value if passed
         kwargs.setdefault("bar_format", TQDM_BAR_FORMAT)  # override default value if passed
+        kwargs.setdefault("dynamic_ncols", True)  # override default value if passed
         super().__init__(*args, **kwargs)
 
 
