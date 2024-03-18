@@ -16,6 +16,7 @@
 - Tested on All-Season-Dataset (Ours)
 - Batch-size=1 on Speed/Image, FPS
 - Jetson uses JetPack 5.0
+- ultralytics 8.1.1
 
 ## Original
 
@@ -38,9 +39,9 @@ YOLOv8 をRGB-FIR向けに拡張したもの. 次の機能をオリジナルか�
 
 ## Models
 
-ベースラインとなっているモデル. [詳細](ultralytics/models)
+ベースラインとなっているモデル. [詳細](ultralytics/cfg/models)
 
-![yolov8s-2stream.drawio.svg](ultralytics/models/diagram/yolov8s-2stream.drawio.svg)
+![yolov8s-2stream.drawio.svg](ultralytics/cfg/models/diagram/yolov8s-2stream.drawio.svg)
 
 ## 1. Installation
 

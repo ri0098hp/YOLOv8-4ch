@@ -68,10 +68,10 @@ jobs:
       - name: Setup Python Dependacy
         run: |
           pip install --upgrade pip
-          pip install wheel setuptools
+          pip install build wheel setuptools
 
       - name: Build Wheel
-        run: python setup.py bdist_wheel
+        run: python -m build
 
       - name: Move Wheel
         run: mv ./dist/*.whl ./concat.zip
