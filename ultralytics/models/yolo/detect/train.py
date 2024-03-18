@@ -120,7 +120,7 @@ class DetectionTrainer(BaseTrainer):
             "Size",
         )
 
-    def plot_training_samples(self, batch, ni, fname):
+    def plot_training_samples(self, batch, fname):
         """Plots training samples with their annotations."""
         plot_images(
             images=batch["img"],

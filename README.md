@@ -19,8 +19,8 @@
 
 ## Original
 
- This is forked repo from (ultralytics/ultralytics) on commit f6309b8.  
- Catch up to changes [here](https://github.com/ultralytics/ultralytics/compare/f6309b8...main).
+ This is forked repo from (ultralytics/ultralytics) on commit f9edac6 (ultralytics 8.1.29).  
+ Catch up to changes [here](https://github.com/ultralytics/ultralytics/compare/f9edac6...main).
 
 ## Features
 
@@ -178,7 +178,7 @@ yolo export model=[重みファイルへのパス] format=[フォーマット]
 以下例...
 
 ```bash
-yolo cfg=cfg/test.yaml
+yolo cfg=test.yaml
 ```
 
 ## 3. Usage (Python with pip)

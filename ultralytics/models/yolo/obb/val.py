@@ -18,7 +18,7 @@ class OBBValidator(DetectionValidator):
         ```python
         from ultralytics.models.yolo.obb import OBBValidator
 
-        args = dict(model='yolov8n-obb.pt', data='coco8-seg.yaml')
+        args = dict(model='yolov8n-obb.pt', data='dota8.yaml')
         validator = OBBValidator(args=args)
         validator(model=args['model'])
         ```
@@ -55,10 +55,11 @@ class OBBValidator(DetectionValidator):
         Return correct prediction matrix.
 
         Args:
-            detections (torch.Tensor): Tensor of shape [N, 6] representing detections.
-                Each detection is of the format: x1, y1, x2, y2, conf, class.
-            labels (torch.Tensor): Tensor of shape [M, 5] representing labels.
-                Each label is of the format: class, x1, y1, x2, y2.
+            detections (torch.Tensor): Tensor of shape [N, 7] representing detections.
+                Each detection is of the format: x1, y1, x2, y2, conf, class, angle.
+            gt_bboxes (torch.Tensor): Tensor of shape [M, 5] representing rotated boxes.
+                Each box is of the format: x1, y1, x2, y2, angle.
+            labels (torch.Tensor): Tensor of shape [M] representing labels.
 
         Returns:
             (torch.Tensor): Correct prediction matrix of shape [N, 10] for 10 IoU levels.
@@ -117,11 +118,10 @@ class OBBValidator(DetectionValidator):
 
     def save_one_txt(self, predn, save_conf, shape, file):
         """Save YOLO detections to a txt file in normalized coordinates in a specific format."""
-        gn = torch.tensor(shape)[[1, 0, 1, 0]]  # normalization gain whwh
-        for *xyxy, conf, cls, angle in predn.tolist():
-            xywha = torch.tensor([*xyxy, angle]).view(1, 5)
-            xywha[:, :4] /= gn
-            xyxyxyxy = ops.xywhr2xyxyxyxy(xywha).view(-1).tolist()  # normalized xywh
+        gn = torch.tensor(shape)[[1, 0]]  # normalization gain whwh
+        for *xywh, conf, cls, angle in predn.tolist():
+            xywha = torch.tensor([*xywh, angle]).view(1, 5)
+            xyxyxyxy = (ops.xywhr2xyxyxyxy(xywha) / gn).view(-1).tolist()  # normalized xywh
             line = (cls, *xyxyxyxy, conf) if save_conf else (cls, *xyxyxyxy)  # label format
             with open(file, "a") as f:
                 f.write(("%g " * len(line)).rstrip() % line + "\n")

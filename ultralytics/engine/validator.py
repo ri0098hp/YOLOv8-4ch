@@ -17,7 +17,9 @@ Usage - formats:
                           yolov8n.tflite             # TensorFlow Lite
                           yolov8n_edgetpu.tflite     # TensorFlow Edge TPU
                           yolov8n_paddle_model       # PaddlePaddle
+                          yolov8n_ncnn_model         # NCNN
 """
+
 import json
 import os
 import time
@@ -121,7 +123,7 @@ class BaseValidator:
         else:
             callbacks.add_integration_callbacks(self)
             model = AutoBackend(
-                model or self.args.model,
+                weights=model or self.args.model,
                 device=select_device(self.args.device, self.args.batch),
                 dnn=self.args.dnn,
                 data=self.args.data,
@@ -155,6 +157,7 @@ class BaseValidator:
                 self.data["ch"] = self.args.get("ch")
             self.stride = model.stride  # used in get_dataloader() for padding
             self.dataloader = self.dataloader or self.get_dataloader(self.data, self.args.batch)
+
             model.eval()
             model.warmup(imgsz=(1 if pt else self.args.batch, self.data["ch"], imgsz, imgsz))  # warmup
 
@@ -211,24 +214,24 @@ class BaseValidator:
 
                 if self.args.get("save_all"):
                     fname = self.save_dir / "jpg" / "gt" / f"val_batch{batch_i}_labels.jpg"
-                    self.plot_val_samples(batch, batch_i, fname)
+                    self.plot_val_samples(batch, fname)
                     fname = self.save_dir / "jpg" / "pred" / f"val_batch{batch_i}_pred.jpg"
-                    self.plot_predictions(batch, preds, batch_i, fname)
+                    self.plot_predictions(batch, preds, fname)
 
             self.run_callbacks("on_val_batch_end")
 
         if not self.training and self.args.plots:
             batch, preds, batch_i = example_0
-            fname = self.save_dir / "examples" / f"val_{batch_i}_labels.jpg"
-            self.plot_val_samples(batch, batch_i, fname)
-            fname = self.save_dir / "examples" / f"val_{batch_i}_pred.jpg"
-            self.plot_predictions(batch, preds, batch_i, fname)
+            fname = self.save_dir / "examples" / f"val_batch{batch_i}_labels.jpg"
+            self.plot_val_samples(batch, fname)
+            fname = self.save_dir / "examples" / f"val_batch{batch_i}_pred.jpg"
+            self.plot_predictions(batch, preds, fname)
 
             batch, preds, batch_i = example_max
-            fname = self.save_dir / "examples" / f"val_{batch_i}_labels.jpg"
-            self.plot_val_samples(batch, batch_i, fname)
-            fname = self.save_dir / "examples" / f"val_{batch_i}_pred.jpg"
-            self.plot_predictions(batch, preds, batch_i, fname)
+            fname = self.save_dir / "examples" / f"val_batch{batch_i}_labels.jpg"
+            self.plot_val_samples(batch, fname)
+            fname = self.save_dir / "examples" / f"val_batch{batch_i}_pred.jpg"
+            self.plot_predictions(batch, preds, fname)
         stats = self.get_stats()
         self.check_stats(stats)
         self.speed = dict(zip(self.speed.keys(), (x.t / len(self.dataloader.dataset) * 1e3 for x in dt)))
@@ -359,11 +362,11 @@ class BaseValidator:
         self.plots[Path(name)] = {"data": data, "timestamp": time.time()}
 
     # TODO: may need to put these following functions into callback
-    def plot_val_samples(self, batch, ni):
+    def plot_val_samples(self, batch, fname):
         """Plots validation samples during training."""
         pass
 
-    def plot_predictions(self, batch, preds, ni):
+    def plot_predictions(self, batch, preds, fname):
         """Plots YOLO model predictions on batch images."""
         pass
 

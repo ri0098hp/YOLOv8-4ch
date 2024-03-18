@@ -104,7 +104,6 @@ nbs: 64 # (int) nominal batch size
 hsv_h: 0.015 # (float) image HSV-Hue augmentation (fraction)
 hsv_s: 0.7 # (float) image HSV-Saturation augmentation (fraction)
 hsv_v: 0.4 # (float) image HSV-Value augmentation (fraction)
-hsv_ir: 0.5 # (float)  FIR image V-Value augmentation (fraction) add by okuda
 degrees: 0.0 # (float) image rotation (+/- deg)
 translate: 0.1 # (float) image translation (+/- fraction)
 scale: 0.5 # (float) image scale (+/- gain)
@@ -112,7 +111,6 @@ shear: 0.0 # (float) image shear (+/- deg)
 perspective: 0.0 # (float) image perspective (+/- fraction), range 0-0.001
 flipud: 0.0 # (float) image flip up-down (probability)
 fliplr: 0.5 # (float) image flip left-right (probability)
-flipir: 0.0 # (float) flip black and white on FIR image (probability) add by okuda
 mosaic: 1.0 # (float) image mosaic (probability)
 mixup: 0.0 # (float) image mixup (probability)
 copy_paste: 0.0 # (float) segment copy-paste (probability)
@@ -120,12 +118,15 @@ auto_augment: randaugment # (str) auto augmentation policy for classification (r
 erasing: 0.4 # (float) probability of random erasing during classification training (0-1)
 crop_fraction: 1.0 # (float) image crop fraction for classification evaluation/inference (0-1)
 
-# Added Parameters ---------------------------------------------------------------------------------------------------
-ch: None # (int) channels of input images (1,2,4)
-pos_imgs_train: None # (int) number of images for train (optionally)
-pos_imgs_val: None # (float) ratio of non-labeled images to labeled ones (optionally)
-neg_ratio_train: None # (int) number of images for val (optionally)
-neg_ratio_val: None # (float) ratio of non-labeled images to labeled ones (optionally)
+# Added Parameters by okuda --------------------------------------------------------------------------------------------
+ch: # (int) channels of input images (1,2,3,4)
+save_all: False # (bool) save all images in test sets
+pos_imgs_train: # (int) number of images for train (optionally)
+pos_imgs_val: # (float) ratio of non-labeled images to labeled ones (optionally)
+neg_ratio_train: # (int) number of images for val (optionally)
+neg_ratio_val: # (float) ratio of non-labeled images to labeled ones (optionally)
+hsv_ir: 0.5 # (float)  FIR image V-Value augmentation (fraction) add by okuda
+flipir: 0.0 # (float) flip black and white on FIR image (probability) add by okuda
 
 # Custom config.yaml ---------------------------------------------------------------------------------------------------
 cfg: # (str, optional) for overriding defaults.yaml

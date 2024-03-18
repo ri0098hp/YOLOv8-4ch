@@ -1,5 +1,6 @@
 # Ultralytics YOLO 🚀, AGPL-3.0 license
 
+import os
 import platform
 import random
 import sys
@@ -26,6 +27,9 @@ from ultralytics.utils import (
     is_pip_package,
 )
 from ultralytics.utils.downloads import GITHUB_ASSETS_NAMES
+
+HUB_API_ROOT = os.environ.get("ULTRALYTICS_HUB_API", "https://api.ultralytics.com")
+HUB_WEB_ROOT = os.environ.get("ULTRALYTICS_HUB_WEB", "https://hub.ultralytics.com")
 
 PREFIX = colorstr("Ultralytics HUB: ")
 HELP_MSG = "If this issue persists please visit https://github.com/ultralytics/hub/issues for assistance."
@@ -80,7 +84,7 @@ def requests_with_progress(method, url, **kwargs):
     Args:
         method (str): The HTTP method to use (e.g. 'GET', 'POST').
         url (str): The URL to send the request to.
-        **kwargs (dict): Additional keyword arguments to pass to the underlying `requests.request` function.
+        **kwargs (any): Additional keyword arguments to pass to the underlying `requests.request` function.
 
     Returns:
         (requests.Response): The response object from the HTTP request.
@@ -118,7 +122,7 @@ def smart_request(method, url, retry=3, timeout=30, thread=True, code=-1, verbos
         code (int, optional): An identifier for the request, used for logging purposes. Default is -1.
         verbose (bool, optional): A flag to determine whether to print out to console or not. Default is True.
         progress (bool, optional): Whether to show a progress bar during the request. Default is False.
-        **kwargs (dict): Keyword arguments to be passed to the requests function specified in method.
+        **kwargs (any): Keyword arguments to be passed to the requests function specified in method.
 
     Returns:
         (requests.Response): The HTTP response object. If the request is executed in a separate thread, returns None.

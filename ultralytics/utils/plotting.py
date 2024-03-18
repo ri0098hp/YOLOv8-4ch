@@ -28,7 +28,7 @@ class Colors:
     Attributes:
         palette (list of tuple): List of RGB color values.
         n (int): The number of colors in the palette.
-        pose_palette (np.array): A specific color palette array with dtype np.uint8.
+        pose_palette (np.ndarray): A specific color palette array with dtype np.uint8.
     """
 
     def __init__(self):
@@ -113,13 +113,13 @@ class Annotator:
 
     def __init__(self, im, line_width=None, font_size=None, font="Arial.ttf", pil=False, example="abc"):
         """Initialize the Annotator class with image and line width along with color palette for keypoints and limbs."""
-        assert im.data.contiguous, "Image not contiguous. Apply np.ascontiguousarray(im) to Annotator() input images."
         non_ascii = not is_ascii(example)  # non-latin labels, i.e. asian, arabic, cyrillic
         self.ch = 1 if len(im.shape) < 3 else im.shape[2]
-        self.pil = pil or non_ascii
-        self.lw = line_width or max(round(sum(im.shape) / 2 * 0.003), 2)  # line width
+        input_is_pil = isinstance(im, Image.Image)
+        self.pil = pil or non_ascii or input_is_pil
+        self.lw = line_width or max(round(sum(im.size if input_is_pil else im.shape) / 2 * 0.003), 2)
         if self.pil:  # use PIL
-            self.im = im if isinstance(im, Image.Image) else Image.fromarray(im)
+            self.im = im if input_is_pil else Image.fromarray(im)
             self.draw = ImageDraw.Draw(self.im)
             try:
                 font = check_font("Arial.Unicode.ttf" if non_ascii else font)
@@ -131,9 +131,10 @@ class Annotator:
             if check_version(pil_version, "9.2.0"):
                 self.font.getsize = lambda x: self.font.getbbox(x)[2:4]  # text width, height
         else:  # use cv2
+            assert im.data.contiguous, "Image not contiguous. Apply np.ascontiguousarray(im) to Annotator input images."
             self.im = im if im.flags.writeable else im.copy()
-            self.tf = max(self.lw - 1, 1)  # font thickness
-            self.sf = self.lw / 3  # font scale
+            self.tf = max(self.lw - 1, 2)  # font thickness
+            self.sf = self.lw / 2.25  # font scale
         # Pose
         self.skeleton = [
             [16, 14],
@@ -254,13 +255,14 @@ class Annotator:
             kpt_line (bool, optional): If True, the function will draw lines connecting keypoints
                                        for human pose. Default is True.
 
-        Note: `kpt_line=True` currently only supports human pose plotting.
+        Note:
+            `kpt_line=True` currently only supports human pose plotting.
         """
         if self.pil:
             # Convert to numpy first
             self.im = np.asarray(self.im).copy()
         nkpt, ndim = kpts.shape
-        is_pose = nkpt == 17 and ndim == 3
+        is_pose = nkpt == 17 and ndim in {2, 3}
         kpt_line &= is_pose  # `kpt_line=True` for now only supports human pose plotting
         for i, k in enumerate(kpts):
             color_k = [int(x) for x in self.kpt_color[i]] if is_pose else colors(i)
@@ -333,10 +335,18 @@ class Annotator:
         """Return annotated image as array."""
         return np.asarray(self.im)
 
-    # Object Counting Annotator
+    def show(self, title=None):
+        """Show the annotated image."""
+        Image.fromarray(np.asarray(self.im)[..., ::-1]).show(title)
+
+    def save(self, filename="image.jpg"):
+        """Save the annotated image to 'filename'."""
+        cv2.imwrite(filename, np.asarray(self.im))
+
     def draw_region(self, reg_pts=None, color=(0, 255, 0), thickness=5):
         """
-        Draw region line
+        Draw region line.
+
         Args:
             reg_pts (list): Region Points (for line 2 points, for region 4 points)
             color (tuple): Region Color value
@@ -346,7 +356,8 @@ class Annotator:
 
     def draw_centroid_and_tracks(self, track, color=(255, 0, 255), track_thickness=2):
         """
-        Draw centroid point and track trails
+        Draw centroid point and track trails.
+
         Args:
             track (list): object tracking points for trails display
             color (tuple): tracks line color
@@ -358,7 +369,8 @@ class Annotator:
 
     def count_labels(self, counts=0, count_txt_size=2, color=(255, 255, 255), txt_color=(0, 0, 0)):
         """
-        Plot counts for object counter
+        Plot counts for object counter.
+
         Args:
             counts (int): objects counts value
             count_txt_size (int): text size for counts display
@@ -387,11 +399,14 @@ class Annotator:
 
     @staticmethod
     def estimate_pose_angle(a, b, c):
-        """Calculate the pose angle for object
+        """
+        Calculate the pose angle for object.
+
         Args:
             a (float) : The value of pose point a
             b (float): The value of pose point b
             c (float): The value o pose point c
+
         Returns:
             angle (degree): Degree value of angle between three points
         """
@@ -412,8 +427,6 @@ class Annotator:
             shape (tuple): imgsz for model inference
             radius (int): Keypoint radius value
         """
-        nkpts, ndim = keypoints.shape
-        nkpts == 17 and ndim == 3
         for i, k in enumerate(keypoints):
             if i in indices:
                 x_coord, y_coord = k[0], k[1]
@@ -521,6 +534,51 @@ class Annotator:
         cv2.putText(
             self.im, label, (int(mask[0][0]) - text_size[0] // 2, int(mask[0][1]) - 5), 0, 0.7, (255, 255, 255), 2
         )
+
+    def plot_distance_and_line(self, distance_m, distance_mm, centroids, line_color, centroid_color):
+        """
+        Plot the distance and line on frame.
+
+        Args:
+            distance_m (float): Distance between two bbox centroids in meters.
+            distance_mm (float): Distance between two bbox centroids in millimeters.
+            centroids (list): Bounding box centroids data.
+            line_color (RGB): Distance line color.
+            centroid_color (RGB): Bounding box centroid color.
+        """
+        (text_width_m, text_height_m), _ = cv2.getTextSize(
+            f"Distance M: {distance_m:.2f}m", cv2.FONT_HERSHEY_SIMPLEX, 0.8, 2
+        )
+        cv2.rectangle(self.im, (15, 25), (15 + text_width_m + 10, 25 + text_height_m + 20), (255, 255, 255), -1)
+        cv2.putText(
+            self.im,
+            f"Distance M: {distance_m:.2f}m",
+            (20, 50),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.8,
+            (0, 0, 0),
+            2,
+            cv2.LINE_AA,
+        )
+
+        (text_width_mm, text_height_mm), _ = cv2.getTextSize(
+            f"Distance MM: {distance_mm:.2f}mm", cv2.FONT_HERSHEY_SIMPLEX, 0.8, 2
+        )
+        cv2.rectangle(self.im, (15, 75), (15 + text_width_mm + 10, 75 + text_height_mm + 20), (255, 255, 255), -1)
+        cv2.putText(
+            self.im,
+            f"Distance MM: {distance_mm:.2f}mm",
+            (20, 100),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.8,
+            (0, 0, 0),
+            2,
+            cv2.LINE_AA,
+        )
+
+        cv2.line(self.im, centroids[0], centroids[1], line_color, 3)
+        cv2.circle(self.im, centroids[0], 6, centroid_color, -1)
+        cv2.circle(self.im, centroids[1], 6, centroid_color, -1)
 
     def visioneye(self, box, center_point, color=(235, 219, 11), pin_color=(255, 0, 255), thickness=2, pins_radius=10):
         """
@@ -659,6 +717,7 @@ def plot_images(
     on_plot=None,
     max_subplots=16,
     save=True,
+    conf_thres=0.25,
 ):
     """Plot image grid with labels."""
     if isinstance(images, torch.Tensor):
@@ -689,9 +748,7 @@ def plot_images(
     grid_color = (0,) * ch
     txt_color = (255,) * ch
 
-    for i, im in enumerate(images):
-        if i == max_subplots:  # if last batch has fewer images than we expect
-            break
+    for i in range(bs):
         x, y = int(w * (i // ns)), int(h * (i % ns))  # block origin
         mosaic[y : y + h, x : x + w, :] = images[i].transpose(1, 2, 0)
 
@@ -718,16 +775,16 @@ def plot_images(
             if len(bboxes):
                 boxes = bboxes[idx]
                 conf = confs[idx] if confs is not None else None  # check for confidence presence (label vs pred)
-                if len(boxes):
-                    if boxes[:, :4].max() <= 1.1:  # if normalized with tolerance 0.1
-                        boxes[:, [0, 2]] *= w  # scale to pixels
-                        boxes[:, [1, 3]] *= h
-                    elif scale < 1:  # absolute coords need scale if image scales
-                        boxes[:, :4] *= scale
-                boxes[:, 0] += x
-                boxes[:, 1] += y
                 is_obb = boxes.shape[-1] == 5  # xywhr
                 boxes = ops.xywhr2xyxyxyxy(boxes) if is_obb else ops.xywh2xyxy(boxes)
+                if len(boxes):
+                    if boxes[:, :4].max() <= 1.1:  # if normalized with tolerance 0.1
+                        boxes[..., 0::2] *= w  # scale to pixels
+                        boxes[..., 1::2] *= h
+                    elif scale < 1:  # absolute coords need scale if image scales
+                        boxes[..., :4] *= scale
+                boxes[..., 0::2] += x
+                boxes[..., 1::2] += y
                 for j, box in enumerate(boxes.astype(np.int64).tolist()):
                     c = classes[j]
                     if ch == 1 or ch == 2:
@@ -735,7 +792,7 @@ def plot_images(
                     else:
                         color = (0,) * (ch - 3) + colors(c)
                     c = names.get(c, c) if names else c
-                    if labels or conf[j] > 0.25:  # 0.25 conf thresh
+                    if labels or conf[j] > conf_thres:
                         label = f"{c}" if labels else f"{c} {conf[j]:.1f}"
                         annotator.box_label(box, label, color=color, txt_color=txt_color, rotated=is_obb)
             elif len(classes):
@@ -756,7 +813,7 @@ def plot_images(
                 kpts_[..., 0] += x
                 kpts_[..., 1] += y
                 for j in range(len(kpts_)):
-                    if labels or conf[j] > 0.25:  # 0.25 conf thresh
+                    if labels or conf[j] > conf_thres:
                         annotator.kpts(kpts_[j])
 
             # Plot masks
@@ -772,7 +829,7 @@ def plot_images(
 
                 im = np.asarray(annotator.im).copy()
                 for j in range(len(image_masks)):
-                    if labels or conf[j] > 0.25:  # 0.25 conf thresh
+                    if labels or conf[j] > conf_thres:
                         color = colors(classes[j])
                         mh, mw = image_masks[j].shape
                         if mh != h or mw != w:
@@ -786,6 +843,9 @@ def plot_images(
                                 im[y : y + h, x : x + w, :][mask] * 0.4 + np.array(color) * 0.6
                             )
                 annotator.fromarray(im)
+
+    if not save:
+        return np.asarray(annotator.im)
 
     # add okuda : multi channels img save
     fname = str(fname)

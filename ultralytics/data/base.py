@@ -81,8 +81,7 @@ class BaseDataset(Dataset):
         self.fraction = fraction
         self.im_files = self.get_img_files()
         self.labels = self.get_labels()
-        if self.single_cls:
-            self.update_labels(include_class=[])
+        self.update_labels(include_class=classes)  # single_cls and include_class
 
         # start of custom code --------------------------------------------------------------------------------------
         # limitting numbers of data on training
@@ -231,6 +230,10 @@ class BaseDataset(Dataset):
                 im_files = [x for x in im_files if x.split(".")[-1].lower() in IMG_FORMATS]
         except Exception as e:
             raise FileNotFoundError(f"{self.prefix}Error loading data from {self.data_path}\n{HELP_URL}") from e
+        if self.fraction < 1:
+            # im_files = im_files[: round(len(im_files) * self.fraction)]
+            num_elements_to_select = round(len(im_files) * self.fraction)
+            im_files = random.sample(im_files, num_elements_to_select)
         return im_files
 
     def update_labels(self, include_class: Optional[list]):

@@ -36,7 +36,7 @@ class DetectionValidator(BaseValidator):
         self.class_map = None
         self.args.task = "detect"
         self.metrics = DetMetrics(save_dir=self.save_dir, on_plot=self.on_plot)
-        self.iouv = torch.linspace(0.5, 0.95, 10)  # iou vector for mAP@0.5:0.95
+        self.iouv = torch.linspace(0.5, 0.95, 10)  # IoU vector for mAP@0.5:0.95
         self.niou = self.iouv.numel()
         self.lb = []  # for autolabelling
 
@@ -132,8 +132,7 @@ class DetectionValidator(BaseValidator):
                 if nl:
                     for k in self.stats.keys():
                         self.stats[k].append(stat[k])
-                    # TODO: obb has not supported confusion_matrix yet.
-                    if self.args.plots and self.args.task != "obb":
+                    if self.args.plots:
                         self.confusion_matrix.process_batch(detections=None, gt_bboxes=bbox, gt_cls=cls)
                 continue
 
@@ -147,8 +146,7 @@ class DetectionValidator(BaseValidator):
             # Evaluate
             if nl:
                 stat["tp"] = self._process_batch(predn, bbox, cls)
-                # TODO: obb has not supported confusion_matrix yet.
-                if self.args.plots and self.args.task != "obb":
+                if self.args.plots:
                     self.confusion_matrix.process_batch(predn, bbox, cls)
             for k in self.stats.keys():
                 self.stats[k].append(stat[k])
@@ -179,9 +177,7 @@ class DetectionValidator(BaseValidator):
         pf = "%22s" + "%11i" * 2 + "%11.3g" * len(self.metrics.keys)  # print format
         LOGGER.info(pf % ("all", self.seen, self.nt_per_class.sum(), *self.metrics.mean_results()))
         if self.nt_per_class.sum() == 0:
-            LOGGER.warning(
-                f"WARNING ⚠️ no labels found in {self.args.task} set, can not compute metrics without labels"
-            )
+            LOGGER.warning(f"WARNING ⚠️ no labels found in {self.args.task} set, can not compute metrics without labels")
 
         # Print results per class
         if self.args.verbose and not self.training and self.nc > 1 and len(self.stats):
@@ -226,7 +222,7 @@ class DetectionValidator(BaseValidator):
         dataset = self.build_dataset(dataset_path, batch=batch_size, mode="val")
         return build_dataloader(dataset, batch_size, self.args.workers, shuffle=False, rank=-1)  # return dataloader
 
-    def plot_val_samples(self, batch, ni, fname="val_batch_labels.jpg"):
+    def plot_val_samples(self, batch, fname):
         """Plot validation image samples."""
         plot_images(
             batch["img"],
@@ -239,7 +235,7 @@ class DetectionValidator(BaseValidator):
             on_plot=self.on_plot,
         )
 
-    def plot_predictions(self, batch, preds, ni, fname="val_batch_pred.jpg"):
+    def plot_predictions(self, batch, preds, fname):
         """Plots predicted bounding boxes on input images and saves the result."""
         plot_images(
             batch["img"],

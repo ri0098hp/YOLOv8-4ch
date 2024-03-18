@@ -129,7 +129,12 @@ class BaseTrainer:
         try:
             if self.args.task == "classify":
                 self.data = check_cls_dataset(self.args.data)
-            elif self.args.data.split(".")[-1] in ("yaml", "yml") or self.args.task in ("detect", "segment", "pose"):
+            elif self.args.data.split(".")[-1] in ("yaml", "yml") or self.args.task in (
+                "detect",
+                "segment",
+                "pose",
+                "obb",
+            ):
                 self.data = check_det_dataset(self.args.data)
                 if "yaml_file" in self.data:
                     self.args.data = self.data["yaml_file"]  # for validating 'yolo train data=url.zip' usage
@@ -244,9 +249,7 @@ class BaseTrainer:
         freeze_list = (
             self.args.freeze
             if isinstance(self.args.freeze, list)
-            else range(self.args.freeze)
-            if isinstance(self.args.freeze, int)
-            else []
+            else range(self.args.freeze) if isinstance(self.args.freeze, int) else []
         )
         always_freeze_names = [".dfl"]  # always freeze these layers
         freeze_layer_names = [f"model.{x}." for x in freeze_list] + always_freeze_names
@@ -255,7 +258,7 @@ class BaseTrainer:
             if any(x in k for x in freeze_layer_names):
                 LOGGER.info(f"Freezing layer '{k}'")
                 v.requires_grad = False
-            elif not v.requires_grad:
+            elif not v.requires_grad and v.dtype.is_floating_point:  # only floating point Tensor can require gradients
                 LOGGER.info(
                     f"WARNING ⚠️ setting 'requires_grad=True' for frozen layer '{k}'. "
                     "See ultralytics.engine.trainer for customization of frozen layers."
@@ -278,19 +281,22 @@ class BaseTrainer:
         # Check imgsz
         gs = max(int(self.model.stride.max() if hasattr(self.model, "stride") else 32), 32)  # grid size (max stride)
         self.args.imgsz = check_imgsz(self.args.imgsz, stride=gs, floor=gs, max_dim=1)
-        self.stride = gs  # for multi-scale training
+        self.stride = gs  # for multiscale training
 
         # Batch size
         if self.batch_size == -1 and RANK == -1:  # single-GPU only, estimate best batch size
             self.args.batch = self.batch_size = check_train_batch_size(
-                self.model, self.args.imgsz, self.amp, self.data_dict["ch"]
+                self.model,
+                self.args.imgsz,
+                self.amp,
+                self.data_dict["ch"],
             )
 
         # Dataloaders
         batch_size = self.batch_size // max(world_size, 1)
         self.train_loader = self.get_dataloader(self.data_dict, batch_size=batch_size, rank=RANK, mode="train")
         if RANK in (-1, 0):
-            # NOTE: When training DOTA dataset, double batch size could get OOM cause some images got more than 2000 objects.
+            # Note: When training DOTA dataset, double batch size could get OOM on images with >2000 objects.
             self.test_loader = self.get_dataloader(
                 self.data_dict,
                 batch_size=batch_size if self.args.task == "obb" else batch_size * 2,
@@ -340,16 +346,13 @@ class BaseTrainer:
             f"Image sizes {self.args.imgsz} train, {self.args.imgsz} val\n"
             f"Using {self.train_loader.num_workers * (world_size or 1)} dataloader workers\n"
             f"Logging results to {colorstr('bold', self.save_dir)}\n"
-            f"Starting training for "
-            f"{self.args.time} hours..."
-            if self.args.time
-            else f"{self.epochs} epochs..."
+            f"Starting training for " + (f"{self.args.time} hours..." if self.args.time else f"{self.epochs} epochs...")
         )
         if self.args.close_mosaic:
             base_idx = (self.epochs - self.args.close_mosaic) * nb
             self.plot_idx.extend([base_idx, base_idx + 1, base_idx + 2])
-        epoch = self.epochs  # predefine for resume fully trained model edge cases
-        for epoch in range(self.start_epoch, self.epochs):
+        epoch = self.start_epoch
+        while True:
             self.epoch = epoch
             self.run_callbacks("on_train_epoch_start")
             self.model.train()
@@ -412,7 +415,7 @@ class BaseTrainer:
 
                 # Log
                 mem = f"{torch.cuda.memory_reserved() / 1E9 if torch.cuda.is_available() else 0:.3g}G"  # (GB)
-                loss_len = self.tloss.shape[0] if len(self.tloss.size()) else 1
+                loss_len = self.tloss.shape[0] if len(self.tloss.shape) else 1
                 losses = self.tloss if loss_len > 1 else torch.unsqueeze(self.tloss, 0)
                 if RANK in (-1, 0):
                     pbar.set_description(
@@ -421,7 +424,7 @@ class BaseTrainer:
                     )
                     self.run_callbacks("on_batch_end")
                     if self.args.plots and ni in self.plot_idx:
-                        self.plot_training_samples(batch, ni, fname=self.save_dir / "examples" / f"train_batch{ni}.jpg")
+                        self.plot_training_samples(batch, fname=self.save_dir / "examples" / f"train_batch{ni}.jpg")
 
                 self.run_callbacks("on_train_batch_end")
 
@@ -435,7 +438,7 @@ class BaseTrainer:
                 if self.args.val or final_epoch or self.stopper.possible_stop or self.stop:
                     self.metrics, self.fitness = self.validate()
                 self.save_metrics(metrics={**self.label_loss_items(self.tloss), **self.metrics, **self.lr})
-                self.stop |= self.stopper(epoch + 1, self.fitness)
+                self.stop |= self.stopper(epoch + 1, self.fitness) or final_epoch
                 if self.args.time:
                     self.stop |= (time.time() - self.train_time_start) > (self.args.time * 3600)
 
@@ -467,6 +470,7 @@ class BaseTrainer:
                 self.stop = broadcast_list[0]
             if self.stop:
                 break  # must break all DDP ranks
+            epoch += 1
 
         if RANK in (-1, 0):
             # Do final val with best.pt
@@ -499,6 +503,8 @@ class BaseTrainer:
             "train_results": results,
             "date": datetime.now().isoformat(),
             "version": __version__,
+            "license": "AGPL-3.0 (https://ultralytics.com/license)",
+            "docs": "https://docs.ultralytics.com",
         }
 
         # Save last and best
@@ -575,8 +581,12 @@ class BaseTrainer:
         raise NotImplementedError("build_dataset function not implemented in trainer")
 
     def label_loss_items(self, loss_items=None, prefix="train"):
-        """Returns a loss dict with labelled training loss items tensor."""
-        # Not needed for classification but necessary for segmentation & detection
+        """
+        Returns a loss dict with labelled training loss items tensor.
+
+        Note:
+            This is not needed for classification but necessary for segmentation & detection
+        """
         return {"loss": loss_items} if loss_items is not None else ["loss"]
 
     def set_model_attributes(self):
@@ -592,7 +602,7 @@ class BaseTrainer:
         return ""
 
     # TODO: may need to put these following functions into callback
-    def plot_training_samples(self, batch, ni):
+    def plot_training_samples(self, batch, fname):
         """Plots training samples during YOLO training."""
         pass
 

@@ -16,7 +16,7 @@ except (ImportError, AssertionError):
     clearml = None
 
 
-def _log_images(imgs_dict, group="", step=0):
+def _log_debug_samples(files, title="Debug Samples") -> None:
     """
     Log files (images) as debug samples in the ClearML task.
 
@@ -24,10 +24,19 @@ def _log_images(imgs_dict, group="", step=0):
         files (list): A list of file paths in PosixPath format.
         title (str): A title that groups together images with the same values.
     """
+    import re
 
     if task := Task.current_task():
-        for k, v in imgs_dict.items():
-            task.get_logger().report_image(group, k, step, v)
+        for f in files:
+            if f.exists():
+                it = re.search(r"_batch(\d+)", f.name)
+                iteration = int(it.groups()[0]) if it else 0
+                task.get_logger().report_image(
+                    title=title,
+                    series=f.name.replace(it.group(), ""),
+                    local_path=str(f),
+                    iteration=iteration,
+                )
 
 
 def _log_plot(title, plot_path) -> None:
@@ -82,7 +91,7 @@ def on_train_epoch_end(trainer):
     if task := Task.current_task():
         # Log debug samples
         if trainer.epoch == 1:
-            _log_images({f.stem: str(f) for f in trainer.save_dir.glob("**/train_batch*.jpg")}, "Mosaic", trainer.epoch)
+            _log_debug_samples(sorted(trainer.save_dir.glob("**/train_batch*.jpg")), "Mosaic")
         # Report the current training progress
         for k, v in trainer.label_loss_items(trainer.tloss, prefix="train").items():
             task.get_logger().report_scalar("train", k, v, iteration=trainer.epoch)
@@ -106,11 +115,6 @@ def on_fit_epoch_end(trainer):
                 task.get_logger().report_single_value(k, v)
 
 
-def on_val_end(validator):
-    """Logs validation results including labels and predictions."""
-    pass
-
-
 def on_train_end(trainer):
     """Logs final model and its name on training completion."""
     if task := Task.current_task():
@@ -130,7 +134,7 @@ def on_train_end(trainer):
         # Log the final model
         task.update_output_model(model_path=str(trainer.best), model_name=trainer.args.name, auto_delete_file=False)
         task.upload_artifact("local file", artifact_object=str(list(trainer.save_dir.glob("events.out.tfevents*"))[0]))
-        _log_images({f.stem: str(f) for f in trainer.save_dir.glob("**/val_*.jpg")}, "Validation", trainer.epoch)
+        _log_debug_samples(sorted(trainer.save_dir.glob("**/val*.jpg")), "Validation")
 
 
 callbacks = (
@@ -138,7 +142,6 @@ callbacks = (
         "on_pretrain_routine_start": on_pretrain_routine_start,
         "on_train_epoch_end": on_train_epoch_end,
         "on_fit_epoch_end": on_fit_epoch_end,
-        "on_val_end": on_val_end,
         "on_train_end": on_train_end,
     }
     if clearml
