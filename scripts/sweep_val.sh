@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
 cd ~/workspace
-conds=(day night hot inter cold)
-models=(day night hot inter cold time season)
+conds=(hot inter cold season)
+models=(hot inter cold season)
 for cond in ${conds[@]}
 do
   for model in ${models[@]}
   do
-    yolo detect val data=data/All-Season-${cond}.yaml model=runs/detect/All-Season-${model}-4ch/weights/best.pt project=runs/val name=${cond}-by-${model};
+    yolo detect val data=All-Season-${cond}.yaml model=runs/season/All-Season-${model}-4ch/weights/best.pt name=${cond}-by-${model};
   done;
 done

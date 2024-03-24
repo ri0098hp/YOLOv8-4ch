@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 cd ~/workspace
 conds=(day night)
@@ -8,6 +8,6 @@ for cond in ${conds[@]}
 do
   for ch in ${chs[@]}
   do
-      yolo predict source=datasets/demo_slides/${cond} model=runs/All-Season/channel/All-Season-${cond}-${ch}ch/weights/best.pt project=runs/demo name=${cond}-${ch}ch save=True
+      yolo predict source=datasets/demo_slides/${cond} model=runs/channel/All-Season-${cond}-${ch}ch/weights/best.pt name=${cond}-${ch}ch save=True
   done;
 done

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # PyTorch Install
 wget https://developer.download.nvidia.cn/compute/redist/jp/v60dp/pytorch/torch-2.2.0a0+81ea7a4.nv24.01-cp310-cp310-linux_aarch64.whl
