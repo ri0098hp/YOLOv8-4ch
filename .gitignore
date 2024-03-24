@@ -1,4 +1,5 @@
 Pipfile*
+*.txt
 !.devcontainer/
 .bak
 

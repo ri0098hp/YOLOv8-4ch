@@ -1,6 +1,6 @@
 *
 !.gitignore
-!batched_train.sh
+!build_jetson.sh
 !build_yolo.sh
 !check_dataset.py
 !sweep_pred.sh
