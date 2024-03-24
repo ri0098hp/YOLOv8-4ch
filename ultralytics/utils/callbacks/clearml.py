@@ -1,5 +1,7 @@
 # Ultralytics YOLO 🚀, AGPL-3.0 license
 
+import timeout_decorator
+
 from ultralytics.utils import LOGGER, SETTINGS, TESTS_RUNNING
 
 try:
@@ -60,6 +62,7 @@ def _log_plot(title, plot_path) -> None:
     )
 
 
+@timeout_decorator.timeout(30)
 def on_pretrain_routine_start(trainer):
     """Runs at start of pretraining routine; initializes and connects/ logs task to ClearML."""
     try:

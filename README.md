@@ -207,7 +207,7 @@ CLI以外にPythonやJupyter上でも使用できる.
 ### 4.1 ライブラリのビルドとインストール
 
 Tegra OS上のPythonに`torch`や`torchvision`, `cv2`をインストールする.  
-既にインストールされている場合は[次の節](#422-yoloのインストール)へ.  
+既にインストールされている場合は[次の節](#42-yoloのインストール)へ.  
 以下に作成したスクリプト[`build_jetson.sh`](scripts/build_jetson.sh)を利用する.  
 なおJetPackとtorchやtorchvisionはその時々によって変わるの以下のURLを参照しスクリプトを書き換える.  
 [[JetPackとtorchのバージョン関係](https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform-release-notes/pytorch-jetson-rel.html#pytorch-jetson-rel)], [[torchのインストールURL一覧](https://developer.download.nvidia.com/compute/redist/jp/)], [[torchとtorchvisionのバージョン関係](https://github.com/pytorch/vision#installation)], [[JetPackとonnx_runtimeのバージョン関係](https://elinux.org/Jetson_Zoo#ONNX_Runtime)]
