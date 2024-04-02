@@ -20,7 +20,9 @@
         "DavidAnson.vscode-markdownlint",
         "TakumiI.markdowntable",
         "redhat.vscode-yaml",
-        "janisdd.vscode-edit-csv"
+        "janisdd.vscode-edit-csv",
+        "eamodio.gitlens",
+        "mhutchie.git-graph"
       ]
     }
   }
