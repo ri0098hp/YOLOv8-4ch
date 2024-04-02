@@ -18,7 +18,8 @@ ADD https://ultralytics.com/assets/Arial.ttf https://ultralytics.com/assets/Aria
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update \
   && apt-get -y upgrade
-RUN apt-get install --no-install-recommends -y gcc git zip curl htop libgl1 libglib2.0-0 libpython3-dev gnupg g++ libusb-1.0-0 screen rename
+RUN apt-get install --no-install-recommends -y gcc git zip curl htop libgl1 libglib2.0-0 libpython3-dev gnupg g++ libusb-1.0-0
+RUN apt-get install --no-install-recommends -y openssh-server screen rename
 
 # Security updates
 # https://security.snyk.io/vuln/SNYK-UBUNTU1804-OPENSSL-3314796
@@ -27,13 +28,9 @@ RUN apt upgrade --no-install-recommends -y openssl tar
 # Copy contents
 USER $USER
 WORKDIR /home/$USER/workspace
-RUN git clone https://github.com/ultralytics/ultralytics
 
 # Install pip packages
 RUN python3 -m pip install --upgrade pip wheel
-RUN cd ultralytics \
-  && pip install --no-cache -e ".[export]" albumentations comet pycocotools lancedb pytest-cov
-RUN rm -rf ultralytics
 
 # Set environment variables
 ENV OMP_NUM_THREADS=1

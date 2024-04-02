@@ -15,6 +15,7 @@
         "ms-python.isort",
         "ms-python.mypy-type-checker",
         "ms-toolsai.jupyter",
+        "ms-azuretools.vscode-docker",
         "yzhang.markdown-all-in-one",
         "DavidAnson.vscode-markdownlint",
         "TakumiI.markdowntable",
