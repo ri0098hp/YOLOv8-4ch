@@ -33,6 +33,10 @@
       "--profile",
       "black"
     ],
+    "mypy-type-checker.args": [
+      "ignore_missing_imports",
+      "true"
+    ],
     "[yaml]": {
       "editor.defaultFormatter": "redhat.vscode-yaml"
     },
