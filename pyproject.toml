@@ -124,7 +124,7 @@ extra = [
 ]
 4ch = [
     "timeout_decorator",
-    "grad-cam==1.4.8",
+    "grad-cam>=1.5.0",
 ]
 
 [project.urls]
