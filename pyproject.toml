@@ -124,7 +124,7 @@ extra = [
 ]
 4ch = [
     "timeout_decorator",
-    "grad-cam==1.4.8"
+    "grad-cam==1.4.8",
 ]
 
 [project.urls]
@@ -182,4 +182,4 @@ ignore-words-list = "crate,nd,ned,strack,dota,ane,segway,fo,gool,winn,commend,bl
 skip = '*.pt,*.pth,*.torchscript,*.onnx,*.tflite,*.pb,*.bin,*.param,*.mlmodel,*.engine,*.npy,*.data*,*.csv,*pnnx*,*venv*,*translat*,__pycache__*,*.ico,*.jpg,*.png,*.mp4,*.mov,/runs,/.git,./docs/??/*.md,./docs/mkdocs_??.yml'
 
 [tool.mypy]
-ignore_missing_imports = True
+ignore_missing_imports = true
