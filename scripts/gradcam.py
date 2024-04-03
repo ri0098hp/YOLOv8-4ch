@@ -3,59 +3,58 @@ author: 魔鬼面具
 source: https://github.com/z1069614715/objectdetection_script/blob/master/yolo-gradcam/yolov8_heatmap.py
 """
 
-import warnings
-
-warnings.filterwarnings("ignore")
-warnings.simplefilter("ignore")
 import os
+import warnings
 from pathlib import Path
 
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
-
-np.random.seed(0)
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from pytorch_grad_cam import *
 from pytorch_grad_cam.activations_and_gradients import ActivationsAndGradients
 from pytorch_grad_cam.utils.image import scale_cam_image, show_cam_on_image
 from tqdm import trange
 
+from ultralytics.models.yolo.detect.predict import DetectionPredictor
 from ultralytics.nn.tasks import attempt_load_weights
 from ultralytics.utils.ops import non_max_suppression, xywh2xyxy
+
+warnings.filterwarnings("ignore")
+warnings.simplefilter("ignore")
+np.random.seed(0)
 
 
 def main():
     methods = [
-        # "AblationCAM",
         "EigenCAM",
         "EigenGradCAM",
-        # "FullGrad",
         "GradCAM",
         "GradCAMPlusPlus",
         "HiResCAM",
         "LayerCAM",
         "RandomCAM",
-        # "ScoreCAM",
         "XGradCAM",
     ]
-    img_path = Path("/home/suwako/workspace/datasets/demo_slides/flip/")
+    img_path = Path("datasets/demo_slides/flip/")
     models = [
-        "weights/3ch.pt",
-        "weights/1ch.pt",
-        "weights/4ch.pt",
-        "weights/2stream.pt",
+        "runs/season/All-Season-season-3ch/weights/best.pt",
+        "runs/season/All-Season-season-1ch/weights/best.pt",
+        "runs/season/All-Season-season-4ch/weights/best.pt",
+        "runs/season/All-Season-season-2stream/weights/best.pt",
     ]
-    models = [Path(x) for x in models]
-    for model in models:
-        save_dir = Path(f"runs/gradcam/{model.stem}")
+    names = ["3ch", "1ch", "4ch", "2stream"]
+    for model, name in zip(models, names):
+        save_dir = Path(f"runs/gradcam/{name}")
         for method in methods:
             heatmap = yolov8_heatmap(**get_params(method, model))
             heatmap(img_path, save_dir)
+    subplot()
 
 
 def get_params(method="GradCAM", weight="best.pt"):
-    if "2stream" in str(weight):  # 29, 32, 35
+    if "2stream" in weight:  # 29, 32, 35
         layer = [29, 32, 35]
     else:  # 15, 18, 21
         layer = [15, 18, 21]
@@ -66,7 +65,8 @@ def get_params(method="GradCAM", weight="best.pt"):
         "method": method,
         "layer": layer,
         "backward_type": "box",  # class, box, all
-        "conf_threshold": 0.2,  # 0.2
+        "conf": 0.1,
+        "iou": 0.25,
         "ratio": 0.02,  # 0.02-0.1
         "show_box": True,
         "renormalize": False,
@@ -176,8 +176,8 @@ class yolov8_target(torch.nn.Module):
         post_result, pre_post_boxes = data
         result = []
         for i in trange(int(post_result.size(0) * self.ratio), bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}"):
-            if float(post_result[i].max()) < self.conf:
-                break
+            # if float(post_result[i].max()) < self.conf:
+            #     break
             if self.ouput_type == "class" or self.ouput_type == "all":
                 result.append(post_result[i].max())
             elif self.ouput_type == "box" or self.ouput_type == "all":
@@ -187,7 +187,7 @@ class yolov8_target(torch.nn.Module):
 
 
 class yolov8_heatmap:
-    def __init__(self, weight, device, method, layer, backward_type, conf_threshold, ratio, show_box, renormalize):
+    def __init__(self, weight, device, method, layer, backward_type, conf, iou, ratio, show_box, renormalize):
         device = torch.device(device)
         ckpt = torch.load(weight)
         model_names = ckpt["model"].names
@@ -197,18 +197,18 @@ class yolov8_heatmap:
             p.requires_grad_(True)
         model.eval()
 
-        target = yolov8_target(backward_type, conf_threshold, ratio)
+        target = yolov8_target(backward_type, conf, ratio)
         ch = model.yaml.get("ch")
         name = method
         target_layers = [model.model[l] for l in layer]
-        method = eval(method)(model, target_layers, use_cuda=device.type == "cuda")
+        method = eval(method)(model, target_layers)
         method.activations_and_grads = ActivationsAndGradients(model, target_layers, None)
 
         colors = np.random.uniform(0, 255, size=(len(model_names), 3)).astype(int)
         self.__dict__.update(locals())
 
     def post_process(self, result):
-        result = non_max_suppression(result, conf_thres=self.conf_threshold, iou_thres=0.65)[0]
+        result = non_max_suppression(result, conf_thres=self.conf, iou_thres=self.iou)[0]
         return result
 
     def draw_detections(self, box, color, name, img):
@@ -246,7 +246,7 @@ class yolov8_heatmap:
             RGB = cv2.cvtColor(RGB, cv2.COLOR_BGR2RGB)
             FIR = cv2.imread(str(img_path).replace("RGB", "FIR"), 0)
             FUSE = cv2.addWeighted(RGB, 0.5, cv2.cvtColor(FIR, cv2.COLOR_GRAY2RGB), 0.5, 0)
-            img = cv2.merge((RGB, FIR))
+            img = cv2.merge((FIR, RGB))
         elif self.ch == 1:
             img = cv2.imread(str(img_path), 0)
         else:
@@ -299,6 +299,30 @@ class yolov8_heatmap:
             src_fps = img_path.glob("RGB/*.jpg")
         for src_fp in src_fps:
             self.process(src_fp, save_path)
+
+
+def subplot(path=Path("runs/gradcam")):
+    # Define the folder names and the common image file name
+    folder_names = [x for x in path.glob("*") if x.is_dir()]
+    image_paths = [x for x in list(folder_names)[0].glob("*.jpg") if x.is_file()]
+
+    # Iterate over each folder and image
+    for image_path in image_paths:
+        # Create a figure with subplots
+        fig, axs = plt.subplots(1, 4, figsize=(20, 5))
+        for i, folder_name in enumerate(folder_names):
+
+            # Open the image
+            image = Image.open(folder_name / image_path.name)
+            # Convert the image to an array and display it in the subplot
+            axs[i].imshow(image)
+            axs[i].set_title(str(folder_name.name))
+            axs[i].axis("off")  # Hide the axis
+        # Adjust layout and display the plot
+        fig.suptitle(image_path.name, size=20)
+        fig.tight_layout()
+        fig.savefig(path / f"{image_path.name}")
+        print(path / f"{image_path.name}")
 
 
 if __name__ == "__main__":
