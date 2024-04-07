@@ -136,7 +136,12 @@ def on_train_end(trainer):
             task.get_logger().report_single_value(k, v)
         # Log the final model
         task.update_output_model(model_path=str(trainer.best), model_name=trainer.args.name, auto_delete_file=False)
-        task.upload_artifact("local file", artifact_object=str(list(trainer.save_dir.glob("events.out.tfevents*"))[0]))
+
+        # Log exp by tensorboard
+        for event in trainer.save_dir.glob("events.out.tfevents*"):
+            task.upload_artifact("local file", artifact_object=str(event))
+
+        # Log validation images
         _log_debug_samples(sorted(trainer.save_dir.glob("**/val*.jpg")), "Validation")
 
 
