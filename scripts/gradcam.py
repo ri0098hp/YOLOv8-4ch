@@ -37,7 +37,7 @@ def main():
         "RandomCAM",
         "XGradCAM",
     ]
-    img_path = Path("datasets/demo_slides/flip/")
+    img_path = Path("datasets/demo/")
     models = [
         "runs/season/All-Season-season-3ch/weights/best.pt",
         "runs/season/All-Season-season-1ch/weights/best.pt",
