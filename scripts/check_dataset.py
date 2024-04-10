@@ -15,21 +15,22 @@ ROOT_DIR = "/home/suwako/workspace"
 
 def main():
     os.chdir(ROOT_DIR)
-    # fps_data = sorted(Path("ultralytics/cfg/datasets/").glob("*.yaml"))
-    # for i, fp_data in enumerate(fps_data):
-    #     print(i, "\t", fp_data.name)
-    # fp_data = fps_data[int(input("index of data: "))]
-    # print(fp_data, "\n")
 
     fps_cfg = sorted(Path("ultralytics/cfg/custom/").glob("*.yaml"))
     for i, fp_cfg in enumerate(fps_cfg):
         print(i, "\t", fp_cfg.name)
-    fp_cfg = fps_cfg[int(input("index of cfg: "))]
+    id = input("index of cfg: ")
+    fp_cfg = fps_cfg[int(id)] if id != "" else DEFAULT_CFG
     print(fp_cfg, "\n")
 
     args = {**cfg2dict(DEFAULT_CFG), **cfg2dict(fp_cfg)}
     args = get_cfg(args, None)
-    # args.data = fp_data
+
+    if id == "":
+        fps_data = sorted(Path("ultralytics/cfg/datasets/").glob("*.yaml"))
+        for i, fp_data in enumerate(fps_data):
+            print(i, "\t", fp_data.name)
+        args.data = fps_data[int(input("index of data: "))]
 
     data_dict = check_det_dataset(args.data)
     if "yaml_file" in data_dict:
