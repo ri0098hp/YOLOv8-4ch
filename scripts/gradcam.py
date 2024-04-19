@@ -4,6 +4,7 @@ source: https://github.com/z1069614715/objectdetection_script/blob/master/yolo-g
 """
 
 import os
+import shutil
 import warnings
 from pathlib import Path
 
@@ -11,13 +12,12 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 from pytorch_grad_cam import *
 from pytorch_grad_cam.activations_and_gradients import ActivationsAndGradients
 from pytorch_grad_cam.utils.image import scale_cam_image, show_cam_on_image
 from tqdm import trange
 
-from ultralytics.models.yolo.detect.predict import DetectionPredictor
 from ultralytics.nn.tasks import attempt_load_weights
 from ultralytics.utils.ops import non_max_suppression, xywh2xyxy
 
@@ -28,28 +28,33 @@ np.random.seed(0)
 
 def main():
     methods = [
-        "EigenCAM",
-        "EigenGradCAM",
-        "GradCAM",
-        "GradCAMPlusPlus",
-        "HiResCAM",
-        "LayerCAM",
-        "RandomCAM",
+        # "EigenCAM",
+        # "EigenGradCAM",
+        # "GradCAM",
+        # "GradCAMPlusPlus",
+        # "HiResCAM",
+        # "LayerCAM",
+        # "RandomCAM",
         "XGradCAM",
     ]
-    img_path = Path("datasets/demo/")
+    # img_path = Path("datasets/demo/")
+    img_path = Path("datasets/demo_slides/flip")
+    param = "season"
     models = [
-        "runs/season/All-Season-season-3ch/weights/best.pt",
-        "runs/season/All-Season-season-1ch/weights/best.pt",
-        "runs/season/All-Season-season-4ch/weights/best.pt",
-        "runs/season/All-Season-season-2stream/weights/best.pt",
+        # f"runs/season/All-Season-{param}-3ch/weights/best.pt",
+        # f"runs/season/All-Season-{param}-1ch/weights/best.pt",
+        f"runs/season/All-Season-{param}-4ch/weights/best.pt",
+        f"runs/season/All-Season-{param}-2stream/weights/best.pt",
     ]
-    names = ["3ch", "1ch", "4ch", "2stream"]
+    names = ["4ch", "2stream"]
+    try:
+        shutil.rmtree("runs/gradcam/")
+    except FileNotFoundError:
+        pass
     for model, name in zip(models, names):
-        save_dir = Path(f"runs/gradcam/{name}")
         for method in methods:
             heatmap = yolov8_heatmap(**get_params(method, model))
-            heatmap(img_path, save_dir)
+            heatmap(img_path, Path(f"runs/gradcam/{name}"))
     subplot()
 
 
@@ -60,16 +65,17 @@ def get_params(method="GradCAM", weight="best.pt"):
         layer = [15, 18, 21]
 
     params = {
-        "weight": weight,
+        "only": "",
+        "backward_type": "class",  # class, box, all
         "device": "cuda:0",
-        "method": method,
-        "layer": layer,
-        "backward_type": "box",  # class, box, all
         "conf": 0.1,
         "iou": 0.25,
         "ratio": 0.02,  # 0.02-0.1
-        "show_box": True,
+        "weight": weight,
+        "method": method,
+        "layer": layer,
         "renormalize": False,
+        "show_box": True,
     }
     return params
 
@@ -107,41 +113,9 @@ def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleF
     return im, ratio, (dw, dh)
 
 
-class ActivationsAndGradients:
+class ActivationsAndGradients(ActivationsAndGradients):
     """Class for extracting activations and
     registering gradients from targetted intermediate layers"""
-
-    def __init__(self, model, target_layers, reshape_transform):
-        self.model = model
-        self.gradients = []
-        self.activations = []
-        self.reshape_transform = reshape_transform
-        self.handles = []
-        for target_layer in target_layers:
-            self.handles.append(target_layer.register_forward_hook(self.save_activation))
-            # Because of https://github.com/pytorch/pytorch/issues/61519,
-            # we don't use backward hook to record gradients.
-            self.handles.append(target_layer.register_forward_hook(self.save_gradient))
-
-    def save_activation(self, module, input, output):
-        activation = output
-
-        if self.reshape_transform is not None:
-            activation = self.reshape_transform(activation)
-        self.activations.append(activation.cpu().detach())
-
-    def save_gradient(self, module, input, output):
-        if not hasattr(output, "requires_grad") or not output.requires_grad:
-            # You can only register hooks on tensor requires grad.
-            return
-
-        # Gradients are computed in reverse order
-        def _store_grad(grad):
-            if self.reshape_transform is not None:
-                grad = self.reshape_transform(grad)
-            self.gradients = [grad.cpu().detach()] + self.gradients
-
-        output.register_hook(_store_grad)
 
     def post_process(self, result):
         logits_ = result[:, 4:]
@@ -154,15 +128,15 @@ class ActivationsAndGradients:
         )
 
     def __call__(self, x):
+        """
+        推論スコアと推論bboxを返す
+        """
+
         self.gradients = []
         self.activations = []
         model_output = self.model(x)
         post_result, pre_post_boxes, post_boxes = self.post_process(model_output[0])
         return [[post_result, pre_post_boxes]]
-
-    def release(self):
-        for handle in self.handles:
-            handle.remove()
 
 
 class yolov8_target(torch.nn.Module):
@@ -172,22 +146,20 @@ class yolov8_target(torch.nn.Module):
         self.conf = conf
         self.ratio = ratio
 
-    def forward(self, data):
-        post_result, pre_post_boxes = data
+    def forward(self, x):
+        post_result, pre_post_boxes = x
         result = []
         for i in trange(int(post_result.size(0) * self.ratio), bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}"):
-            # if float(post_result[i].max()) < self.conf:
-            #     break
             if self.ouput_type == "class" or self.ouput_type == "all":
-                result.append(post_result[i].max())
+                result.append(post_result[i].max())  # highest score in bbox
             elif self.ouput_type == "box" or self.ouput_type == "all":
                 for j in range(4):
-                    result.append(pre_post_boxes[i, j])
+                    result.append(pre_post_boxes[i, j])  # bbox 4 point coordinate
         return sum(result)
 
 
 class yolov8_heatmap:
-    def __init__(self, weight, device, method, layer, backward_type, conf, iou, ratio, show_box, renormalize):
+    def __init__(self, weight, device, method, layer, backward_type, conf, iou, ratio, show_box, renormalize, only):
         device = torch.device(device)
         ckpt = torch.load(weight)
         model_names = ckpt["model"].names
@@ -215,16 +187,6 @@ class yolov8_heatmap:
         xmin, ymin, xmax, ymax = list(map(int, list(box)))
         color = tuple(int(x) for x in color)
         cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (255, 0, 0), 2)
-        # cv2.putText(
-        #     img,
-        #     str(name),
-        #     (xmin, ymin - 5),
-        #     cv2.FONT_HERSHEY_SIMPLEX,
-        #     0.8,
-        #     tuple(int(x) for x in color),
-        #     2,
-        #     lineType=cv2.LINE_AA,
-        # )
         return img
 
     def renormalize_cam_in_bounding_boxes(self, boxes, image_float_np, grayscale_cam):
@@ -239,13 +201,20 @@ class yolov8_heatmap:
         eigencam_image_renormalized = show_cam_on_image(image_float_np, renormalized_cam, use_rgb=True)
         return eigencam_image_renormalized
 
-    def process(self, img_path, save_path):
+    def process(self, img_path, save_path, only=""):
         # img process
         if self.ch == 4:
             RGB = cv2.imread(str(img_path))
             RGB = cv2.cvtColor(RGB, cv2.COLOR_BGR2RGB)
             FIR = cv2.imread(str(img_path).replace("RGB", "FIR"), 0)
-            FUSE = cv2.addWeighted(RGB, 0.5, cv2.cvtColor(FIR, cv2.COLOR_GRAY2RGB), 0.5, 0)
+            if only == "RGB":
+                FIR = np.zeros_like(FIR)
+                FUSE = cv2.addWeighted(RGB, 0.5, cv2.cvtColor(FIR, cv2.COLOR_GRAY2RGB), 0.5, 0)
+            elif only == "FIR":
+                RGB = np.zeros_like(RGB)
+                FUSE = FIR
+            else:
+                FUSE = cv2.addWeighted(RGB, 0.5, cv2.cvtColor(FIR, cv2.COLOR_GRAY2RGB), 0.5, 0)
             img = cv2.merge((FIR, RGB))
         elif self.ch == 1:
             img = cv2.imread(str(img_path), 0)
@@ -262,7 +231,8 @@ class yolov8_heatmap:
             grayscale_cam = self.method(tensor, [self.target])
         except AttributeError:
             return
-
+        except Exception as e:
+            raise e
         grayscale_cam = grayscale_cam[0, :]
         if self.ch == 4:
             img = letterbox(FUSE)[0]
@@ -289,6 +259,8 @@ class yolov8_heatmap:
 
         cam_image = Image.fromarray(cam_image)
         cam_image.save(save_path / f"{img_path.stem}_{self.name}.jpg")
+        grayscale_cam = Image.fromarray(show_cam(grayscale_cam)).convert("RGB")
+        grayscale_cam.save(save_path / f"{img_path.stem}_{self.name}_gray.jpg")
 
     def __call__(self, img_path, save_path):
         os.makedirs(save_path, exist_ok=True)
@@ -298,7 +270,16 @@ class yolov8_heatmap:
         else:
             src_fps = img_path.glob("RGB/*.jpg")
         for src_fp in src_fps:
-            self.process(src_fp, save_path)
+            self.process(src_fp, save_path, self.only)
+
+
+def show_cam(mask):
+    """
+    Tensor to Grascale
+    """
+    heatmap = mask / np.max(mask)
+    heatmap = np.uint8(255 * heatmap)
+    return plt.get_cmap("jet")(heatmap, bytes=True)
 
 
 def subplot(path=Path("runs/gradcam")):
@@ -309,9 +290,8 @@ def subplot(path=Path("runs/gradcam")):
     # Iterate over each folder and image
     for image_path in image_paths:
         # Create a figure with subplots
-        fig, axs = plt.subplots(1, 4, figsize=(20, 5))
+        fig, axs = plt.subplots(1, len(image_paths), figsize=(len(image_paths) * 5, 5))
         for i, folder_name in enumerate(folder_names):
-
             # Open the image
             image = Image.open(folder_name / image_path.name)
             # Convert the image to an array and display it in the subplot
