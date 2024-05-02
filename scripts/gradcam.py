@@ -1,10 +1,10 @@
 """
-author: 魔鬼面具
-source: https://github.com/z1069614715/objectdetection_script/blob/master/yolo-gradcam/yolov8_heatmap.py
+base : 魔鬼面具 https://github.com/z1069614715/objectdetection_script/blob/master/yolo-gradcam/yolov8_heatmap.py
+mod  : okuda
 """
 
 import os
-import shutil
+import sys
 import warnings
 from pathlib import Path
 
@@ -13,12 +13,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from PIL import Image
-from pytorch_grad_cam import *
+from pytorch_grad_cam import *  # noqa
 from pytorch_grad_cam.activations_and_gradients import ActivationsAndGradients
 from pytorch_grad_cam.utils.image import scale_cam_image, show_cam_on_image
 from tqdm import trange
 
+from ultralytics.cfg import check_dict_alignment, parse_key_value_pair
 from ultralytics.nn.tasks import attempt_load_weights
+from ultralytics.utils.checks import check_suffix
+from ultralytics.utils.downloads import attempt_download_asset
 from ultralytics.utils.ops import non_max_suppression, xywh2xyxy
 
 warnings.filterwarnings("ignore")
@@ -27,56 +30,45 @@ np.random.seed(0)
 
 
 def main():
-    methods = [
-        # "EigenCAM",
-        # "EigenGradCAM",
-        # "GradCAM",
-        # "GradCAMPlusPlus",
-        # "HiResCAM",
-        # "LayerCAM",
-        # "RandomCAM",
-        "XGradCAM",
-    ]
-    # img_path = Path("datasets/demo/")
-    img_path = Path("datasets/demo_slides/flip")
-    param = "season"
-    models = [
-        # f"runs/season/All-Season-{param}-3ch/weights/best.pt",
-        # f"runs/season/All-Season-{param}-1ch/weights/best.pt",
-        f"runs/season/All-Season-{param}-4ch/weights/best.pt",
-        f"runs/season/All-Season-{param}-2stream/weights/best.pt",
-    ]
-    names = ["4ch", "2stream"]
-    try:
-        shutil.rmtree("runs/gradcam/")
-    except FileNotFoundError:
-        pass
-    for model, name in zip(models, names):
-        for method in methods:
-            heatmap = yolov8_heatmap(**get_params(method, model))
-            heatmap(img_path, Path(f"runs/gradcam/{name}"))
-    subplot()
+    params = get_params()
+    heatmap = yolov8_heatmap(**params)
+    heatmap()
 
 
-def get_params(method="GradCAM", weight="best.pt"):
-    if "2stream" in weight:  # 29, 32, 35
-        layer = [29, 32, 35]
-    else:  # 15, 18, 21
-        layer = [15, 18, 21]
-
+def get_params():
     params = {
-        "only": "",
+        "source": "ultralytics/assets/bus.jpg",
+        "project": "runs/gradcam",
+        "name": "",
         "backward_type": "class",  # class, box, all
         "device": "cuda:0",
         "conf": 0.1,
         "iou": 0.25,
         "ratio": 0.02,  # 0.02-0.1
-        "weight": weight,
-        "method": method,
-        "layer": layer,
+        "model": "yolov8n.pt",
+        "method": "XGradCAM",
+        "layer": [15, 18, 21],  # [15, 18, 21] in base, [29, 32, 35] in 2stream
         "renormalize": False,
         "show_box": True,
+        "only": "",  # input only RGB or FIR in 4-channel model
     }
+    args = sys.argv
+    for arg in args:
+        if arg.startswith("--"):
+            print(f"WARNING ⚠️ '{arg}' does not require leading dashes '--', updating to '{arg[2:]}'.")
+            arg = arg[2:]
+        if arg.endswith(","):
+            print(f"WARNING ⚠️ '{arg}' does not require trailing comma ',', updating to '{arg[:-1]}'.")
+            arg = arg[:-1]
+        if "=" in arg:
+            try:
+                k, v = parse_key_value_pair(arg)
+                params[k] = v
+            except (NameError, SyntaxError, ValueError, AssertionError) as e:
+                check_dict_alignment(params, {arg: ""}, e)
+    assert params["method"][-3:] == "CAM", "'method' shold be CAM name"
+    params["source"] = Path(params["source"])
+    params["project"] = Path(params["project"])
     return params
 
 
@@ -159,11 +151,30 @@ class yolov8_target(torch.nn.Module):
 
 
 class yolov8_heatmap:
-    def __init__(self, weight, device, method, layer, backward_type, conf, iou, ratio, show_box, renormalize, only):
+    def __init__(
+        self,
+        source,
+        project,
+        name,
+        backward_type,
+        device,
+        conf,
+        iou,
+        ratio,
+        model,
+        method,
+        layer,
+        show_box,
+        renormalize,
+        only,
+    ):
         device = torch.device(device)
-        ckpt = torch.load(weight)
+        check_suffix(file=model, suffix=".pt")
+        if not Path(model).exists():
+            model = attempt_download_asset(model)  # downlaod offcial YOLOv8 weight
+        ckpt = torch.load(model)
         model_names = ckpt["model"].names
-        model = attempt_load_weights(weight, device)
+        model = attempt_load_weights(model, device)
         model.info()
         for p in model.parameters():
             p.requires_grad_(True)
@@ -171,10 +182,9 @@ class yolov8_heatmap:
 
         target = yolov8_target(backward_type, conf, ratio)
         ch = model.yaml.get("ch")
-        name = method
         target_layers = [model.model[l] for l in layer]
-        method = eval(method)(model, target_layers)
-        method.activations_and_grads = ActivationsAndGradients(model, target_layers, None)
+        cam = eval(method)(model, target_layers)
+        cam.activations_and_grads = ActivationsAndGradients(model, target_layers, None)
 
         colors = np.random.uniform(0, 255, size=(len(model_names), 3)).astype(int)
         self.__dict__.update(locals())
@@ -183,7 +193,7 @@ class yolov8_heatmap:
         result = non_max_suppression(result, conf_thres=self.conf, iou_thres=self.iou)[0]
         return result
 
-    def draw_detections(self, box, color, name, img):
+    def draw_detections(self, box, color, img):
         xmin, ymin, xmax, ymax = list(map(int, list(box)))
         color = tuple(int(x) for x in color)
         cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (255, 0, 0), 2)
@@ -201,16 +211,16 @@ class yolov8_heatmap:
         eigencam_image_renormalized = show_cam_on_image(image_float_np, renormalized_cam, use_rgb=True)
         return eigencam_image_renormalized
 
-    def process(self, img_path, save_path, only=""):
+    def process(self, img_path, save_path):
         # img process
         if self.ch == 4:
             RGB = cv2.imread(str(img_path))
             RGB = cv2.cvtColor(RGB, cv2.COLOR_BGR2RGB)
             FIR = cv2.imread(str(img_path).replace("RGB", "FIR"), 0)
-            if only == "RGB":
+            if self.only == "RGB":
                 FIR = np.zeros_like(FIR)
                 FUSE = cv2.addWeighted(RGB, 0.5, cv2.cvtColor(FIR, cv2.COLOR_GRAY2RGB), 0.5, 0)
-            elif only == "FIR":
+            elif self.only == "FIR":
                 RGB = np.zeros_like(RGB)
                 FUSE = FIR
             else:
@@ -228,7 +238,7 @@ class yolov8_heatmap:
         tensor = torch.from_numpy(np.transpose(img, axes=[2, 0, 1])).unsqueeze(0).to(self.device)
 
         try:
-            grayscale_cam = self.method(tensor, [self.target])
+            grayscale_cam = self.cam(tensor, [self.target])
         except AttributeError:
             return
         except Exception as e:
@@ -250,27 +260,29 @@ class yolov8_heatmap:
         if self.show_box:
             for data in pred:
                 data = data.cpu().detach().numpy()
-                cam_image = self.draw_detections(
-                    data[:4],
-                    self.colors[int(data[4:].argmax())],
-                    f"{self.model_names[int(data[4:].argmax())]} {float(data[4:].max()):.2f}",
-                    cam_image,
-                )
+                cam_image = self.draw_detections(data[:4], self.colors[int(data[4:].argmax())], cam_image)
 
+        fp_cam_image = save_path / f"{img_path.stem}_{self.method}.jpg"
         cam_image = Image.fromarray(cam_image)
-        cam_image.save(save_path / f"{img_path.stem}_{self.name}.jpg")
+        cam_image.save(fp_cam_image)
         grayscale_cam = Image.fromarray(show_cam(grayscale_cam)).convert("RGB")
-        grayscale_cam.save(save_path / f"{img_path.stem}_{self.name}_gray.jpg")
+        grayscale_cam.save(save_path / f"{img_path.stem}_{self.method}_map.jpg")
+        print(f"cam image was saved at {fp_cam_image}")
 
-    def __call__(self, img_path, save_path):
-        os.makedirs(save_path, exist_ok=True)
+    def __call__(self):
+        # image loader
 
-        if self.ch == 1:
-            src_fps = img_path.glob("FIR/*.jpg")
-        else:
-            src_fps = img_path.glob("RGB/*.jpg")
+        if self.source.is_file():  # single file
+            src_fps = [self.source]
+        elif self.ch == 1:  # RGB-FIR folder only with FIR
+            src_fps = self.source.glob("FIR/*.jpg")
+        else:  # RGB-FIR folders
+            src_fps = self.source.glob("RGB/*.jpg")
         for src_fp in src_fps:
-            self.process(src_fp, save_path, self.only)
+            save_path = self.project / self.name if self.name else self.project / src_fp.stem
+            os.makedirs(save_path, exist_ok=True)
+            print("image:", src_fp)
+            self.process(src_fp, save_path)
 
 
 def show_cam(mask):
@@ -280,29 +292,6 @@ def show_cam(mask):
     heatmap = mask / np.max(mask)
     heatmap = np.uint8(255 * heatmap)
     return plt.get_cmap("jet")(heatmap, bytes=True)
-
-
-def subplot(path=Path("runs/gradcam")):
-    # Define the folder names and the common image file name
-    folder_names = [x for x in path.glob("*") if x.is_dir()]
-    image_paths = [x for x in list(folder_names)[0].glob("*.jpg") if x.is_file()]
-
-    # Iterate over each folder and image
-    for image_path in image_paths:
-        # Create a figure with subplots
-        fig, axs = plt.subplots(1, len(image_paths), figsize=(len(image_paths) * 5, 5))
-        for i, folder_name in enumerate(folder_names):
-            # Open the image
-            image = Image.open(folder_name / image_path.name)
-            # Convert the image to an array and display it in the subplot
-            axs[i].imshow(image)
-            axs[i].set_title(str(folder_name.name))
-            axs[i].axis("off")  # Hide the axis
-        # Adjust layout and display the plot
-        fig.suptitle(image_path.name, size=20)
-        fig.tight_layout()
-        fig.savefig(path / f"{image_path.name}")
-        print(path / f"{image_path.name}")
 
 
 if __name__ == "__main__":
