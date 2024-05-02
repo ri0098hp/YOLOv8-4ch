@@ -101,7 +101,12 @@ find ../All-Season -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
 
 その後, [`All-Season.yaml`](data/All-Season.yaml) を参考にディレクトリとクラスを指定.  
 なおRGB画像、FIR画像、ラベルファイルは全て同じ名前を持っている必要がある. (RGBを基準に出ディレクトリを置換している)  
-上手く読み込めるかどうかは [`check_dataset.py`](scripts/check_dataset.py) で確認できる.  
+上手く読み込めるかどうかは次のコマンドでcfgやdataのYAMLファイルを利用して確認できる.
+
+```bash
+yolo utils dataset
+```
+
 以下はディレクトリ構造の例.
 
 ```txt
@@ -192,24 +197,24 @@ GradCAMやLaryerCAMによるモデルの注目度を画像上にヒートマッ�
 コマンドはワークスペース直下にて以下の通り.
 
 ```bash
-python scripts/gradcam.py source=[データフォルダ or 画像ファイルパス] model=[重みファイルへのパス] method=[CAMの種類]
+yolo utils gradcam source=[データフォルダ or 画像ファイルパス] model=[重みファイルへのパス] layer=[レイヤの選択]
 ```
 
 対応している引数は上記の例も含めて以下の通り.
 
-| パラメータ名  |      type       |          デフォルト          | 説明                                                                    |
-| :-----------: | :-------------: | :--------------------------: | :---------------------------------------------------------------------- |
-|    source     |       str       | `ultralytics/assets/bus.jpg` | RGB・FIRフォルダを含むディレクトリパス, またはJPEG画像のファイルパス    |
-|    project    |       str       |        `runs/gradcam`        | 保存先のルートパス                                                      |
-|     name      |       str       |        画像ファイル名        | 保存先のフォルダ名                                                      |
-| backward_type | [class,box,all] |            class             | 逆伝搬させる出力の種類. 信頼度, bbox座標, 両方                          |
-|   conf, iou   |      float      |           0.1,0.25           | 信頼度とIoUの閾値                                                       |
-|     model     |       pt        |          yolov8n.pt          | 重みファイルのパス（公式の重みは自動ダウンロード）                      |
-|    method     |    下記参照     |           XGradCAM           | CAMの種類                                                               |
-|     layer     |  list[int,...]  |          [15,18,21]          | 特徴量マップを利用するレイヤの場所. Detect層の直前を推奨.               |
-|  renormalize  |      bool       |            False             | bbox内でヒートマップを正規化する. 主にクラス分類に対する考察で使用する. |
-|   show_box    |      bool       |             True             | 検出したオブジェクトのbboxを表示する                                    |
-|     only      |  ["",RGB,FIR]   |              ""              | RGB-FIR検出器で指定した方のみのデータで検出を行う.                      |
+| パラメータ名  |      type       |          デフォルト          | 説明                                                                              |
+| :-----------: | :-------------: | :--------------------------: | :-------------------------------------------------------------------------------- |
+|    source     |       str       | `ultralytics/assets/bus.jpg` | RGB・FIRフォルダを含むディレクトリパス, またはJPEG画像のファイルパス              |
+|    project    |       str       |        `runs/gradcam`        | 保存先のルートパス                                                                |
+|     name      |       str       |        画像ファイル名        | 保存先のフォルダ名                                                                |
+| backward_type | [class,box,all] |            class             | 逆伝搬させる出力の種類. 信頼度, bbox座標, 両方                                    |
+|   conf, iou   |      float      |           0.1,0.25           | 信頼度とIoUの閾値                                                                 |
+|     model     |       pt        |          yolov8n.pt          | 重みファイルのパス (公式の重みは自動ダウンロード)                                 |
+|    method     |    下記参照     |           XGradCAM           | CAMの種類                                                                         |
+|     layer     |  list[int,...]  |          [15,18,21]          | 特徴量マップを利用するレイヤの場所. Detect層の直前を推奨. (2streamなら[29,32,35]) |
+|  renormalize  |      bool       |            False             | bbox内でヒートマップを正規化する. 主にクラス分類に対する考察で使用する.           |
+|   show_box    |      bool       |             True             | 検出したオブジェクトのbboxを表示する                                              |
+|     only      |  ["",RGB,FIR]   |              ""              | RGB-FIR検出器で指定した方のみのデータで検出を行う.                                |
 
 - 対応しているCAMの種類
   - Gradient required: GradCAM, GradCAMPlusPlus, EigenGradCAM, LayerCAM, HiResCAM, XGradCAM

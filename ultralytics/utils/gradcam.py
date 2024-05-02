@@ -29,13 +29,14 @@ warnings.simplefilter("ignore")
 np.random.seed(0)
 
 
-def main():
-    params = get_params()
+def gradcam(args=""):
+    params = get_params(args)
     heatmap = yolov8_heatmap(**params)
     heatmap()
+    print("Recommend layer=[29, 32, 35] in 2stream model.")
 
 
-def get_params():
+def get_params(args):
     params = {
         "source": "ultralytics/assets/bus.jpg",
         "project": "runs/gradcam",
@@ -52,7 +53,8 @@ def get_params():
         "show_box": True,
         "only": "",  # input only RGB or FIR in 4-channel model
     }
-    args = sys.argv
+    if not args:
+        args = sys.argv
     for arg in args:
         if arg.startswith("--"):
             print(f"WARNING ⚠️ '{arg}' does not require leading dashes '--', updating to '{arg[2:]}'.")
@@ -295,4 +297,4 @@ def show_cam(mask):
 
 
 if __name__ == "__main__":
-    main()
+    gradcam()

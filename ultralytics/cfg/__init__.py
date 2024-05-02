@@ -86,6 +86,7 @@ CLI_HELP_MSG = f"""
         yolo settings
         yolo copy-cfg
         yolo cfg
+        yolo utils [dataset, gradcam]
 
     Docs: https://docs.ultralytics.com
     Community: https://community.ultralytics.com
@@ -406,6 +407,22 @@ def handle_explorer():
     subprocess.run(["streamlit", "run", ROOT / "data/explorer/gui/dash.py", "--server.maxMessageSize", "2048"])
 
 
+def handle_custom_cmd(args: List[str]):
+    from ultralytics.utils.check_dataset import check_dataset
+    from ultralytics.utils.gradcam import gradcam
+
+    MSG = "Please set option [dataset, gradcam], like 'yolo utils gradcam'"
+    if args == []:
+        pass
+    elif args[0] == "dataset":
+        check_dataset()
+        return
+    elif args[0] == "gradcam":
+        gradcam(args[1:])
+        return
+    raise SyntaxError(MSG)
+
+
 def parse_key_value_pair(pair):
     """Parse one 'key=value' pair and return key and value."""
     k, v = pair.split("=", 1)  # split on first '=' sign
@@ -459,6 +476,7 @@ def entrypoint(debug=""):
         "login": lambda: handle_yolo_hub(args),
         "copy-cfg": copy_default_cfg,
         "explorer": lambda: handle_explorer(),
+        "utils": lambda: handle_custom_cmd(args[1:]),
     }
     full_args_dict = {**DEFAULT_CFG_DICT, **{k: None for k in TASKS}, **{k: None for k in MODES}, **special}
 

@@ -13,7 +13,7 @@ DEFAULT_CFG = "ultralytics/cfg/default.yaml"
 ROOT_DIR = "/home/suwako/workspace"
 
 
-def main():
+def check_dataset():
     os.chdir(ROOT_DIR)
 
     fps_cfg = sorted(Path("ultralytics/cfg/custom/").glob("*.yaml"))
@@ -117,4 +117,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    check_dataset()
