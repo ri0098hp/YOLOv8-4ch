@@ -178,7 +178,7 @@ yolo detect predict model=[重みファイルへのパス] source=[データフ�
 
 ### 2.5 モデル変換
 
-NVIDIAデバイス向けのTensorRTやIntelデバイス向けのOpenVINO, オープンソース(主にAMDデバイス向け)のONNXへの変換を行うことができる.
+NVIDIAデバイス向けのTensorRTやIntelデバイス向けのOpenVINO, オープンソース(主にAMDデバイス向け)のONNXへの変換を行うことができる.  
 必要に応じて半精度`half`オプションを入れる.  
 なおformatは[engine, openvino, onnx, tflite]など [[詳細](https://docs.ultralytics.com/modes/export/)].
 
@@ -188,7 +188,7 @@ yolo export model=[重みファイルへのパス] format=[フォーマット] h
 
 ### 2.6 CAMによる注目領域の可視化
 
-GradCAMやLaryerCAMによるモデルの注目度を画像上にヒートマップで可視化する.
+GradCAMやLaryerCAMによるモデルの注目度を画像上にヒートマップで可視化する.  
 コマンドはワークスペース直下にて以下の通り.
 
 ```bash
