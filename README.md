@@ -34,7 +34,8 @@ YOLOv8 をRGB-FIR向けに拡張したもの. 次の機能をオリジナルか�
 - [x] テスト結果の画像を全て書き出し
 - [x] pip installで利用可能にする
 - [x] Jetsonで実装
-- [x] YOLOv8をベースにした2入力モデル
+- [x] YOLOv8をベースにした2入力モデルYOLOv8-2stream
+- [x] CAMによるサリエンシーマップの作成
 
 ## Models
 
@@ -136,16 +137,16 @@ find ../All-Season -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
 またパラメータは全てコマンド上でも変更可能であるから, 無理にcfgファイルを分ける必要はない.  
 以下は追加パラメータの説明.
 
-| パラメータ名    | type  | 説明                                             |
-| --------------- | ----- | ------------------------------------------------ |
-| ch              | int   | データセットのチャネル数                         |
-| save_all        | bool  | テスト時に全ての結果画像を保存する               |
-| pos_imgs_train  | int   | 学習時のラベル有り画像の枚数 ( ≠ インスタンス数) |
-| pos_imgs_val    |       | 訓練時の同上                                     |
+|  パラメータ名   | type  | 説明                                             |
+| :-------------: | :---: | :----------------------------------------------- |
+|       ch        |  int  | データセットのチャネル数                         |
+|    save_all     | bool  | テスト時に全ての結果画像を保存する               |
+| pos_imgs_train  |  int  | 学習時のラベル有り画像の枚数 ( ≠ インスタンス数) |
+|  pos_imgs_val   |       | 訓練時の同上                                     |
 | neg_ratio_train | float | 学習時のラベル無し画像の全画像に対する比率       |
-| neg_ratio_val   |       | 訓練時の同上                                     |
-| hsv_ir          | float | データ拡張. FIR画像の輝度値を変化させる振幅割合. |
-| flipir          | float | データ拡張. FIR画像の白黒反転の確立.             |
+|  neg_ratio_val  |       | 訓練時の同上                                     |
+|     hsv_ir      | float | データ拡張. FIR画像の輝度値を変化させる振幅割合. |
+|     flipir      | float | データ拡張. FIR画像の白黒反転の確立.             |
 
 ### 2.2 訓練
 
@@ -185,7 +186,36 @@ NVIDIAデバイス向けのTensorRTやIntelデバイス向けのOpenVINO, オー
 yolo export model=[重みファイルへのパス] format=[フォーマット] half
 ```
 
-### 2.6 動作テスト
+### 2.6 CAMによる注目領域の可視化
+
+GradCAMやLaryerCAMによるモデルの注目度を画像上にヒートマップで可視化する.
+コマンドはワークスペース直下にて以下の通り.
+
+```bash
+python scripts/gradcam.py source=[データフォルダ or 画像ファイルパス] model=[重みファイルへのパス] method=[CAMの種類]
+```
+
+対応している引数は上記の例も含めて以下の通り.
+
+| パラメータ名  |      type       |          デフォルト          | 説明                                                                    |
+| :-----------: | :-------------: | :--------------------------: | :---------------------------------------------------------------------- |
+|    source     |       str       | `ultralytics/assets/bus.jpg` | RGB・FIRフォルダを含むディレクトリパス, またはJPEG画像のファイルパス    |
+|    project    |       str       |        `runs/gradcam`        | 保存先のルートパス                                                      |
+|     name      |       str       |        画像ファイル名        | 保存先のフォルダ名                                                      |
+| backward_type | [class,box,all] |            class             | 逆伝搬させる出力の種類. 信頼度, bbox座標, 両方                          |
+|   conf, iou   |      float      |           0.1,0.25           | 信頼度とIoUの閾値                                                       |
+|     model     |       pt        |          yolov8n.pt          | 重みファイルのパス（公式の重みは自動ダウンロード）                      |
+|    method     |    下記参照     |           XGradCAM           | CAMの種類                                                               |
+|     layer     |  list[int,...]  |          [15,18,21]          | 特徴量マップを利用するレイヤの場所. Detect層の直前を推奨.               |
+|  renormalize  |      bool       |            False             | bbox内でヒートマップを正規化する. 主にクラス分類に対する考察で使用する. |
+|   show_box    |      bool       |             True             | 検出したオブジェクトのbboxを表示する                                    |
+|     only      |  ["",RGB,FIR]   |              ""              | RGB-FIR検出器で指定した方のみのデータで検出を行う.                      |
+
+- 対応しているCAMの種類
+  - Gradient required: GradCAM, GradCAMPlusPlus, EigenGradCAM, LayerCAM, HiResCAM, XGradCAM
+  - Gradient free: EigenCAM, RandomCAM(?)
+
+### 2.7 動作テスト
 
 [ここ](memo.txt)を参照. 基本的にはdataオプションとbatch-sizeオプション, epochsオプションで変更すればよい.  
 場合によってはdataやモデル名を指定して変更すること. test時には2000枚ほどを使用して訓練が行われる.
