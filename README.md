@@ -96,7 +96,13 @@ All-Season以外はtrainとvalフォルダ以下で再帰的に探索を行う.
 シンボリックリンクでも認識可能なのでデータフォルダを作った後, フォルダごとにリンクを作るとスペースを節約できる
 
 ```bash
-find ../All-Season -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
+mkdir train
+cd train
+find ../../All-Season/train -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
+cd ..
+mkdir val
+cd val
+find ../../All-Season/val -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
 ```
 
 その後, [`All-Season.yaml`](data/All-Season.yaml) を参考にディレクトリとクラスを指定.  
@@ -112,20 +118,24 @@ yolo utils dataset
 ```txt
   <datasets>
   ├── All-Season
-  │   ├── 20180903_1113
-  │   │   ├── FIR
-  │   │   ├── FIR_labels
-  │   │   └── RGB_homo
-  │   └── 20190116_2008
-  ├── All-Season-day
-  │   └── 20180903_1113  <-シンボリックリンク推奨
-  │   
+  │   ├── train
+  │   │   ├── 20180731_1415
+  │   │   │   ├── set00
+  │   │   │   │   ├── FIR
+  │   │   │   │   ├── labels
+  │   │   │   │   └── RGB
+  │   │   │   └── set01
+  │   │   └── 20190116_2008
+  │   └── val
+  ├── All-Season-hot
+  │   ├── train
+  │   │   └── 20180731_1415 <-シンボリックリンク推奨
+  │   └── val
   └── kaist-sanit
       ├── train
       │   ├── set00
       │   │   ├──V000
       │   │   │  ├── labels
-      │   │   │  ├── person
       │   │   │  ├── lwir
       │   │   │  └── visible
       │   │   └──V001

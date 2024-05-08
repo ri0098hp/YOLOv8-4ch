@@ -1,7 +1,7 @@
 data_path: datasets/All-Season # データセットのrootフォルダ
-rgb_folder: RGB_homo # RGB画像があるフォルダ名
+rgb_folder: RGB # RGB画像があるフォルダ名
 fir_folder: FIR # FIR画像があるフォルダ名
-labels_folder: FIR_labels # ラベルがあるフォルダ名
+labels_folder: labels # ラベルがあるフォルダ名
 
 nc: 1 # number of classes
 ch: 4 # number of channels

@@ -2,4 +2,4 @@
 data: All-Season-cold.yaml # path to data file, i.e. i.e. coco128.yaml
 
 # Hyperparameters ------------------------------------------------------------------------------------------------------
-pos_imgs_train: 2496
+pos_imgs_train: 2519

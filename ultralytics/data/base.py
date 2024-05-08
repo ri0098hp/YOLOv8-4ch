@@ -4,7 +4,6 @@ import glob
 import math
 import os
 import random
-import re
 from copy import deepcopy
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
@@ -212,22 +211,13 @@ class BaseDataset(Dataset):
         """Read image files."""
         try:
             # loading images
-            if "All-Season" in str(self.data_path):  # 自作データセットの場合はディレクトリごとに割合で振り分け
-                target = self.data_path / "**" / self.rgb_folder
-                dirs = sorted(glob.iglob(f"{target}/", recursive=True))
-                dirs = [x.replace(self.rgb_folder + os.sep, "") for x in dirs]
-                if self.ch == 1:  # FIR only
-                    im_files = self.data_distributor(dirs, self.fir_folder)
-                else:  # RGB only, RGB-FIR
-                    im_files = self.data_distributor(dirs, self.rgb_folder)
-            else:  # それ以外の場合はtrainとvalフォルダで切り分け
-                base = self.fir_folder if self.ch == 1 else self.rgb_folder
-                if "train" in self.is_train:
-                    target = self.data_path / "train" / "**" / base / "*.*"
-                else:
-                    target = self.data_path / "val" / "**" / base / "*.*"
-                im_files = sorted(glob.iglob(str(target), recursive=True))
-                im_files = [x for x in im_files if x.split(".")[-1].lower() in IMG_FORMATS]
+            base = self.fir_folder if self.ch == 1 else self.rgb_folder
+            if "train" in self.is_train:
+                target = self.data_path / "train" / "**" / base / "*.*"
+            else:
+                target = self.data_path / "val" / "**" / base / "*.*"
+            im_files = sorted(glob.iglob(str(target), recursive=True))
+            im_files = [x for x in im_files if x.split(".")[-1].lower() in IMG_FORMATS]
         except Exception as e:
             raise FileNotFoundError(f"{self.prefix}Error loading data from {self.data_path}\n{HELP_URL}") from e
         if self.fraction < 1:
@@ -431,66 +421,3 @@ class BaseDataset(Dataset):
             ```
         """
         raise NotImplementedError
-
-    # ADD: by okuda ------------------------------------------------------------------------------------------------
-    def split_list(self, list: list, n: int) -> list:
-        """
-        配列を均等にn分割する
-        """
-        list_size = len(list)
-        a = list_size // n
-        b = list_size % n
-        return [list[i * a + (i if i < b else b) : (i + 1) * a + (i + 1 if i < b else b)] for i in range(n)]
-
-    def show_selected(self, dir: str, idx: list):
-        """
-        振り分けを可視化する関数
-        """
-        msg = f"{dir}: "
-        for i in range(10):
-            if i in idx:
-                msg += "■"
-            else:
-                msg += "□"
-        print(msg)
-
-    def data_distributor(self, dirs, trg_folder):
-        """
-        学習画像とテスト画像を振り分け
-        """
-        fs = []  # ファイルパス
-        if "train" in self.prefix:
-            print("\n□ is train group, ■ is val group")
-        for dir in dirs:  # 日付ディレクトリごとに探索
-            # RGBフォルダ下の画像を探索
-            f = sorted(glob.iglob(os.path.join(dir, trg_folder, "*.*"), recursive=True))
-            f = [x for x in f if x.split(".")[-1].lower() in IMG_FORMATS]
-            f.sort(key=lambda s: int(re.search(r"(\d+)\.", s).groups()[0]))  # 自然数で並び替え
-
-            # train と test の振り分け - 再現性のためフォルダからハッシュ値を計算しシフト
-            spl = self.split_list(f, 10)
-            idx_train = [0, 1, 2, 4, 6, 7, 8]
-            idx_val = [3, 5, 9]
-            # idx_val = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # test all images
-            try:
-                d = int(re.sub(r"\D", "", dir))
-            except Exception:
-                d = ord(dir[-2])
-            idx_train = list(map(lambda x: (x + d) % 10, idx_train))
-            idx_val = list(map(lambda x: (x + d) % 10, idx_val))
-            if "train" in self.prefix:
-                self.show_selected(dir, idx_val)
-                for id in idx_train:
-                    fs += spl[id]
-            else:
-                for id in idx_val:
-                    fs += spl[id]
-        print()
-        return fs
-
-
-def hist_eq(img):
-    res1 = cv2.equalizeHist(img)
-    res2 = cv2.createCLAHE(clipLimit=2, tileGridSize=(4, 4)).apply(img)
-    ave_img = np.clip(((np.float32(img) + np.float32(res1) + np.float32(res2)) / 3.0), 0, 255).astype(np.uint8)
-    return ave_img
