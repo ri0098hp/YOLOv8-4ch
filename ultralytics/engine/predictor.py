@@ -74,9 +74,7 @@ class BasePredictor:
         data (dict): Data configuration.
         device (torch.device): Device used for prediction.
         dataset (Dataset): Dataset used for prediction.
-        vid_path (str): Path to video file.
         vid_writer (dict): Dictionary of {save_path: video_writer, ...} writer for saving video output.
-        data_path (str): Path to data.
     """
 
     def __init__(self, cfg=DEFAULT_CFG, overrides=None, _callbacks=None):
@@ -103,7 +101,6 @@ class BasePredictor:
         self.dataset = None
         self.vid_writer = {}  # dict of {save_path: video_writer, ...}
         self.plotted_img = None
-        self.data_path = None
         self.source_type = None
         self.seen = 0
         self.windows = []
@@ -278,7 +275,6 @@ class BasePredictor:
                         "inference": profilers[1].dt * 1e3 / n,
                         "postprocess": profilers[2].dt * 1e3 / n,
                     }
-
                     if self.args.verbose or self.args.save or self.args.save_txt or self.args.show:
                         s[i] += self.write_results(i, Path(paths[i]), im, s)
 

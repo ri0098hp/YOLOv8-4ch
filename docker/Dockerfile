@@ -3,8 +3,7 @@
 # Image is CUDA-optimized for YOLOv8 single/multi-GPU training and inference
 
 # Start FROM PyTorch image https://hub.docker.com/r/pytorch/pytorch or nvcr.io/nvidia/pytorch:23.03-py3
-FROM pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime
-RUN rm -rf /opt/pytorch
+FROM pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime
 RUN pip install --no-cache nvidia-tensorrt --index-url https://pypi.ngc.nvidia.com
 
 # rootless user
@@ -12,10 +11,11 @@ ARG USER=suwako
 RUN useradd -m -d /home/$USER -s /bin/bash $USER
 
 # Downloads to user config dir
-ADD https://ultralytics.com/assets/Arial.ttf https://ultralytics.com/assets/Arial.Unicode.ttf /home/$USER/.config/Ultralytics/
+ADD https://github.com/ultralytics/assets/releases/download/v0.0.0/Arial.ttf\
+    https://github.com/ultralytics/assets/releases/download/v0.0.0/Arial.Unicode.ttf\
+    /home/$USER/.config/Ultralytics/
 
 # Install linux packages
-ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update \
   && apt-get -y upgrade
 RUN apt-get install --no-install-recommends -y gcc git zip curl htop libgl1 libglib2.0-0 libpython3-dev gnupg g++ libusb-1.0-0
@@ -49,8 +49,11 @@ COPY docker/.screenrc /home/$USER
 # Build and Push
 # t=ultralytics/ultralytics:latest && sudo docker build -f docker/Dockerfile -t $t . && sudo docker push $t
 
-# Pull and Run
+# Pull and Run with access to all GPUs
 # t=ultralytics/ultralytics:latest && sudo docker pull $t && sudo docker run -it --ipc=host --gpus all $t
+
+# Pull and Run with access to GPUs 2 and 3 (inside container CUDA devices will appear as 0 and 1)
+# t=ultralytics/ultralytics:latest && sudo docker pull $t && sudo docker run -it --ipc=host --gpus '"device=2,3"' $t
 
 # Pull and Run with local directory access
 # t=ultralytics/ultralytics:latest && sudo docker pull $t && sudo docker run -it --ipc=host --gpus all -v "$(pwd)"/datasets:/usr/src/datasets $t

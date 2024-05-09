@@ -20,8 +20,8 @@
 
 ## Original
 
- This is forked repo from (ultralytics/ultralytics) on commit a62cdab (ultralytics 8.1.29).  
- Catch up to changes [here](https://github.com/ultralytics/ultralytics/compare/a62cdab...main).
+ This is forked repo from (ultralytics/ultralytics) on commit fcfc44e (ultralytics 8.2.11).  
+ Catch up to changes [here](https://github.com/ultralytics/ultralytics/compare/fcfc44e...main).
 
 ## Features
 
@@ -84,7 +84,7 @@ devcontainerかdocker-compose upでコンテナを立ち上げる.
 なおオプションとして最後の`.`をONNXやTensorRTに対応する`.[export]`に変えることも可能.
 
 ```bash
-pip install -e .
+pip install -e .[4ch]
 ```
 
 ### 1.5 データセットを準備

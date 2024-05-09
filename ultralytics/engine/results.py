@@ -385,36 +385,55 @@ class Results(SimpleClass):
                 BGR=True,
             )
 
-    def tojson(self, normalize=False):
-        """Convert the object to JSON format."""
-        if self.probs is not None:
-            LOGGER.warning("Warning: Classify task do not support `tojson` yet.")
-            return
-
-        import json
-
+    def summary(self, normalize=False, decimals=5):
+        """Convert the results to a summarized format."""
         # Create list of detection dictionaries
         results = []
-        data = self.boxes.data.cpu().tolist()
+        if self.probs is not None:
+            class_id = self.probs.top1
+            results.append(
+                {
+                    "name": self.names[class_id],
+                    "class": class_id,
+                    "confidence": round(self.probs.top1conf.item(), decimals),
+                }
+            )
+            return results
+
+        data = self.boxes or self.obb
+        is_obb = self.obb is not None
         h, w = self.orig_shape if normalize else (1, 1)
         for i, row in enumerate(data):  # xyxy, track_id if tracking, conf, class_id
-            box = {"x1": row[0] / w, "y1": row[1] / h, "x2": row[2] / w, "y2": row[3] / h}
-            conf = row[-2]
-            class_id = int(row[-1])
-            name = self.names[class_id]
-            result = {"name": name, "class": class_id, "confidence": conf, "box": box}
-            if self.boxes.is_track:
-                result["track_id"] = int(row[-3])  # track ID
+            class_id, conf = int(row.cls), round(row.conf.item(), decimals)
+            box = (row.xyxyxyxy if is_obb else row.xyxy).squeeze().reshape(-1, 2).tolist()
+            xy = {}
+            for i, b in enumerate(box):
+                xy[f"x{i + 1}"] = round(b[0] / w, decimals)
+                xy[f"y{i + 1}"] = round(b[1] / h, decimals)
+            result = {"name": self.names[class_id], "class": class_id, "confidence": conf, "box": xy}
+            if data.is_track:
+                result["track_id"] = int(row.id.item())  # track ID
             if self.masks:
-                x, y = self.masks.xy[i][:, 0], self.masks.xy[i][:, 1]  # numpy array
-                result["segments"] = {"x": (x / w).tolist(), "y": (y / h).tolist()}
+                result["segments"] = {
+                    "x": (self.masks.xy[i][:, 0] / w).round(decimals).tolist(),
+                    "y": (self.masks.xy[i][:, 1] / h).round(decimals).tolist(),
+                }
             if self.keypoints is not None:
                 x, y, visible = self.keypoints[i].data[0].cpu().unbind(dim=1)  # torch Tensor
-                result["keypoints"] = {"x": (x / w).tolist(), "y": (y / h).tolist(), "visible": visible.tolist()}
+                result["keypoints"] = {
+                    "x": (x / w).numpy().round(decimals).tolist(),  # decimals named argument required
+                    "y": (y / h).numpy().round(decimals).tolist(),
+                    "visible": visible.numpy().round(decimals).tolist(),
+                }
             results.append(result)
 
-        # Convert detections to JSON
-        return json.dumps(results, indent=2)
+        return results
+
+    def tojson(self, normalize=False, decimals=5):
+        """Convert the results to JSON format."""
+        import json
+
+        return json.dumps(self.summary(normalize=normalize, decimals=decimals), indent=2)
 
 
 class Boxes(BaseTensor):
@@ -457,7 +476,7 @@ class Boxes(BaseTensor):
         if boxes.ndim == 1:
             boxes = boxes[None, :]
         n = boxes.shape[-1]
-        assert n in (6, 7), f"expected 6 or 7 values but got {n}"  # xyxy, track_id, conf, cls
+        assert n in {6, 7}, f"expected 6 or 7 values but got {n}"  # xyxy, track_id, conf, cls
         super().__init__(boxes, orig_shape)
         self.is_track = n == 7
         self.orig_shape = orig_shape
@@ -674,7 +693,7 @@ class OBB(BaseTensor):
         if boxes.ndim == 1:
             boxes = boxes[None, :]
         n = boxes.shape[-1]
-        assert n in (7, 8), f"expected 7 or 8 values but got {n}"  # xywh, rotation, track_id, conf, cls
+        assert n in {7, 8}, f"expected 7 or 8 values but got {n}"  # xywh, rotation, track_id, conf, cls
         super().__init__(boxes, orig_shape)
         self.is_track = n == 8
         self.orig_shape = orig_shape

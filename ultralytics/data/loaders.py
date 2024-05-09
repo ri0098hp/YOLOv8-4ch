@@ -15,8 +15,8 @@ import requests
 import torch
 from PIL import Image
 
-from ultralytics.data.utils import IMG_FORMATS, VID_FORMATS
-from ultralytics.utils import LOGGER, is_colab, is_kaggle, ops
+from ultralytics.data.utils import FORMATS_HELP_MSG, IMG_FORMATS, VID_FORMATS
+from ultralytics.utils import IS_COLAB, IS_KAGGLE, LOGGER, ops
 from ultralytics.utils.checks import check_requirements
 
 
@@ -83,11 +83,11 @@ class LoadStreams:
         for i, s in enumerate(sources):  # index, source
             # Start thread to read frames from video stream
             st = f"{i + 1}/{n}: {s}... "
-            if urlparse(s).hostname in ("www.youtube.com", "youtube.com", "youtu.be"):  # if source is YouTube video
+            if urlparse(s).hostname in {"www.youtube.com", "youtube.com", "youtu.be"}:  # if source is YouTube video
                 # YouTube format i.e. 'https://www.youtube.com/watch?v=Zgi9g1ksQHc' or 'https://youtu.be/LNwODJXcvt4'
                 s = get_best_youtube_url(s)
             s = eval(s) if s.isnumeric() else s  # i.e. s = '0' local webcam
-            if s == 0 and (is_colab() or is_kaggle()):
+            if s == 0 and (IS_COLAB or IS_KAGGLE):
                 raise NotImplementedError(
                     "'source=0' webcam not supported in Colab and Kaggle notebooks. "
                     "Try running 'source=0' in a local environment."
@@ -273,27 +273,37 @@ class LoadImagesAndVideos:
 
     def __init__(self, path, ch=3, batch=1, vid_stride=1):
         """Initialize the Dataloader and raise FileNotFoundError if file not found."""
+        parent = None
         if isinstance(path, str) and Path(path).suffix == ".txt":  # *.txt file with img/vid/dir on each line
+            parent = Path(path).parent
             path = Path(path).read_text().splitlines()  # list of sources
         files = []
         for p in sorted(path) if isinstance(path, (list, tuple)) else [path]:
-            p = str(Path(p).absolute())  # do not use .resolve() https://github.com/ultralytics/ultralytics/issues/2912
-            if "*" in p:
-                files.extend(sorted(glob.glob(p, recursive=True)))  # glob
-            elif os.path.isdir(Path(p) / "RGB") or os.path.isdir(Path(p) / "FIR"):
+            a = str(Path(p).absolute())  # do not use .resolve() https://github.com/ultralytics/ultralytics/issues/2912
+            if "*" in a:
+                files.extend(sorted(glob.glob(a, recursive=True)))  # glob
+            elif os.path.isdir(Path(a) / "RGB") or os.path.isdir(Path(a) / "FIR"):
                 if ch == 1:
-                    files.extend(sorted(glob.glob(os.path.join(p, "FIR", "*.*"))))  # FIR dir
+                    files.extend(sorted(glob.glob(os.path.join(a, "FIR", "*.*"))))  # FIR dir
                 else:
-                    files.extend(sorted(glob.glob(os.path.join(p, "RGB", "*.*"))))  # RGB dir
-            elif os.path.isdir(p):
-                files.extend(sorted(glob.glob(os.path.join(p, "*.*"))))  # dir
-            elif os.path.isfile(p):
-                files.append(p)  # files
+                    files.extend(sorted(glob.glob(os.path.join(a, "RGB", "*.*"))))  # RGB dir
+            elif os.path.isdir(a):
+                files.extend(sorted(glob.glob(os.path.join(a, "*.*"))))  # dir
+            elif os.path.isfile(a):
+                files.append(a)  # files (absolute or relative to CWD)
+            elif parent and (parent / p).is_file():
+                files.append(str((parent / p).absolute()))  # files (relative to *.txt file parent)
             else:
                 raise FileNotFoundError(f"{p} does not exist")
 
-        images = [x for x in files if x.split(".")[-1].lower() in IMG_FORMATS]
-        videos = [x for x in files if x.split(".")[-1].lower() in VID_FORMATS]
+        # Define files as images or videos
+        images, videos = [], []
+        for f in files:
+            suffix = f.split(".")[-1].lower()  # Get file extension without the dot and lowercase
+            if suffix in IMG_FORMATS:
+                images.append(f)
+            elif suffix in VID_FORMATS:
+                videos.append(f)
         ni, nv = len(images), len(videos)
 
         self.ch = ch
@@ -309,10 +319,7 @@ class LoadImagesAndVideos:
         else:
             self.cap = None
         if self.nf == 0:
-            raise FileNotFoundError(
-                f"No images or videos found in {p}. "
-                f"Supported formats are:\nimages: {IMG_FORMATS}\nvideos: {VID_FORMATS}"
-            )
+            raise FileNotFoundError(f"No images or videos found in {p}. {FORMATS_HELP_MSG}")
 
     def __iter__(self):
         """Returns an iterator object for VideoStream or ImageFolder."""
