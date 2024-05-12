@@ -20,8 +20,8 @@
 
 ## Original
 
- This is forked repo from (ultralytics/ultralytics) on commit fcfc44e (ultralytics 8.2.11).  
- Catch up to changes [here](https://github.com/ultralytics/ultralytics/compare/fcfc44e...main).
+ This is forked repo from (ultralytics/ultralytics) on commit 6909f08 (ultralytics 8.2.13).  
+ Catch up to changes [here](https://github.com/ultralytics/ultralytics/compare/6909f08...main).
 
 ## Features
 
@@ -148,7 +148,12 @@ yolo utils dataset
 ### 2.1 cfgファイルの準備
 
 [`default.yaml`](ultralytics/cfg/default.yaml) をベースに設定を弄る.  
-なお `pos_imgs_train` などのパラメータは [`check_dataset.py`](scripts/check_dataset.py) を活用すると良い.  
+なお `pos_imgs_train` などのパラメータは [`check_dataset.py`](ultralytics/utils/check_dataset.py) を活用すると良い.  
+
+```bash
+yolo utils dataset
+```
+
 またパラメータは全てコマンド上でも変更可能であるから, 無理にcfgファイルを分ける必要はない.  
 以下は追加パラメータの説明.
 
@@ -232,7 +237,7 @@ yolo utils gradcam source=[データフォルダ or 画像ファイルパス] mo
 
 ### 2.7 動作テスト
 
-[ここ](memo.txt)を参照. 基本的にはdataオプションとbatch-sizeオプション, epochsオプションで変更すればよい.  
+基本的にはdataオプションとbatch-sizeオプション, epochsオプションで変更すればよい.  
 場合によってはdataやモデル名を指定して変更すること. test時には2000枚ほどを使用して訓練が行われる.
 
 ```bash
