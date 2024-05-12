@@ -123,7 +123,6 @@ CFG_FRACTION_KEYS = {
     "iou",
     "fraction",
     "neg_ratio_train",
-    "neg_ratio_val",
 }  # fraction floats 0.0 - 1.0
 CFG_INT_KEYS = {
     "epochs",
@@ -139,7 +138,6 @@ CFG_INT_KEYS = {
     "nbs",
     "save_period",
     "pos_imgs_train",
-    "pos_imgs_val",
     "ch",
 }
 CFG_BOOL_KEYS = {
