@@ -2,8 +2,4 @@
 !.gitignore
 !build_jetson.sh
 !build_yolo.sh
-!check_dataset.py
-!gradcam.py
-!sweep_pred.sh
-!sweep_train.sh
-!sweep_val.sh
+!sweep_*_season.py
