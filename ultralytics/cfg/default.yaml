@@ -123,9 +123,7 @@ crop_fraction: 1.0 # (float) image crop fraction for classification (0.1-1), 1.0
 ch: # (int) channels of input images (1,2,3,4)
 save_all: False # (bool) save all images in test sets
 pos_imgs_train: # (int) number of images for train (optionally)
-pos_imgs_val: # (float) number of images for val (optionally)
 neg_ratio_train: # (float) ratio of non-labeled images to all images for train (optionally)
-neg_ratio_val: # (float) ratio of non-labeled images to all images for val (optionally)
 hsv_ir: 0.5 # (float)  FIR image V-Value augmentation (fraction) add by okuda
 flipir: 0.0 # (float) flip black and white on FIR image (probability) add by okuda
 
