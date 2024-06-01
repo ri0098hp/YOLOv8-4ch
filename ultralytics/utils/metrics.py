@@ -482,6 +482,8 @@ def plot_pr_curve(px, py, ap, save_dir=Path("pr_curve.png"), names=(), on_plot=N
 def plot_lamr_curve(px, py, lamr, save_dir=Path("lamr_curve.png"), names=(), on_plot=None):
     """Plots a fppi-missrate curve. add by okuda"""
     # TODO: each class plotting
+    if len(px) // 1000 == 0:
+        return
     px = px[:: len(px) // 1000]
     py = py[:: len(py) // 1000]
     yticks = [0.05, 0.1, 0.20, 0.30, 0.40, 0.50, 0.64, 0.80, 1]

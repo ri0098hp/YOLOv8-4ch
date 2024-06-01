@@ -422,7 +422,7 @@ class Annotator:
             lineType=cv2.LINE_AA,
         )
 
-    ### Parking management utils
+    # Parking management utils
     def display_objects_labels(self, im0, text, txt_color, bg_color, x_center, y_center, margin):
         """
         Display the bounding boxes labels in parking management app.
@@ -813,14 +813,13 @@ def plot_images(
         batch_idx = batch_idx.cpu().numpy()
 
     max_size = 1920  # max image size
-    bs, _, h, w = images.shape  # batch size, _, height, width
+    bs, ch, h, w = images.shape  # batch size, _, height, width
     bs = min(bs, max_subplots)  # limit plot images
     ns = np.ceil(bs**0.5)  # number of subplots (square)
     if np.max(images[0]) <= 1:
         images *= 255  # de-normalise (optional)
 
     # Build Image
-    ch = images[0].shape[0]
     mosaic = np.full((int(ns * h), int(ns * w), ch), 255, dtype=np.uint8)  # init
 
     # add okuda: color for multi channels
