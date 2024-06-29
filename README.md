@@ -1,5 +1,7 @@
 # YOLOv8-4ch
 
+[English](README.md) | [日本語🇯🇵](README-ja.md)
+
 ## DEMO
 
 <https://github.com/ri0098hp/YOLOv8-4ch/assets/104181368/177f036e-4932-4fda-9338-532504e81663>
@@ -15,8 +17,27 @@
 - AP means AP@0.5 in a single class.
 - Tested on All-Season-Dataset (Ours)
 - ultralytics 8.1.29
-- Batch-size=1 on Speed/Image, FPS
 - Jetson uses JetPack 6.0 DP
+
+## Paper Results
+
+### 4-CHANNEL
+
+| Model | AP@Hot   | AP@Inter | AP@Cold  | Avg.     |
+| ----- | -------- | -------- | -------- | -------- |
+| Hot   | **74.5** | 81.8     | 69.5     | 75.3     |
+| Inter | 50.2     | 84.7     | 68.0     | 67.6     |
+| Cold  | 49.6     | 82.3     | **77.7** | 69.9     |
+| Mix   | 67.5     | **85.0** | 75.6     | **76.0** |
+
+### 2-STREAM
+
+| Model |  AP@Hot  | AP@Inter | AP@Cold  |   Avg.   |
+| :---- | :------: | :------: | :------: | :------: |
+| Hot   | **78.3** |   84.2   |   72.0   |   78.2   |
+| Inter |   56.3   |   85.9   |   72.2   |   71.5   |
+| Cold  |   59.8   |   85.2   |   80.1   |   75.0   |
+| Mix   |   77.5   | **87.8** | **80.9** | **82.1** |
 
 ## Original
 
@@ -25,75 +46,95 @@
 
 ## Features
 
-YOLOv8 をRGB-FIR向けに拡張したもの. 次の機能をオリジナルから追加している.
+An extension of YOLOv8 for RGB-FIR. The following features have been added from the original:
 
-- [x] 1ch, 3ch, 4chの学習・テスト・推論に対応 (ch=1等で指定可能)
-- [x] TensorRT, ONNX, OpenVINOのエクスポートに対応
-- [x] データセットの読み込みを確認、cfgの設定をできるツール `check_dataset.py`
-- [x] テスト結果をsvg, csvで保存
-- [x] テスト結果の画像を全て書き出し
-- [x] pip installで利用可能にする
-- [x] Jetsonで実装
-- [x] YOLOv8をベースにした2入力モデルYOLOv8-2stream
-- [x] CAMによるサリエンシーマップの作成
+- [x] Support for 1ch, 3ch, 4ch data (specified as ch=1 etc.)
+- [x] Support for LAMR metric
+- [x] Tool for checking dataset loading and configuring
+- [x] Save test results in svg, csv
+- [x] Export all test images
+- [x] Available with pip install for 4ch dependencies
+- [x] Implementation on Jetson
+- [x] YOLOv8-2stream, a two-input model based on YOLOv8
+- [x] Creating a saliency map using CAM
 
 ## Models
 
-ベースラインとなっているモデル. [詳細](ultralytics/cfg/models)
+Baseline model: YOLOv8s-2stream [details](ultralytics/cfg/models)
 
 ![yolov8s-2stream.drawio.svg](ultralytics/cfg/models/diagram/yolov8s-2stream.drawio.svg)
 
 ## 1. Installation
 
-以下[1.1](#11-環境構築)以降の手法はYOLOの内部を弄る必要があるときである.  
-ただ利用するだけなら, まず[Actions](https://github.com/ri0098hp/YOLOv8-4ch/actions/workflows/release.yaml)で`Run workflow`を実行すれば, [Release](https://github.com/ri0098hp/YOLOv8-4ch/releases/latest)に最新のwhlファイルが実装される.  
-これをダウンロードしたのち
+If you just want to use it, the latest wheel file is available in [Release](https://github.com/ri0098hp/YOLOv8-4ch/releases/latest).  
+After downloading this, install the package as below:
 
 ```bash
-pip install [whlファイル]
+python -m venv .venv
+. ./.venv/bin/activate
+pip install ultralytics-YYYY.MM.DD-py3-none-any.whl[4ch]
 ```
 
-でインストールした後, [CLI](#2-usage-cli)上や[Pythonコード](#3-usage-python-with-pip)上で従って利用する.
+Please follow the instructions to use it on the [CLI](#4-usage-cli) or Python code like in [scripts](scripts).  
+We also prepare the demo code with datasets.  
+Please refer to the next section.
 
-### 1.1 環境構築
+## 2 Custom Installation and Demo Run
 
-必要に応じてDockerのセットアップやNVIDIA環境を入れる. [[参考]](<https://github.com/Rits-Fujinolab/Docker-setup/blob/master/server.md>)  
+### 2.1 Full Installation
 
-### 1.2 レポジトリを取得
-
-レポジトリをcloneする. git環境がある人はOrganizationsにアクセス権限のあるuser名とmailを設定して
+This is an installation way to customize our codes.
+Set up Docker, NVIDIA Driver, and git environment as necessary.  
+(We recommend use docker and devcontainer with VSCode.)  
+Clone the repository.
 
 ```bash
 git clone git@github.com:ri0098hp/YOLOv8-4ch.git
 ```
 
-または [GitHub CLI](https://cli.github.com) をインストールしてログイン認証後
+Or you can use [GitHub CLI](https://cli.github.com) with:
 
 ```bash
 gh repo clone ri0098hp/YOLOv8-4ch
 ```
 
-### 1.3 コンテナを立ち上げる
+After that, start the container with devcontainer or docker-compose up.  
+Or you can use virtualenv like venv like:
 
-devcontainerかdocker-compose upでコンテナを立ち上げる.
+```bash
+cd YOLOv8-4ch
+python -m venv .venv
+. ./.venv/bin/activate
+```
 
-### 1.4 YOLOv8をpipでインストール
-
-`pyproject.toml`があるディレクトリで次のコマンドを実行する.  
-これにより, 逐次ファイルの変更をパッケージに反映出来るようにする.  
-なおオプションとして最後の`.`をONNXやTensorRTに対応する`.[export]`に変えることも可能.
+After that, execute the following command in the directory where `pyproject.toml` is located.  
+This allows you to reflect changes to the file sequentially in the package.
 
 ```bash
 pip install -e .[4ch]
 ```
 
-### 1.5 データセットを準備
+### 2.2 Run Demo Tests
 
-データセットをdatasetフォルダーに入れる.  
-dataloaderを魔改造してるため次のようなディレクトリ構造推奨...  
-All-Season以外はtrainとvalフォルダ以下で再帰的に探索を行う.  
-尚ラベルとRGB画像とFIR画像は対称となるパス関係に存在する必要がある.  
-シンボリックリンクでも認識可能なのでデータフォルダを作った後, フォルダごとにリンクを作るとスペースを節約できる
+Demo codes are available on [sweep_val_season.py](scripts/sweep_val_season.py).  
+Please download the codes, weight files, and dataset from release v2024.06.13 assets [[here]](https://github.com/ri0098hp/YOLOv8-4ch/releases/tag/v2024.06.13).  
+Note that the locations of each subset in the datasets ([hot](ultralytics/cfg/datasets/All-Season-hot.yaml), [inter](ultralytics/cfg/datasets/All-Season-inter.yaml), [cold](ultralytics/cfg/datasets/All-Season-cold.yaml)) in yaml file should be changed.  
+(We recommend make `datasets` folder and place `All-Season-tiny` folder in it.)  
+You must change the path to weight files, such as L8 and L25, in the [script](scripts/sweep_val_season.py).  
+(We recommend make `runs` folder and place pt files in it.)  
+Then, run the python command and you will obtain the result table as csv file.
+
+```bash
+python scripts/sweep_val_season.py
+```
+
+## 3. Dataset
+
+Put the dataset in the dataset folder.  
+Because the dataloader has been modified, the following directory structure is recommended.  
+Except for All-Season, the search will be performed recursively under the train and val folders.  
+Note that the labels, RGB images, and FIR images must exist in a symmetrical path relationship.  
+Symbolic links can also be recognized, so after creating the data folder, you can save space by creating links for each folder.
 
 ```bash
 mkdir train
@@ -105,19 +146,19 @@ cd val
 find ../../All-Season/val -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
 ```
 
-その後, [`All-Season.yaml`](data/All-Season.yaml) を参考にディレクトリとクラスを指定.  
-なおRGB画像、FIR画像、ラベルファイルは全て同じ名前を持っている必要がある. (RGBを基準に出ディレクトリを置換している)  
-上手く読み込めるかどうかは次のコマンドでcfgやdataのYAMLファイルを利用して確認できる.
+After that, specify the directory and class by referring to [`All-Season.yaml`](data/All-Season.yaml).  
+The RGB image, FIR image, and label file must all have the same name. (The output directory is replaced based on RGB.)  
+You can check whether it was successfully loaded by using the configuration or data YAML file with the following command.
 
 ```bash
 yolo utils dataset
 ```
 
-以下はディレクトリ構造の例.
+An example of the directory structure:
 
 ```txt
   <datasets>
-  ├── All-Season
+  ├── All-Season (not available now)
   │   ├── train
   │   │   ├── 20180731_1415
   │   │   │   ├── set00
@@ -127,11 +168,15 @@ yolo utils dataset
   │   │   │   └── set01
   │   │   └── 20190116_2008
   │   └── val
-  ├── All-Season-hot
+  ├── All-Season-hot (not available now)
   │   ├── train
-  │   │   └── 20180731_1415 <-シンボリックリンク推奨
+  │   │   └── 20180731_1415 <-recommended to use symbolic links
   │   └── val
-  └── kaist-sanit
+  ├── All-Season-tiny
+  │   ├── hot
+  │   ├── inter
+  │   └── cold
+  └── kaist-sanit (other datasets)
       ├── train
       │   ├── set00
       │   │   ├──V000
@@ -143,148 +188,97 @@ yolo utils dataset
       └── val
 ```
 
-## 2. Usage (CLI)
+## 4. Usage (CLI)
 
-### 2.1 cfgファイルの準備
+### 4.1 Preparing the CFG File
 
-[`default.yaml`](ultralytics/cfg/default.yaml) をベースに設定を弄る.  
-なお `pos_imgs_train` などのパラメータは [`check_dataset.py`](ultralytics/utils/check_dataset.py) を活用すると良い.  
+Tweak the settings based on [`default.yaml`](ultralytics/cfg/default.yaml).  
+For parameters such as `pos_imgs_train`, it is a good idea to use [`check_dataset.py`](ultralytics/utils/check_dataset.py).
 
 ```bash
 yolo utils dataset
 ```
 
-またパラメータは全てコマンド上でも変更可能であるから, 無理にcfgファイルを分ける必要はない.  
-以下は追加パラメータの説明.
+Also, all parameters can be changed through commands, so there is no need to force separate cfg files.  
+Additional parameters are available like below:
 
-|  パラメータ名   | type  | 説明                                             |
-| :-------------: | :---: | :----------------------------------------------- |
-|       ch        |  int  | データセットのチャネル数                         |
-|    save_all     | bool  | テスト時に全ての結果画像を保存する               |
-| pos_imgs_train  |  int  | 学習時のラベル有り画像の枚数 ( ≠ インスタンス数) |
-|  pos_imgs_val   |       | 訓練時の同上                                     |
-| neg_ratio_train | float | 学習時のラベル無し画像の全画像に対する比率       |
-|  neg_ratio_val  |       | 訓練時の同上                                     |
-|     hsv_ir      | float | データ拡張. FIR画像の輝度値を変化させる振幅割合. |
-|     flipir      | float | データ拡張. FIR画像の白黒反転の確立.             |
+|   Parameters    | Type  | Description                                                                    |
+| :-------------: | :---: | :----------------------------------------------------------------------------- |
+|       ch        |  int  | Number of channels in the data set                                             |
+|    save_all     | bool  | Save all result images during testing                                          |
+| pos_imgs_train  |  int  | Number of labeled images during training (≠ number of instances)               |
+| neg_ratio_train | float | Ratio of unlabeled images to all images during training                        |
+|     hsv_ir      | float | Data augmentation. Amplitude ratio for changing brightness value of FIR image. |
+|     flipir      | float | Data augmentation. Establishment of black and white inversion of FIR image.    |
 
-### 2.2 訓練
+### 4.2 Train, Validate, and Predict
 
-[ここ](memo.txt)を参照.  
-必要に応じて`cfg`オプションを読み込めばよい.  
-基本的には`data`オプションと`batch`オプション, `epochs`オプションで変更すればよい.
+All commands for basic method is the same as official implementation.  
+Therefore, please see and follow their documents. [[here]](https://docs.ultralytics.com)
 
-```bash
-yolo detect train data=[yamlへのパス] model=[yamlまたはptへのパス]
-```
+### 4.3 CAM Visualization
 
-### 2.3 テスト
-
-基本的には`data`オプションと重みファイルオプションで変更すればよい.  
-速度を測定する場合には`batch=1`とする.  
-スライド用の画像を探す場合は`save_all`オプションが便利.
+Visualize the attention of the model by GradCAM or LaryerCAM on the image with a heat map.
+The command is as follows, directly under the workspace.
 
 ```bash
-yolo detect val model=[重みファイルへのパス] data=[データyamlへのパス] save_all
+yolo utils gradcam source=[data folder or image file path] model=[path to weight file] layer=[layer selection]
 ```
 
-### 2.4 検知
+The supported arguments are as follows, including the above example.
 
-`source`で指定するフォルダ直下にRGB, FIRのいずれか, あるいは両方が存在する必要がある.
+| Parameter name |      type       |           Default            | Description                                                                                                                      |
+| :------------: | :-------------: | :--------------------------: | :------------------------------------------------------------------------------------------------------------------------------- |
+|     source     |       str       | `ultralytics/assets/bus.jpg` | Directory path including RGB and FIR folders, or file path of JPEG image                                                         |
+|    project     |       str       |        `runs/gradcam`        | Root path of destination                                                                                                         |
+|      name      |       str       |       Image file name        | Destination folder name                                                                                                          |
+| backward_type  | [class,box,all] |            class             | Type of output to be backpropagated. Confidence, bbox coordinates, both                                                          |
+|   conf, iou    |      float      |           0.1,0.25           | Confidence and IoU threshold                                                                                                     |
+|     model      |       pt        |          yolov8n.pt          | Path of weight file (official weights are automatically downloaded)                                                              |
+|     method     |    See below    |           XGradCAM           | CAM type                                                                                                                         |
+|     layer      |  list[int,...]  |          [15,18,21]          | Location of the layer that uses the feature map. Recommended focusing on just before the Detect layer. (For 2stream, [29,32,35]) |
+|  renormalize   |      bool       |            False             | Normalize the heat map within the bbox. Mainly used for class classification considerations.                                     |
+|    show_box    |      bool       |             True             | Display the bbox of the detected object                                                                                          |
+|      only      |  ["",RGB,FIR]   |              ""              | Perform detection using only the data specified by the RGB-FIR detector.                                                         |
 
-```bash
-yolo detect predict model=[重みファイルへのパス] source=[データフォルダ] save
-```
-
-### 2.5 モデル変換
-
-NVIDIAデバイス向けのTensorRTやIntelデバイス向けのOpenVINO, オープンソース(主にAMDデバイス向け)のONNXへの変換を行うことができる.  
-必要に応じて半精度`half`オプションを入れる.  
-なおformatは[engine, openvino, onnx, tflite]など [[詳細](https://docs.ultralytics.com/modes/export/)].
-
-```bash
-yolo export model=[重みファイルへのパス] format=[フォーマット] half
-```
-
-### 2.6 CAMによる注目領域の可視化
-
-GradCAMやLaryerCAMによるモデルの注目度を画像上にヒートマップで可視化する.  
-コマンドはワークスペース直下にて以下の通り.
-
-```bash
-yolo utils gradcam source=[データフォルダ or 画像ファイルパス] model=[重みファイルへのパス] layer=[レイヤの選択]
-```
-
-対応している引数は上記の例も含めて以下の通り.
-
-| パラメータ名  |      type       |          デフォルト          | 説明                                                                              |
-| :-----------: | :-------------: | :--------------------------: | :-------------------------------------------------------------------------------- |
-|    source     |       str       | `ultralytics/assets/bus.jpg` | RGB・FIRフォルダを含むディレクトリパス, またはJPEG画像のファイルパス              |
-|    project    |       str       |        `runs/gradcam`        | 保存先のルートパス                                                                |
-|     name      |       str       |        画像ファイル名        | 保存先のフォルダ名                                                                |
-| backward_type | [class,box,all] |            class             | 逆伝搬させる出力の種類. 信頼度, bbox座標, 両方                                    |
-|   conf, iou   |      float      |           0.1,0.25           | 信頼度とIoUの閾値                                                                 |
-|     model     |       pt        |          yolov8n.pt          | 重みファイルのパス (公式の重みは自動ダウンロード)                                 |
-|    method     |    下記参照     |           XGradCAM           | CAMの種類                                                                         |
-|     layer     |  list[int,...]  |          [15,18,21]          | 特徴量マップを利用するレイヤの場所. Detect層の直前を推奨. (2streamなら[29,32,35]) |
-|  renormalize  |      bool       |            False             | bbox内でヒートマップを正規化する. 主にクラス分類に対する考察で使用する.           |
-|   show_box    |      bool       |             True             | 検出したオブジェクトのbboxを表示する                                              |
-|     only      |  ["",RGB,FIR]   |              ""              | RGB-FIR検出器で指定した方のみのデータで検出を行う.                                |
-
-- 対応しているCAMの種類
+- Supported CAM types
   - Gradient required: GradCAM, GradCAMPlusPlus, EigenGradCAM, LayerCAM, HiResCAM, XGradCAM
   - Gradient free: EigenCAM, RandomCAM(?)
 
-### 2.7 動作テスト
+## 5. Jetson Implementation
 
-基本的にはdataオプションとbatch-sizeオプション, epochsオプションで変更すればよい.  
-場合によってはdataやモデル名を指定して変更すること. test時には2000枚ほどを使用して訓練が行われる.
+This document explains the procedure based on JetPack 6.0 DP.  
+Please read the official documents on [GitHub](https://github.com/ultralytics/ultralytics/blob/5f7d76e2eb50d50873825bcd3e675537b2396dd3/docs/en/guides/nvidia-jetson.md)
 
-```bash
-yolo cfg=test.yaml
-```
+### 5.1 Building and Installing the Library
 
-## 3. Usage (Python with pip)
+Install `torch`, `torchvision`, and `cv2` to Python on Tegra OS.  
+If they are already installed, go to the next section (#42-Installing yolo).  
+Use the script [`build_jetson.sh`] (scripts/build_jetson.sh) created below.  
+Note that JetPack, torch, and torchvision change from time to time, so refer to the following URL to rewrite the script.  
+[[JetPack and torch version relationship](https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform-release-notes/pytorch-jetson-rel.html#pytorch-jetson-rel)]  
+[[torch installation URL list](https://developer.download.nvidia.com/compute/redist/jp/)]  
+[[torch and torchvision version relationship](https://github.com/pytorch/vision#installation)]  
+[[JetPack and onnx_runtime version relationship](https://elinux.org/Jetson_Zoo#ONNX_Runtime)]
 
-CLI以外にPythonやJupyter上でも使用できる.  
-使用方法は [公式ドキュメント](https://docs.ultralytics.com/) 参照.  
-なお組み込み例は [こちら](https://github.com/ri0098hp/harvesters4RGB-FIR) を参照.
+### 5.2 Installing YOLOv8-4ch
 
-## 4. Jetson メモ
-
-このドキュメントではJetPack 6.0 DPを基準に説明する.
-
-### 4.1 ライブラリのビルドとインストール
-
-Tegra OS上のPythonに`torch`や`torchvision`, `cv2`をインストールする.  
-既にインストールされている場合は[次の節](#42-yoloのインストール)へ.  
-以下に作成したスクリプト[`build_jetson.sh`](scripts/build_jetson.sh)を利用する.  
-なおJetPackとtorchやtorchvisionはその時々によって変わるの以下のURLを参照しスクリプトを書き換える.  
-[[JetPackとtorchのバージョン関係](https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform-release-notes/pytorch-jetson-rel.html#pytorch-jetson-rel)], [[torchのインストールURL一覧](https://developer.download.nvidia.com/compute/redist/jp/)], [[torchとtorchvisionのバージョン関係](https://github.com/pytorch/vision#installation)], [[JetPackとonnx_runtimeのバージョン関係](https://elinux.org/Jetson_Zoo#ONNX_Runtime)]
-
-### 4.2 YOLOのインストール
-
-#### 4.2.1 仮想環境の構築
-
-まずvenvを使用してシステム上のPythonに含まれるライブラリを使用する.  
-`torch`や`torchvision`, `onnxrutime_gpu`や`cv2`などを引き継ぐ.  
-(pipenvやpoetryはハッシュ計算や構造が面倒で, 宗教上の理由がない人は非推奨)
+First, use venv to use libraries included in the Python on your system.
+Libraries on system, such as `torch`, `torchvision`, `onnxrutime_gpu`, `cv2`, etc. are should be import.
 
 ```bash
 python3 -m venv venv --system-site-packages
 ```
 
-#### 4.2.2 YOLOv8のインストール
-
-[`pyproject.toml`](pyproject.toml)を編集して`torch`, `torchvision`, `onnx-gpu`などGPU関連のパッケージをコメントアウトする.  
-その後YOLOを開発モード`-e`でpipインストールする.
+Edit [`pyproject.toml`](pyproject.toml) and comment out GPU-related packages such as `torch`, `torchvision`, and `onnx-gpu`.
+Then pip install YOLO in development mode `-e`.
 
 ```bash
 source venv/bin/activate
-pip install -e .
+pip install -e .[4ch]
 ```
 
-## 5. Citation
+## 6. Citation
 
 ```bibtex
 @INPROCEEDINGS{10325231,
