@@ -8,18 +8,18 @@ from ultralytics import YOLO
 ROOT = Path("runs")
 
 metrics = [["Model", "AP@Hot", "AP@Inter", "AP@Cold"]]
-model_subsets = ["hot", "inter", "cold", "season"]
+model_subsets = ["hot", "inter", "cold", "mix"]
 test_subsets = ["hot", "inter", "cold"]
-suffix = "2stream" # 4ch or 2stream
+suffix = "2stream"  # 4ch or 2stream
 
 for model_subset in model_subsets:
     row = [model_subset]
     for test_subset in test_subsets:
         param = {
-            "data": f"All-Season-{test_subset}.yaml",
+            "data": f"All-Season-tiny-{test_subset}.yaml",
             "batch": 1,
             "half": True,
-            "plots": True if model_subset == "season" else False,
+            "plots": True if model_subset == "mix" else False,
             "name": f"{model_subset}_{test_subset}",
         }
 
@@ -39,4 +39,4 @@ for model_subset in model_subsets:
 import pandas as pd
 
 df = pd.DataFrame(metrics)
-df.to_csv(f"metrics_{suffix}.csv")
+df.to_csv(f"runs/metrics_{suffix}.csv")

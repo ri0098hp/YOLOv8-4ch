@@ -17,14 +17,14 @@ except (ImportError, AssertionError):
     clearml = None
 
 
-subsets = ["hot", "inter", "cold", "season"]
+subsets = ["hot", "inter", "cold", "mix"]
 chs = ["4ch", "3ch", "1ch", "2stream"]
 
 for ch in chs:
     for subset in subsets:
         param = {
             "cfg": f"{subset}.yaml",
-            "data": "All-Season.yaml" if subset == "season" else f"All-Season-{subset}.yaml",
+            "data": "All-Season-tiny.yaml" if subset == "mix" else f"All-Season-tiny-{subset}.yaml",
             "ch": 4 if "2st" in ch else int(ch[0]),
             "name": f"All-Season-{subset}-{ch}",
         }

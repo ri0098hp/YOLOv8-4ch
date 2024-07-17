@@ -1,21 +1,21 @@
 # YOLOv8-4ch
 
-[English](README.md) | [日本語🇯🇵](README-ja.md)
+[English 🇺🇸](README.md) | [日本語 🇯🇵](README-ja.md)
 
 ## DEMO
 
 <https://github.com/ri0098hp/YOLOv8-4ch/assets/104181368/177f036e-4932-4fda-9338-532504e81663>
 
-| **Model**       | **Device**       | **Format**    | **Speed/Image** | **FPS** | **AP@All** | **LAMR50** |
-| --------------- | ---------------- | ------------- | --------------- | ------- | ---------- | ---------- |
-| YOLOv8s-2stream | RTX3090          | PyTorch       | 4.1 ms          | 241     | 86.2       | 18.5       |
-|                 |                  | TensorRT FP16 | 1.5 ms          | 675     | 85.9       | 18.7       |
-|                 | Jetson AGX  Orin | PyTorch       | 16.2 ms         | 61      | 86.5       | 17.9       |
-|                 |                  | TensorRT FP16 | 13.7 ms         | 72      | 86.0       | 18.7       |
-|                 | Intel i7-12700   | ONNX          | 73.0 ms         | 13      | 85.9       | 18.7       |
+| **Model**       | **Device**       | **Format**    | **Speed/Image** | **FPS** | **AP50** | **LAMR50** |
+| --------------- | ---------------- | ------------- | --------------- | ------- | -------- | ---------- |
+| YOLOv8s-2stream | RTX3090          | PyTorch       | 4.1 ms          | 241     | 86.2     | 18.5       |
+|                 |                  | TensorRT FP16 | 1.5 ms          | 675     | 85.9     | 18.7       |
+|                 | Jetson AGX  Orin | PyTorch       | 16.2 ms         | 61      | 86.5     | 17.9       |
+|                 |                  | TensorRT FP16 | 13.7 ms         | 72      | 86.0     | 18.7       |
+|                 | Intel i7-12700   | ONNX          | 73.0 ms         | 13      | 85.9     | 18.7       |
 
-- AP means AP@0.5 in a single class.
-- Tested on All-Season-Dataset (Ours)
+- AP50 means AP@0.5 in a single class.
+- Tested on All-Season Dataset (Ours)
 - ultralytics 8.1.29
 - Jetson uses JetPack 6.0 DP
 
@@ -38,6 +38,11 @@
 | Inter |   56.3   |   85.9   |   72.2   |   71.5   |
 | Cold  |   59.8   |   85.2   |   80.1   |   75.0   |
 | Mix   |   77.5   | **87.8** | **80.9** | **82.1** |
+
+- AP means AP@0.5 in a single class.
+- Tested on All-Season Dataset (Ours)
+- ultralytics 8.1.29
+- Jetson uses JetPack 6.0 DP
 
 ## Original
 
@@ -107,7 +112,7 @@ python -m venv .venv
 . ./.venv/bin/activate
 ```
 
-After that, execute the following command in the directory where `pyproject.toml` is located.  
+Finnaly, execute the following command in the directory where `pyproject.toml` is located.  
 This allows you to reflect changes to the file sequentially in the package.
 
 ```bash
@@ -117,8 +122,8 @@ pip install -e .[4ch]
 ### 2.2 Run Demo Tests
 
 Demo codes are available on [sweep_val_season.py](scripts/sweep_val_season.py).  
-Please download the codes, weight files, and dataset from release v2024.06.13 assets [[here]](https://github.com/ri0098hp/YOLOv8-4ch/releases/tag/v2024.06.13).  
-Note that the locations of each subset in the datasets ([hot](ultralytics/cfg/datasets/All-Season-hot.yaml), [inter](ultralytics/cfg/datasets/All-Season-inter.yaml), [cold](ultralytics/cfg/datasets/All-Season-cold.yaml)) in yaml file should be changed.  
+Please download the weight files, and dataset from assets [[here]](https://github.com/ri0098hp/YOLOv8-4ch/releases/latest).  
+Note that the locations of each subset in the datasets ([hot](ultralytics/cfg/datasets/All-Season-tiny-hot.yaml), [inter](ultralytics/cfg/datasets/All-Season-tiny-inter.yaml), [cold](ultralytics/cfg/datasets/All-Season-tiny-cold.yaml)) in yaml file should be changed.  
 (We recommend make `datasets` folder and place `All-Season-tiny` folder in it.)  
 You must change the path to weight files, such as L8 and L25, in the [script](scripts/sweep_val_season.py).  
 (We recommend make `runs` folder and place pt files in it.)  
@@ -158,7 +163,12 @@ An example of the directory structure:
 
 ```txt
   <datasets>
-  ├── All-Season (not available now)
+  ├── All-Season-tiny
+  │   ├── hot
+  │   ├── inter
+  │   ├── cold
+  │   └── mix (recommended symbolic link) 
+  ├── All-Season (not available)
   │   ├── train
   │   │   ├── 20180731_1415
   │   │   │   ├── set00
@@ -168,14 +178,6 @@ An example of the directory structure:
   │   │   │   └── set01
   │   │   └── 20190116_2008
   │   └── val
-  ├── All-Season-hot (not available now)
-  │   ├── train
-  │   │   └── 20180731_1415 <-recommended to use symbolic links
-  │   └── val
-  ├── All-Season-tiny
-  │   ├── hot
-  │   ├── inter
-  │   └── cold
   └── kaist-sanit (other datasets)
       ├── train
       │   ├── set00
