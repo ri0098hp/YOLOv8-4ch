@@ -6,20 +6,9 @@
 
 <https://github.com/ri0098hp/YOLOv8-4ch/assets/104181368/177f036e-4932-4fda-9338-532504e81663>
 
-| **Model**       | **Device**       | **Format**    | **Speed/Image** | **FPS** | **AP50** | **LAMR50** |
-| --------------- | ---------------- | ------------- | --------------- | ------- | -------- | ---------- |
-| YOLOv8s-2stream | RTX3090          | PyTorch       | 4.1 ms          | 241     | 86.2     | 18.5       |
-|                 |                  | TensorRT FP16 | 1.5 ms          | 675     | 85.9     | 18.7       |
-|                 | Jetson AGX  Orin | PyTorch       | 16.2 ms         | 61      | 86.5     | 17.9       |
-|                 |                  | TensorRT FP16 | 13.7 ms         | 72      | 86.0     | 18.7       |
-|                 | Intel i7-12700   | ONNX          | 73.0 ms         | 13      | 85.9     | 18.7       |
+**All-Season-tiny dataset and pre-trained models are available in [Release](https://github.com/ri0098hp/YOLOv8-4ch/releases/latest).**
 
-- AP50 means AP@0.5 in a single class.
-- Tested on All-Season Dataset (Ours)
-- ultralytics 8.1.29
-- Jetson uses JetPack 6.0 DP
-
-## Paper Results
+## Paper Results with AP@0.5
 
 ### 4-CHANNEL
 
@@ -68,6 +57,19 @@ An extension of YOLOv8 for RGB-FIR. The following features have been added from 
 Baseline model: YOLOv8s-2stream [details](ultralytics/cfg/models)
 
 ![yolov8s-2stream.drawio.svg](ultralytics/cfg/models/diagram/yolov8s-2stream.drawio.svg)
+
+| **Model**       | **Device**       | **Format**    | **Speed/Image** | **FPS** | **AP50** | **LAMR50** |
+| --------------- | ---------------- | ------------- | --------------: | ------: | -------: | ---------: |
+| YOLOv8s-2stream | RTX3090          | PyTorch       |          4.1 ms |     241 |     86.2 |       18.5 |
+|                 |                  | TensorRT FP16 |          1.5 ms |     675 |     85.9 |       18.7 |
+|                 | Jetson AGX  Orin | PyTorch       |         16.2 ms |      61 |     86.5 |       17.9 |
+|                 |                  | TensorRT FP16 |         13.7 ms |      72 |     86.0 |       18.7 |
+|                 | Intel i7-12700   | ONNX          |         73.0 ms |      13 |     85.9 |       18.7 |
+
+- AP50 means AP@0.5 in a single class.
+- Tested on All-Season Dataset (Ours)
+- ultralytics 8.1.29
+- Jetson run on JetPack 6.0 DP
 
 ## 1. Installation
 
@@ -139,16 +141,22 @@ Put the dataset in the dataset folder.
 Because the dataloader has been modified, the following directory structure is recommended.  
 Except for All-Season, the search will be performed recursively under the train and val folders.  
 Note that the labels, RGB images, and FIR images must exist in a symmetrical path relationship.  
-Symbolic links can also be recognized, so after creating the data folder, you can save space by creating links for each folder.
+Symbolic links can also be recognized, so after creating the data folder, you can save space by creating links for each folder.  
+Example:
 
 ```bash
+# Create Mix subset folder
+mkdir mix
+cd mix
+# link to images and labels for training
 mkdir train
 cd train
-find ../../All-Season/train -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
+find ../../**/train -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;  
 cd ..
+# link to images and labels for valdating
 mkdir val
 cd val
-find ../../All-Season/val -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
+find ../../**/val -mindepth 1 -maxdepth 1 -type d -exec ln -s {} \;
 ```
 
 After that, specify the directory and class by referring to [`All-Season.yaml`](data/All-Season.yaml).  

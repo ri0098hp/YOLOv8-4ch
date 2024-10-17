@@ -18,15 +18,17 @@ except (ImportError, AssertionError):
 
 
 subsets = ["hot", "inter", "cold", "mix"]
-chs = ["4ch", "3ch", "1ch", "2stream"]
+chs = ["4ch", "2stream"]
 
 for ch in chs:
     for subset in subsets:
         param = {
-            "cfg": f"{subset}.yaml",
             "data": "All-Season-tiny.yaml" if subset == "mix" else f"All-Season-tiny-{subset}.yaml",
             "ch": 4 if "2st" in ch else int(ch[0]),
             "name": f"All-Season-{subset}-{ch}",
+            "pos_imgs_train": 960,
+            "neg_ratio_train": 0.2,
+            "project": "runs/sweep_season",
         }
 
         # Load a model
