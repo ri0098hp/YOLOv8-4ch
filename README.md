@@ -1,6 +1,6 @@
 # YOLOv8-4ch
 
-[English 🇺🇸](README.md) | [日本語 🇯🇵](README-ja.md)
+[English 🇺🇸](README.md) | [日本語 🇯🇵](README-ja.md) | [Paper](https://doi.org/10.1109/OJITS.2024.3507917)
 
 ## DEMO
 
@@ -291,14 +291,15 @@ pip install -e .[4ch]
 ## 6. Citation
 
 ```bibtex
-@INPROCEEDINGS{10325231,
-  author={Okuda, Masato and Yoshida, Kota and Fujino, Takeshi},
-  booktitle={2023 IEEE SENSORS}, 
-  title={Multispectral Pedestrian Detection with Visible and Far-infrared Images Under Drifting Ambient Light and Temperature}, 
-  year={2023},
-  volume={},
-  number={},
-  pages={1-4},
-  doi={10.1109/SENSORS56945.2023.10325231}
+@article{10770282,
+  author   = {Okuda, Masato and Yoshida, Kota and Fujino, Takeshi},
+  journal  = {IEEE Open Journal of Intelligent Transportation Systems},
+  title    = {Realtime Multispectral Pedestrian Detection With Visible and Far-Infrared Under Ambient Temperature Changing},
+  year     = {2024},
+  volume   = {5},
+  number   = {},
+  pages    = {797-809},
+  keywords = {Finite impulse response filters;Cameras;Pedestrians;Accuracy;Image edge detection;Feature extraction;Deep learning;YOLO;Training;Synchronization;Object detection;pedestrian detection;deep learning;far-infrared;sensor fusion},
+  doi      = {10.1109/OJITS.2024.3507917}
 }
 ```
